@@ -107,6 +107,20 @@ export GUILE_LOAD_COMPILED_PATH="/opt/homebrew/lib/guile/3.0/site-ccache"
 export GUILE_SYSTEM_EXTENSIONS_PATH="/opt/homebrew/lib/guile/3.0/extensions"
 ```
 
+You also need to install Guile Goblins:
+
+```
+brew tap aconchillo/guile
+brew install guile-goblins
+```
+
+When loading the goblins module, if you get segfaults or errors related to guile-fibers, install it from a tar ball (https://github.com/wingo/fibers) and update your GUILE_LOAD_PATH and GUILE_LOAD_COMPILED_PATH accordingly.
+
+## Guile Goblins
+
+See https://spritely.institute/static/papers/spritely-core.html for an intro. It uses Wisp syntax whose main feature is that instead of using parentheses for separating expressions from each other, it uses linebreaks. See https://spritely.institute/static/papers/spritely-core.html#appendix-lisp-wisp.
+
+
 ## Getting help
 
 If you have questions or need some help, visit the [Spritely

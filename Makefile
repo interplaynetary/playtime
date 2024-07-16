@@ -14,6 +14,9 @@ game.wasm: game.scm $(modules)
 	guild compile-wasm -L modules -o $@ $<
 
 serve: game.wasm
+playtime.go: playtime.scm $(modules)
+	guild compile -o $@ $<
+
 	guile -c '((@ (hoot web-server) serve))'
 
 bundle: game.wasm
