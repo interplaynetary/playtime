@@ -60,6 +60,32 @@ make bundle
 Upload the resulting zip file to your itch.io game page and share your
 game with others!  Have fun!
 
+### Guix on Mac
+
+It is possible to set up a virtual machine in which Guix is available. However, you'd still need to transfer the code of this repository to that box in order to benefit from it. Alternatively, read the instructions for a manual installation of dependencies in the following section.
+
+If you want to give it a try, follow the instructions here to install msg, a Guix environment for Mac: https://superkamiguru.org/projects/msg.html
+
+Then run the following commands in order to set up and connect to the virtual machine in which Guix is available:
+
+```
+msg machine init
+msg machine start
+msg shell
+```
+
+### Manual installation of dependencies on Mac
+
+Follow the instructions here to install Hoot: https://gitlab.com/spritely/guile-hoot
+
+Also add the following path exports to your ~/.bashrc or similar:
+
+```
+export GUILE_LOAD_PATH="/opt/homebrew/share/guile/site/3.0"
+export GUILE_LOAD_COMPILED_PATH="/opt/homebrew/lib/guile/3.0/site-ccache"
+export GUILE_SYSTEM_EXTENSIONS_PATH="/opt/homebrew/lib/guile/3.0/extensions"
+```
+
 ## Getting help
 
 If you have questions or need some help, visit the [Spritely
