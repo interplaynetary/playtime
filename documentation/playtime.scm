@@ -72,16 +72,16 @@
      					                (roles (
 			    		                	(role-offerer
       						            		(moves (
-        						            		(<move-name> <script>)
-                                               	➕)
+        						            	     (<move-name> <script>)
+                                               				➕)
                   		       	        	    (requires <role-play-contract>)
                                                 (role-player <element>))
  			       			                (role-acceptor
                 					            (moves (
-        								            (<move-name> <script>)
-                        				        ➕)
+        								 (<move-name> <script>)
+                        				            ➕)
                   					            (requires <role-play-contract>)
-                                                (role-player <element>))
+                                        			    (role-player <element>))
             				                ➕))
     					                (enactment <script>)))))
                                 (role-play-contractor
