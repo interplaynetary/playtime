@@ -14,6 +14,11 @@ Accordingly, the same **play** when _viewed_ from different **perspectives** can
 
 We **playtime creators** believe **playtime** to be an expression that alligns with the **valued effects** of the **playnet** in _augmenting_ the **capacities** of **players** to _**recognize, read, (re)-write,**_ and _**perform**_ **plays** for _creating_ **valuable effects**.
 
+### Goblins
+Built on top of **[Goblin's distributed object programming environment]([url](https://spritely.institute/goblins/))**. **Playtime** and **organizations/games** expressed through can easily be **distributed, P2P,** and can **run in the browser.**
+
+**Goblins** provides an intuitive security model, automatic local transactions for locally synchronous operations, and an easy to use and efficient asynchronous programming interface for encapsulated objects which can live anywhere on the network. **Goblins** also integrates powerful distributed debugging tools, and a process persistence and upgrade model which respects its security fundamentals.
+
 ## Guile Hoot Game Jam Template
 
 This repository is the quickest way to get started building games in
