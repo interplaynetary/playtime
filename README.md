@@ -12,7 +12,7 @@ Accordingly, the same **play** when _viewed_ from different **perspectives** can
 
 **Playnet** _xorganizes_ (_expresses/experiments_ with the **organization** of) **plays** (playful organizational forms) and **interfaces** (analog, digital, natural, social, material, ecological, communicational, economic etc.) that _augment_ the **capacities** of **players** to _**recognize, read, (re)-write,**_ and _**perform**_ **plays** for _creating_ **valuable effects**.
 
-We **playtime creators** believe **playtime** to be expression that alligns with the **valued effects** of the **playnet** in _augmenting_ the **capacities** of **players** to _**recognize, read, (re)-write,**_ and _**perform**_ **plays** for _creating_ **valuable effects**.
+We **playtime creators** believe **playtime** to be an expression that alligns with the **valued effects** of the **playnet** in _augmenting_ the **capacities** of **players** to _**recognize, read, (re)-write,**_ and _**perform**_ **plays** for _creating_ **valuable effects**.
 
 ## Guile Hoot Game Jam Template
 
