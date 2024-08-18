@@ -31,7 +31,7 @@
 		},
 		"enactment": {
 			"name": "meta.enactment.playtime",
-			"begin": "\\((enactment)\\s*",
+			"begin": "\\(\\s*(enactment)\\s*",
 			"beginCaptures": {
 				"1": {
 					"name": "keyword.control.playtime"
@@ -55,15 +55,62 @@
 			"end": "\\)",
 			"patterns": [
 				{
-					"include": "#roles-list"
+					"include": "#role-list"
 				}
 			]
 		},
-		"roles-list": {
+		"role-list": {
+			"name": "meta.role-list.playtime",
 			"begin": "\\(\\s*(\\w+)\\s*",
 			"beginCaptures": {
 				"1": {
 					"name": "entity.name.type.playtime"
+				}
+			},
+			"end": "\\)",
+			"patterns": [
+				{
+					"include": "#scripts"
+				},
+				{
+					"include": "#requires"
+				}
+			]
+		},
+		"scripts": {
+			"begin": "\\(\\s*(scripts)\\s*",
+			"beginCaptures": {
+				"1": {
+					"name": "keyword.control.playtime"
+				}
+			},
+			"end": "\\)",
+			"patterns": [
+				{
+					"include": "#script-list"
+				}
+			]
+		},
+		"script-list": {
+			"name": "meta.script-list.playtime",
+			"begin": "\\(\\s*(\\w+)\\s*",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.name.function.playtime"
+				}
+			},
+			"end": "\\)",
+			"patterns": [
+				{
+					"include": "source.scheme"
+				}
+			]
+		},
+		"requires": {
+			"begin": "\\(\\s*(requires)\\s*",
+			"beginCaptures": {
+				"1": {
+					"name": "keyword.control.playtime"
 				}
 			},
 			"end": "\\)",
