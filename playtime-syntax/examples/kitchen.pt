@@ -1,0 +1,34 @@
+(context kitchen
+  (enactment (cleaner-1 ‘wash-dishes)) ;; a single enacting expression
+  (roles
+    (woo goo)
+    (abc 123)
+    (def
+      (scripts))
+    (cleaner
+      (scripts 
+        (‘wash-dishes
+          (define offer-response (player ‘respond ‘accept wash-dishes?))
+          (when (offer-response) ;; player accepts
+            (define proof (player ‘respond ‘proof of dish completion’))
+            (if (validator ‘validate proof) 
+              (player ‘add-points 4 ‘dish-washing))))
+        (‘cast-validator
+          (define new-player (player ‘respond ‘cast validator’))
+          (cast validator new-player)))
+      (requires (player 'has-cleaning-equipment)))
+    (validator
+      (scripts 
+        (‘validate inputs
+          (player ‘respond ‘validate inputs’ inputs))
+        (‘cast-cleaner
+          (define new-player (player ‘respond ‘cast cleaner’))
+          (cast cleaner new-player)))
+      (requires (player 'is-competent)))))
+
+
+;; EXAMPLE CONTEXT INSTANTIATION
+
+(enact kitchen ( ;; we can pass in roles in any order
+  (cleaner ‘(fronx alice charles vlad) ;; each player will be (cast <role> <player>)
+  (validator ‘(ruz brad)))))
