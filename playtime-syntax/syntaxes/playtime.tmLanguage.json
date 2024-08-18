@@ -1,0 +1,58 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"scopeName": "source.playtime",
+	"name": "playtime-dsl",
+	"patterns": [
+		{
+			"include": "#context"
+		}
+	],
+	"repository": {
+		"context": {
+			"begin": "\\((context)\\s*(\\w+)\\s*",
+			"beginCaptures": {
+				"1": {
+					"name": "keyword.control.playtime"
+				},
+				"2": {
+					"name": "entity.name.section.playtime"
+				}
+			},
+			"end": "\\)",
+			"patterns": [
+				{
+					"include": "#roles"
+				}
+			]
+		},
+		"roles": {
+			"begin": "\\((roles)\\s*",
+			"beginCaptures": {
+				"1": {
+					"name": "keyword.control.playtime"
+				}
+			},
+			"end": "\\)",
+			"patterns": [
+				{
+					"include": "#roles-list"
+				}
+			]
+		},
+		"roles-list": {
+			"begin": "\\(\\s*(\\w+)\\s*",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.name.type.playtime"
+				}
+			},
+			"end": "\\)",
+			"patterns": [
+				{
+					"include": "source.scheme"
+				}
+			]
+		}
+	},
+	"uuid": "c4dfbdd2-7016-4d27-bf1a-91cacfd176b0"
+}

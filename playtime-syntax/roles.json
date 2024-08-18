@@ -1,0 +1,30 @@
+{
+  "roles": {
+    "begin": "\\((roles)\\s*",
+    "beginCaptures": {
+      "1": {
+        "name": "keyword.control.playtime"
+      }
+    },
+    "end": "\\)",
+    "patterns": [
+      {
+        "include": "#roles-list"
+      }
+    ]
+  },
+  "roles-list": {
+    "begin": "\\(\\s*(\\w+)\\s*",
+    "beginCaptures": {
+      "1": {
+        "name": "entity.name.type.playtime"
+      }
+    },
+    "end": "\\)",
+    "patterns": [
+      {
+        "include": "source.scheme"
+      }
+    ]
+  }
+}
