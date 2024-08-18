@@ -9,6 +9,7 @@
 	],
 	"repository": {
 		"context": {
+			"name": "meta.context.playtime",
 			"begin": "\\((context)\\s*(\\w+)\\s*",
 			"beginCaptures": {
 				"1": {
@@ -22,10 +23,29 @@
 			"patterns": [
 				{
 					"include": "#roles"
+				},
+				{
+					"include": "#enactment"
 				}
 			]
 		},
+		"enactment": {
+			"name": "meta.enactment.playtime",
+			"begin": "\\((enactment)\\s*",
+			"beginCaptures": {
+				"1": {
+					"name": "keyword.control.playtime"
+				}
+			},
+			"patterns": [
+				{
+					"include": "source.scheme"
+				}
+			],
+			"end": "\\)"
+		},
 		"roles": {
+			"name": "meta.roles.playtime",
 			"begin": "\\((roles)\\s*",
 			"beginCaptures": {
 				"1": {
