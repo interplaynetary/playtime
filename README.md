@@ -19,6 +19,13 @@ Built on top of **[Goblin's distributed object programming environment]([url](ht
 
 **Goblins** provides an intuitive security model, automatic local transactions for locally synchronous operations, and an easy to use and efficient asynchronous programming interface for encapsulated objects which can live anywhere on the network. **Goblins** also integrates powerful distributed debugging tools, and a process persistence and upgrade model which respects its security fundamentals.
 
+## Run Playtime Environment
+
+```
+guile -s playtime.scm playtime-syntax/examples/team.pt
+```
+
+
 ## Guile Hoot Game Template
 
 This repository is the quickest way to get started building games in
@@ -81,7 +88,7 @@ make bundle
 Upload the resulting zip file to your itch.io game page and share your
 game with others!  Have fun!
 
-### Guix on Mac
+### Guix on Mac (At your own risk)
 
 It is possible to set up a virtual machine in which Guix is available. However, you'd still need to transfer the code of this repository to that box in order to benefit from it. Alternatively, read the instructions for a manual installation of dependencies in the following section.
 
@@ -95,7 +102,7 @@ msg machine start
 msg shell
 ```
 
-### Manual installation of dependencies on Mac
+### Manual installation of dependencies on Mac (Recommended)
 
 Follow the instructions here to install Hoot: https://gitlab.com/spritely/guile-hoot
 
