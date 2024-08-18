@@ -5,6 +5,9 @@
 	"patterns": [
 		{
 			"include": "#context"
+		},
+		{
+			"include": "#play"
 		}
 	],
 	"repository": {
@@ -16,7 +19,7 @@
 					"name": "keyword.control.playtime"
 				},
 				"2": {
-					"name": "entity.name.section.playtime"
+					"name": "entity.name.class.playtime"
 				}
 			},
 			"end": "\\)",
@@ -119,6 +122,46 @@
 					"include": "source.scheme"
 				}
 			]
+		},
+		"play": {
+			"name": "meta.play.playtime",
+			"begin": "\\(\\s*(\\w+)\\s*",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.name.class.playtime"
+				}
+			},
+			"end": "\\)",
+			"patterns": [
+				{
+					"include": "#casting-role"
+				}
+			]
+		},
+		"casting-role": {
+			"name": "meta.role.casting.playtime",
+			"begin": "\\(\\s*(\\w+)\\s*",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.name.class.playtime"
+				}
+			},
+			"end": "\\)",
+			"patterns": [
+				{
+					"include": "source.scheme"
+				}
+			]
+		},
+		"casting-list": {
+			"name": "meta.list.casting.playtime",
+			"begin": "\\(\\s*(\\w+)\\s*",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.name.variable.playtime"
+				}
+			},
+			"end": "\\)"
 		}
 	},
 	"uuid": "c4dfbdd2-7016-4d27-bf1a-91cacfd176b0"

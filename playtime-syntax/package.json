@@ -4,7 +4,7 @@
   "private": true,
   "description": "It's playtime!",
   "publisher": "ruzfronx",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "repository": {},
   "engines": {
     "vscode": "^1.92.0"

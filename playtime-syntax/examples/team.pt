@@ -1,5 +1,8 @@
 (context team
-  (enactment (xyz))
+  (enactment
+    (manager plan)
+    (designer design)
+    (engineer code))
   (roles
     (manager
       (scripts
@@ -16,3 +19,8 @@
         (code (abc))
         (test (bcd)))
       (requires ('is-pragmatic 'is-analytical')))))
+
+(team
+  (manager '(a))
+  (designer '(b c d))
+  (engineer '(e f g)))
