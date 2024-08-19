@@ -1,7 +1,7 @@
 (add-to-load-path (dirname (current-filename)))
 
 (define-module (playtime main)
-  #:use-module (playtime interpreter)
+  #:use-module (playtime interpreter2)
   #:use-module (ice-9 rdelim)  ;; For reading entire files
   #:use-module (ice-9 readline)
   #:use-module (srfi srfi-1)  ;; For list functions
@@ -12,23 +12,27 @@
 (display "Goblins module loaded successfully")
 (newline)
 
-(define (load-program-from-file filename)
-  (with-input-from-file filename
-    (lambda ()
-      (let ((contents (read)))
-        contents))))
+; (context xyz
+;   (enactment
+;     (manager plan))
+;   (roles
+;     (manager
+;       (scripts
+;         (plan)
+;         (assess))))
+; )
 
-(define (main args)
-  (if (> (length args) 1)
-      (let ((filename (second args)))
-        (catch #t
-          (lambda ()
-            (let ((program (load-program-from-file filename)))
-              (execute-program program)))
-          (lambda (key . args)
-            (format (current-error-port) "Error: ~A~%" (car args)))))
-      (begin
-        (format (current-output-port) "Usage: guile -s main.scm <program-file>\n")
-        (exit 1))))
+(define file-to-load (cadr (command-line)))
+(display "Loading play: ") (display file-to-load) (newline)
 
-(main (command-line))
+(define (load-with-macros file)
+  (let ((env (interaction-environment)))
+    ;; Use `eval` to load the file within the custom environment
+    (with-input-from-file file
+      (lambda ()
+        (let loop ((expr (read)))
+          (unless (eof-object? expr)
+            (eval expr env)
+            (loop (read))))))))
+
+(load-with-macros file-to-load)

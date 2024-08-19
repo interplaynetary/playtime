@@ -4,21 +4,21 @@
   (roles
     (manager
       (scripts
-        (plan (abc))
-        (assess (bcd)))
+        (plan ('abc))
+        (assess ('bcd)))
       (requires ('has-empathy 'is-confident)))
     (designer
       (scripts
-        (design (abc))
-        (present (bcd)))
+        (design ('abc))
+        (present ('bcd)))
       (requires ('has-taste)))
     (engineer
       (scripts
-        (code (abc))
-        (test (bcd)))
+        (code ('abc))
+        (test ('bcd)))
       (requires ('is-pragmatic 'is-analytical')))))
 
-(team
-  (manager '(a))
-  (designer '(b c d))
-  (engineer '(e f g)))
+;; (team
+;;   (manager '(a))
+;;   (designer '(b c d))
+;;   (engineer '(e f g)))
