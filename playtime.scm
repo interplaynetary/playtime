@@ -7,20 +7,31 @@
   #:use-module (srfi srfi-1)  ;; For list functions
   #:use-module (goblins)
   #:use-module (goblins actor-lib methods)
+  ; #:use-modules (system base macros)
   #:export (main))
 
 (display "Goblins module loaded successfully")
 (newline)
 
-; (context xyz
-;   (enactment
-;     (manager plan))
-;   (roles
-;     (manager
-;       (scripts
-;         (plan)
-;         (assess))))
-; )
+(context team-abc
+  (enactment
+    (manager plan)
+    (designer design))
+  (roles
+    (designer
+      (scripts
+        (design ('abc))
+        (present ('bcd))))
+    (manager
+      (scripts
+        (plan ('abc))
+        (assess ('bcd))))
+    (engineer
+      (scripts
+        (code ('abc))
+        (test ('bcd))))
+  )
+)
 
 (define file-to-load (cadr (command-line)))
 (display "Loading play: ") (display file-to-load) (newline)
@@ -35,4 +46,5 @@
             (eval expr env)
             (loop (read))))))))
 
-(load-with-macros file-to-load)
+; (load-with-macros file-to-load)
+(load file-to-load)

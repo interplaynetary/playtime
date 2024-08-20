@@ -1,97 +1,80 @@
 (define-module (playtime interpreter2)
   #:export (context)
+  #:export (context-item)
   #:export (enactment)
   #:export (roles)
+  #:export (role)
   #:export (scripts))
 
-;; Top-level context parser
-(define-syntax context
-  (lambda (stx)
-    (syntax-case stx ()
-      [(_ name (enactment enactment-content ...) (roles roles-content ...))
-       #`(begin
-           ;; Ensure `enactment` and `roles` are parsed within the context
-           (enactment enactment-content ...)
-           (roles roles-content ...))]
-      [(_ name (roles roles-content ...) (enactment enactment-content ...))
-       #`(begin
-           (roles roles-content ...)
-           (enactment enactment-content ...))]
-      ;; Catch-all for unexpected patterns
-      [_ (begin
-           (display "Unexpected syntax in context: ")
-           (display (syntax->datum stx))
-           (newline))])))
-
-;; Define the enactment block keyword
-(define-syntax enactment
-  (lambda (stx)
-    (syntax-case stx ()
-      ;; Match the enactment block and handle its contents
-      [(_ (role-name script ...))
-       #`(begin
-           ;; Handle the role and scripts
-           (display "Enactment: Role ")
-           (display (syntax->datum #'role-name))
-           (display " with scripts: ")
-           (display (syntax->datum #'(script ...)))
-           (newline))]
-      ;; Catch-all for unexpected patterns
-      [_ (begin
-           (display "Unexpected syntax in enactment: ")
-           (display (syntax->datum stx))
-           (newline))])))
-
-;; Define the roles block keyword
-(define-syntax roles
-  (lambda (stx)
-    (syntax-case stx ()
-      ;; Match the roles block
-      [(_ role-content ...)
-       #`(begin
-           ;; Handle each role directly using ellipses
-           (role role-content) ...)]
-      ;; Catch-all for unexpected patterns
-      [_ (begin
-           (display "Unexpected syntax in roles: ")
-           (display (syntax->datum stx))
-           (newline))])))
-
-;; Define the role keyword
-(define-syntax role
-  (lambda (stx)
-    (syntax-case stx ()
-      ;; Match an individual role and its scripts
-      [(_ role-name (scripts script ...))
-       #`(begin
-           ;; Handle the role and scripts
-           (display "Role: ")
-           (display (syntax->datum #'role-name))
-           (display " with scripts: ")
-           (display (syntax->datum #'(script ...)))
-           (newline))]
-      ;; Catch-all for unexpected patterns
-      [_ (begin
-           (display "Unexpected syntax in role: ")
-           (display (syntax->datum stx))
-           (newline))])))
-
-;; Define the scripts block keyword (optional if you need further behavior)
 (define-syntax scripts
   (lambda (stx)
     (syntax-case stx ()
-      ;; Match the scripts block
-      [(_ script ...)
+      [(_ (script-name script-body) ...)
        #`(begin
-           ;; Handle each script
            (display "Scripts: ")
-           (display (syntax->datum #'(script ...)))
-           (newline))]
-      ;; Catch-all for unexpected patterns
+           (newline)
+           (begin
+            (display "  ")
+            (display 'script-name)
+            (newline)
+            (display "    ")
+            (display 'script-body)
+            (newline)) ...
+          )]
       [_ (begin
            (display "Unexpected syntax in scripts: ")
            (display (syntax->datum stx))
-           (newline))])))
+           (newline)
+          )])))
+
+(define-syntax requires
+  (lambda (stx)
+    (syntax-case stx ()
+      [(_ (body))
+        #'(begin
+            (display "Requires: ")
+            (display (syntax->datum #'body))
+            (newline)
+          )])))
+
+(define-syntax roles
+  (lambda (stx)
+    (syntax-case stx ()
+      [(_ (role-name role-item ...) ...)
+       #`(begin
+           (display "Roles: ")
+           (newline)
+           (begin
+            (display "  ")
+            (display 'role-name)
+            (newline)) ...
+           (begin role-item ...) ...
+          )]
+      [_ (begin
+           (display "Unexpected syntax in roles: ")
+           (display (syntax->datum stx))
+           (newline)
+          )])))
+
+(define-syntax enactment
+  (lambda (x)
+    (syntax-case x ()
+      ((_ (role action) ...)
+       #'(begin
+           (display "Enactment:") (newline)
+           (begin
+             (display "  ") (display 'role) (display " ") (display 'action) (newline))
+           ...
+          )))))
+
+(define-syntax context
+  (lambda (stx)
+    (syntax-case stx ()
+      [(_ name context-item ...)
+       #`(begin
+           (display "Context: ") (display 'name) (newline)
+           context-item ...
+          )])))
 
 (define *script-table* (make-hash-table))
 (define *role-requirements* '())
