@@ -1,22 +1,23 @@
 (context team-abc
-  (enactment
-    (manager plan))
   (roles
+    (designer
+      (requires 'has-taste)
+      (scripts
+        (design ('abc))
+        (present ('bcd))))
     (manager
       (scripts
         (plan ('abc))
         (assess ('bcd)))
-      (requires ('has-empathy 'is-confident)))
-    (designer
-      (scripts
-        (design ('abc))
-        (present ('bcd)))
-      (requires ('has-taste)))
+      (requires 'has-empathy 'is-confident))
     (engineer
       (scripts
         (code ('abc))
         (test ('bcd)))
-      (requires ('is-pragmatic 'is-analytical')))))
+      (requires 'is-pragmatic 'is-analytical')))
+  (enactment
+    (manager plan)
+    (designer design)))
 
 ;; (team
 ;;   (manager '(a))

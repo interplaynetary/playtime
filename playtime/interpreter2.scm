@@ -1,4 +1,5 @@
 (define-module (playtime interpreter2)
+  #:use-module (srfi srfi-13)
   #:export (context)
   #:export (context-item)
   #:export (enactment)
@@ -6,18 +7,28 @@
   #:export (role)
   #:export (scripts))
 
+(define (capitalize-symbol sym)
+  (string->symbol
+   (string-capitalize
+    (symbol->string sym))))
+
+(define (symbol-to-uppercase sym)
+  (string->symbol
+   (string-upcase
+    (symbol->string sym))))
+
 (define-syntax scripts
   (lambda (stx)
     (syntax-case stx ()
       [(_ (script-name script-body) ...)
        #`(begin
-           (display "Scripts: ")
+           (display "    Scripts:")
            (newline)
            (begin
-            (display "  ")
+            (display "      ")
             (display 'script-name)
             (newline)
-            (display "    ")
+            (display "        ")
             (display 'script-body)
             (newline)) ...
           )]
@@ -27,28 +38,45 @@
            (newline)
           )])))
 
-(define-syntax requires
+(define-syntax role-item
   (lambda (stx)
-    (syntax-case stx ()
-      [(_ (body))
+    (syntax-case stx (requires scripts)
+      [(_ (requires req ...))
         #'(begin
-            (display "Requires: ")
-            (display (syntax->datum #'body))
+            (display "    Requires:")
             (newline)
-          )])))
+            (display "      ")
+            (begin
+              (display req)
+              (display ", ")
+              (display req)) ...
+            (newline)
+          )]
+      [(_ (scripts script-def ...))
+        #'(scripts script-def ...)]
+      [_
+        (begin
+           (display "Unexpected syntax in role-item: ")
+           (display (syntax->datum stx))
+           (newline)
+        )])))
 
 (define-syntax roles
   (lambda (stx)
     (syntax-case stx ()
-      [(_ (role-name role-item ...) ...)
-       #`(begin
+      ;; item = scripts|requires
+      [(_ (role-name item ...) ...)
+       #'(begin
+           (newline)
            (display "Roles: ")
            (newline)
            (begin
+            (newline)
             (display "  ")
-            (display 'role-name)
-            (newline)) ...
-           (begin role-item ...) ...
+            (display (symbol-to-uppercase 'role-name))
+            (newline)
+            (role-item item) ...)
+           ...
           )]
       [_ (begin
            (display "Unexpected syntax in roles: ")
@@ -61,6 +89,7 @@
     (syntax-case x ()
       ((_ (role action) ...)
        #'(begin
+           (newline)
            (display "Enactment:") (newline)
            (begin
              (display "  ") (display 'role) (display " ") (display 'action) (newline))
@@ -70,6 +99,7 @@
 (define-syntax context
   (lambda (stx)
     (syntax-case stx ()
+      ;; context-item = enactment|roles
       [(_ name context-item ...)
        #`(begin
            (display "Context: ") (display 'name) (newline)
