@@ -1,11 +1,14 @@
 (define-module (playtime interpreter2)
   #:use-module (srfi srfi-13)
+  #:use-module (goblins)
+  #:use-module (goblins actor-lib methods)
   #:export (context)
   #:export (context-item)
   #:export (enactment)
   #:export (roles)
   #:export (role)
   #:export (scripts))
+
 
 (define (capitalize-symbol sym)
   (string->symbol
@@ -75,6 +78,8 @@
             (display "  ")
             (display (symbol-to-uppercase 'role-name))
             (newline)
+            ;; define class with name role-name
+
             (role-item item) ...)
            ...
           )]
@@ -103,6 +108,7 @@
       [(_ name context-item ...)
        #`(begin
            (display "Context: ") (display 'name) (newline)
+           (define name (spawn-vat))
            context-item ...
           )])))
 
