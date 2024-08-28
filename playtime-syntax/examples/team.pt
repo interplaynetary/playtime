@@ -19,16 +19,6 @@
     (manager plan)
     (designer design)))
 
-(define (^greeter bcom our-name)   ; constructor (outer procedure)
-  (lambda (your-name)              ; behavior    (inner procedure)
-    (format #f "Hello ~a, my name is ~a!"
-            your-name our-name)))
-
-(display (call-with-vat team-abc
-   (lambda ()
-     (define alice (spawn ^greeter "Alice"))
-     ($ alice "Bob"))))
-
 ;; (team
 ;;   (manager '(a))
 ;;   (designer '(b c d))
