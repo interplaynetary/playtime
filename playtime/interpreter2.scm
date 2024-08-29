@@ -125,14 +125,18 @@
 
 (define (^player bcom name)
   (methods
-    ((prompt msg) ; prompt the player to do something
+    ((cue msg) ; cue the player to do something
       (format #f "Hey ~a! ~a" name msg)
     )))
 
 (define (player name)
   (let ((player-symbol (normalize-name name)))
-    (eval `(define ,player-symbol (spawn ^player ,name))
-          (current-module))))
+    (if (defined? player-symbol)
+        (eval player-symbol (current-module))
+        (let ((new-player (spawn ^player name)))
+          (eval `(define ,player-symbol ,new-player)
+                (current-module))
+          new-player))))
 
 (define-syntax enact
   (lambda (stx)

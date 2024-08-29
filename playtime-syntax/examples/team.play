@@ -22,5 +22,5 @@
 (enact team-abc
   (player "Alice")
   (player "Bob")
-  ($ alice 'prompt "Welcome to the world!")
-  ($ bob 'prompt "Welcome to the world!"))
+  ($ (player "Alice") 'cue "Welcome to the world!")
+  ($ (player "Bob") 'cue "Welcome to the world!"))
