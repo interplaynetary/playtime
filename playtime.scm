@@ -13,29 +13,14 @@
 (display "Goblins module loaded successfully")
 (newline)
 
-; (newline)
-; (display (syntax->datum (macroexpand
-;   '(context team-abc
-;    )
-; )))
-; (newline)
-; (newline)
 
 (define file-to-load (cadr (command-line)))
 (display "Loading play: ") (display file-to-load) (newline)
 
 (load file-to-load)
 
-;; todo: write an actor for representing players
-(define (^greeter bcom our-name)   ; constructor (outer procedure)
-  (lambda (your-name)              ; behavior    (inner procedure)
-    (format #f "Hello ~a, my name is ~a!"
-            your-name our-name)))
-
-;; todo: write a macro that removes the boilerplate
-(newline)
-(display (call-with-vat team-abc
-   (lambda ()
-     (define alice (spawn ^greeter "Alice"))
-     ($ alice "Bob"))))
-(newline)
+(enact team-abc
+  (def-player "Alice")
+  (def-player "Bob")
+  ($ alice 'prompt "Welcome to the world!")
+  ($ bob 'prompt "Welcome to the world!"))

@@ -19,7 +19,7 @@
     (manager plan)
     (designer design)))
 
-;; (team
+;; (team-abc
 ;;   (manager '(a))
 ;;   (designer '(b c d))
 ;;   (engineer '(e f g)))

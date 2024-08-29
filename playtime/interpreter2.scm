@@ -2,6 +2,9 @@
   #:use-module (srfi srfi-13)
   #:use-module (goblins)
   #:use-module (goblins actor-lib methods)
+  #:export (enact)
+  #:export (def-player)
+  #:export (^player)
   #:export (context)
   #:export (context-item)
   #:export (enactment)
@@ -111,6 +114,36 @@
            (define name (spawn-vat))
            context-item ...
           )])))
+
+(define (normalize-name name)
+  (string->symbol
+    (string-map (lambda (c)
+                  (if (char-alphabetic? c)
+                      (char-downcase c)
+                      #\-))
+                (string-trim name))))
+
+(define (^player bcom name)
+  (methods
+    ((prompt msg) ; prompt the player to do something
+      (format #f "Hey ~a! ~a" name msg)
+    )))
+
+(define (def-player name)
+  (let ((player-symbol (normalize-name name)))
+    (eval `(define ,player-symbol (spawn ^player ,name))
+          (current-module))))
+
+(define-syntax enact
+  (lambda (stx)
+    (syntax-case stx ()
+      [(_ context body ...)
+       #'(call-with-vat context
+           (lambda ()
+             (begin
+               (let ([result body])
+                 (display result)
+                 (newline)) ...)))])))
 
 (define *script-table* (make-hash-table))
 (define *role-requirements* '())
