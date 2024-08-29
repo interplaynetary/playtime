@@ -19,7 +19,8 @@
     (manager plan)
     (designer design)))
 
-;; (team-abc
-;;   (manager '(a))
-;;   (designer '(b c d))
-;;   (engineer '(e f g)))
+(enact team-abc
+  (player "Alice")
+  (player "Bob")
+  ($ alice 'prompt "Welcome to the world!")
+  ($ bob 'prompt "Welcome to the world!"))

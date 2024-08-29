@@ -19,8 +19,3 @@
 
 (load file-to-load)
 
-(enact team-abc
-  (def-player "Alice")
-  (def-player "Bob")
-  ($ alice 'prompt "Welcome to the world!")
-  ($ bob 'prompt "Welcome to the world!"))

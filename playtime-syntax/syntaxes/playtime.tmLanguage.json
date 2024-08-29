@@ -7,10 +7,23 @@
 			"include": "#context"
 		},
 		{
+			"include": "#enact"
+		},
+		{
 			"include": "#play"
+		},
+		{
+			"include": "#comment"
+		},
+		{
+			"include": "source.scheme"
 		}
 	],
 	"repository": {
+		"comment": {
+			"name": "comment.line.semicolon.playtime",
+			"match": ";.*$"
+		},
 		"context": {
 			"name": "meta.context.playtime",
 			"begin": "\\((context)\\s*([\\w-]+)\\s*",
@@ -29,6 +42,9 @@
 				},
 				{
 					"include": "#enactment"
+				},
+				{
+					"include": "#comment"
 				}
 			]
 		},
@@ -122,6 +138,27 @@
 					"include": "source.scheme"
 				}
 			]
+		},
+		"enact": {
+			"name": "meta.enact.playtime",
+			"begin": "\\(\\s*(enact)\\s*([\\w-]+)\\s*",
+			"beginCaptures": {
+				"1": {
+					"name": "keyword.control.playtime"
+				},
+				"2": {
+					"name": "entity.name.type.playtime"
+				}
+			},
+			"patterns": [
+				{
+					"include": "#casting-role"
+				},
+				{
+					"include": "source.scheme"
+				}
+			],
+			"end": "\\)"
 		},
 		"play": {
 			"name": "meta.play.playtime",

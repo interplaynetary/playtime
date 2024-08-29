@@ -3,7 +3,7 @@
   #:use-module (goblins)
   #:use-module (goblins actor-lib methods)
   #:export (enact)
-  #:export (def-player)
+  #:export (player)
   #:export (^player)
   #:export (context)
   #:export (context-item)
@@ -129,7 +129,7 @@
       (format #f "Hey ~a! ~a" name msg)
     )))
 
-(define (def-player name)
+(define (player name)
   (let ((player-symbol (normalize-name name)))
     (eval `(define ,player-symbol (spawn ^player ,name))
           (current-module))))
