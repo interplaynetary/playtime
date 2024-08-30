@@ -1,5 +1,6 @@
 (define-module (playtime interpreter2)
   #:use-module (srfi srfi-13)
+  #:use-module (ice-9 readline)
   #:use-module (goblins)
   #:use-module (goblins actor-lib methods)
   #:export (enact)
@@ -15,6 +16,7 @@
   #:export (role)
   #:export (scripts))
 
+(activate-readline)
 
 (define (capitalize-symbol sym)
   (string->symbol
@@ -27,8 +29,10 @@
     (symbol->string sym))))
 
 (define cue display)
-(define request display)
-(define confirmation "Confirm here when you're ready")
+
+(define request readline)
+
+(define confirmation "Confirm here when you're ready: ")
 
 (define-syntax scripts
   (lambda (stx)

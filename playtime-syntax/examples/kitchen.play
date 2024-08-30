@@ -6,12 +6,12 @@
       (cleaner
         (scripts
           (wash-dish
-            (cue "It's time to wash the dishes!")
+            (cue "It's time to wash the dishes!\n")
             (request confirmation)
             ;; (drier dry-dish)
           )
           (another-script
-            (cue "Another script!"))
+            (cue "Another script!\n"))
         ))
       (drier
         (scripts
@@ -26,4 +26,5 @@
   (player "Alice")
   (player "Bob")
   ($ (player "Alice") 'cue "Welcome to the world!")
-  ($ (player "Bob") 'cue "Welcome to the world!"))
+  ($ (player "Bob") 'cue "Welcome to the world!")
+  (cleaner 'wash-dish))
