@@ -1,0 +1,29 @@
+(use-modules (ice-9 pretty-print))
+
+;; (pretty-print (tree-il->scheme (macroexpand
+  (context kitchen
+    (roles
+      (cleaner
+        (scripts
+          (wash-dish
+            (cue "It's time to wash the dishes!")
+            (request confirmation)
+            ;; (drier dry-dish)
+          )
+          (another-script
+            (cue "Another script!"))
+        ))
+      (drier
+        (scripts
+          (dry-dish
+            (cue "There's dishes to dry!")
+          ))))
+    (enactment
+      (cleaner wash-dishes)))
+;; )))
+
+(enact kitchen
+  (player "Alice")
+  (player "Bob")
+  ($ (player "Alice") 'cue "Welcome to the world!")
+  ($ (player "Bob") 'cue "Welcome to the world!"))

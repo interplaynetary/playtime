@@ -5,6 +5,9 @@
   #:export (enact)
   #:export (player)
   #:export (^player)
+  #:export (cue)
+  #:export (request)
+  #:export (confirmation)
   #:export (context)
   #:export (context-item)
   #:export (enactment)
@@ -23,20 +26,21 @@
    (string-upcase
     (symbol->string sym))))
 
+(define cue display)
+(define request display)
+(define confirmation "Confirm here when you're ready")
+
 (define-syntax scripts
   (lambda (stx)
     (syntax-case stx ()
-      [(_ (script-name script-body) ...)
+      [(_ (script-name script-body ...) ...)
        #`(begin
            (display "    Scripts:")
            (newline)
-           (begin
-            (display "      ")
-            (display 'script-name)
-            (newline)
-            (display "        ")
-            (display 'script-body)
-            (newline)) ...
+           (methods 
+              ((script-name)
+                (begin script-body ...))
+             ...)
           )]
       [_ (begin
            (display "Unexpected syntax in scripts: ")
@@ -62,9 +66,9 @@
         #'(scripts script-def ...)]
       [_
         (begin
-           (display "Unexpected syntax in role-item: ")
-           (display (syntax->datum stx))
-           (newline)
+          (display "Unexpected syntax in role-item: ")
+          (display (syntax->datum stx))
+          (newline)
         )])))
 
 (define-syntax roles
@@ -81,9 +85,8 @@
             (display "  ")
             (display (symbol-to-uppercase 'role-name))
             (newline)
-            ;; define class with name role-name
-
-            (role-item item) ...)
+            (define role-name
+              (role-item item) ...))
            ...
           )]
       [_ (begin
