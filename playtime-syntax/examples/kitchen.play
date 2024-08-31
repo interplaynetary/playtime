@@ -22,9 +22,12 @@
       (cleaner wash-dishes)))
 ;; )))
 
-(enact kitchen
-  (player "Alice")
-  (player "Bob")
-  ($ (player "Alice") 'cue "Welcome to the world!")
-  ($ (player "Bob") 'cue "Welcome to the world!")
-  (cleaner 'wash-dish))
+
+;; (pretty-print (tree-il->scheme (macroexpand (quote
+  (enact kitchen
+    (player "Alice")
+    (player "Bob")
+    ($ (player "Alice") 'cue "Welcome to the world!")
+    ($ (player "Bob") 'cue "Welcome to the world!")
+    (cleaner 'wash-dish))
+;; ))))

@@ -5,7 +5,6 @@
   #:use-module (goblins actor-lib methods)
   #:export (enact)
   #:export (player)
-  #:export (^player)
   #:export (cue)
   #:export (request)
   #:export (confirmation)
@@ -27,6 +26,25 @@
   (string->symbol
    (string-upcase
     (symbol->string sym))))
+
+(define (^registry bcom)
+  (define players (make-hash-table))
+  (methods
+    ((register symbol actor)
+      (hash-set! players symbol actor))
+    ((get-player symbol)
+      (hash-ref players symbol #f))
+    ((list-players)
+      (hash-map->list (lambda (k v) v) players))))
+
+(define (^player bcom name)
+  (methods
+    ((cue msg) ; cue the player to do something
+      (format #f "Hey ~a! ~a" name msg)
+    )))
+
+;; TODO: cue and request should implicitly select a
+;; player to send the message to
 
 (define cue display)
 
@@ -130,31 +148,31 @@
                       #\-))
                 (string-trim name))))
 
-(define (^player bcom name)
-  (methods
-    ((cue msg) ; cue the player to do something
-      (format #f "Hey ~a! ~a" name msg)
-    )))
-
-(define (player name)
+(define (get-player registry name)
   (let ((player-symbol (normalize-name name)))
-    (if (defined? player-symbol)
-        (eval player-symbol (current-module))
-        (let ((new-player (spawn ^player name)))
-          (eval `(define ,player-symbol ,new-player)
-                (current-module))
-          new-player))))
+    (let ((existing-player ($ registry 'get-player player-symbol)))
+      (if existing-player
+          existing-player
+          (let ((new-player (spawn ^player name)))
+            ($ registry 'register player-symbol new-player)
+            new-player)))))
+
+(define-syntax player
+  (lambda (stx)
+    (syntax-case stx ()
+      [(_ name)
+        (with-syntax ([registry (datum->syntax stx 'registry)])
+          #'(get-player registry name))])))
 
 (define-syntax enact
   (lambda (stx)
     (syntax-case stx ()
       [(_ context body ...)
-       #'(call-with-vat context
-           (lambda ()
-             (begin
-               (let ([result body])
-                 (display result)
-                 (newline)) ...)))])))
+       (with-syntax ([registry (datum->syntax stx 'registry)])
+         #'(call-with-vat context
+             (lambda ()
+                (let ([registry (spawn ^registry)])
+                  (begin body ...)))))])))
 
 (define *script-table* (make-hash-table))
 (define *role-requirements* '())
