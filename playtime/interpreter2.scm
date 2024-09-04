@@ -4,13 +4,11 @@
   #:use-module (goblins)
   #:use-module (goblins actor-lib methods)
   #:export (enact)
-  #:export (player)
-  #:export (confirmation)
+  #:export (cue)
+  #:export (request)
   #:export (context)
-  #:export (context-item)
   #:export (enactment)
   #:export (roles)
-  #:export (role)
   #:export (scripts))
 
 (activate-readline)
@@ -62,41 +60,49 @@
 (define (^player bcom name)
   (methods
     ((cue msg) ; cue the player to do something
-      (display (format #f "Hey ~a! ~a" name msg))
-      (newline))
+      (display (format #f "Hey ~a! ~a\n" name msg)))
     ((request msg)
       (readline (format #f "~a, ~a: " name msg)))
     ((who) name)
   ))
 
-(define confirmation "confirm here when you're ready")
+(define-syntax cue
+  (lambda (stx)
+    (syntax-case stx ()
+      [(_ msg)
+        (with-syntax ([player (datum->syntax stx 'player)])
+          #'($ player 'cue msg))
+      ])))
+
+(define-syntax request
+  (lambda (stx)
+    (syntax-case stx ()
+      [(_ msg)
+        (with-syntax ([player (datum->syntax stx 'player)])
+          #'($ player 'request msg))
+      ])))
 
 (define-syntax scripts
   (lambda (stx)
-    (syntax-case stx (cue request)
+    (syntax-case stx (player)
       [(_ (script-name script-body ...) ...)
-        (with-syntax ([cue (datum->syntax stx 'cue)]
-                      [request (datum->syntax stx 'request)])
-        #`(begin
-            (methods 
-                ;; TODO list all player methods here
-                ((script-name cue request)
-                  (begin
-                    script-body ...))
-              ...)
-            ))]
+       (with-syntax ([player (datum->syntax stx 'player)])
+          #'(begin
+              (methods
+                ((script-name player)
+                  (begin script-body ...))
+                ...))
+        )]
       [_ (begin
            (display "Unexpected syntax in scripts: ")
            (display (syntax->datum stx))
-           (newline)
-          )])))
+           (newline))])))
 
 (define (role _name _scripts)
   (lambda (bcom _player) ;; aka role-class
-    (methods
+    (extend-methods _scripts
       ((role-name) _name)
       ((player-name) ($ _player 'who))
-      ((script) _scripts)
       ((cue msg) ($ _player 'cue msg))
       ((request msg) ($ _player 'request msg)))))
 
@@ -125,8 +131,7 @@
              (display "Roles: ")
              (newline)
              (begin ;; each role
-                (display 'role-name)
-                (newline)
+                (display (format #f "  ~a\n" 'role-name))
                 (define-role role-name a_scripts)) ...
          )]
       [_ (begin
@@ -136,18 +141,16 @@
           )])))
 
 (define (run-role-script role-name script)
-  (display "Running script: ")
-  (display script)
-  (display " of role: ")
-  (display role-name)
-  (newline)
+  ; (display "Running script: ")
+  ; (display script)
+  ; (display " of role: ")
+  ; (display role-name)
+  ; (newline)
   (let ((role-player (registry 'get-role-player role-name)))
     (if role-player
         (begin
-          (display (format #f "Player \"~a\": ~a -> ~a\n" ($ role-player 'player-name) 'script script))
-          (($ role-player 'script) script
-            (lambda (msg) ($ role-player 'cue msg))
-            (lambda (msg) ($ role-player 'request msg))))
+          ; (display (format #f "Player \"~a\" -> ~a\n" ($ role-player 'player-name) script))
+          ($ role-player script role-player))
         (begin
           (display "No role player found for role: ")
           (display role-name)
@@ -204,10 +207,9 @@
          #'(call-with-vat context
              (lambda ()
                 (begin body ...)
-                (print-role-players)
-                (newline)
-                (newline)
-                (display "~~~ Enactment ~~~\n")
+                ; (print-role-players)
+                ; (newline)
+                (display "\n~~~ Enactment ~~~\n\n")
                 (the-enactment)
                 (display "~~~ The End ~~~\n")
               )))])))
@@ -216,5 +218,5 @@
   (display "Current script table:\n")
   (hash-for-each
    (lambda (key value)
-     (format #t "~a: ~a\n" key value))
+     (format #t "  ~a: ~a\n" key value))
      (registry 'role-players)))
