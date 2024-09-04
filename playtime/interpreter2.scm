@@ -92,7 +92,7 @@
   (lambda (bcom _player) ;; aka role-class
     (methods
       ((role-name) _name)
-      ((player) _player)
+      ((player-name) ($ _player 'who))
       ((script) _scripts)
       ((cue msg) ($ _player 'cue msg))
       ((request msg) ($ _player 'request msg)))))
@@ -144,7 +144,7 @@
   (let ((role-player (registry 'get-role-player role-name)))
     (if role-player
         (begin
-          (display (format #f "Player \"~a\": ~a -> ~a\n" ($ ($ role-player 'player) 'who) 'script script))
+          (display (format #f "Player \"~a\": ~a -> ~a\n" ($ role-player 'player-name) 'script script))
           (($ role-player 'script) script))
         (begin
           (display "No role player found for role: ")
