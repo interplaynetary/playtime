@@ -19,8 +19,8 @@
               (begin
                 (cue "It's time to wash the dishes.")
                 (request confirmation))
+                ;; (drier 'dry-dish))
               (cue "Nah… it's not time yet to wash the dishes."))
-                ;; (drier 'dry-dish)
           )
           (another-script
             (cue "Another script!\n"))
@@ -36,6 +36,6 @@
 
 ;; (print-and-run (quote
   (enact kitchen
-    (cleaner "Alice")
-    (drier "Bob"))
+    (cast 'cleaner "Alice")
+    (cast 'drier "Bob"))
 ;; ))

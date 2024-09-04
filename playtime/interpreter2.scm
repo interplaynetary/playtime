@@ -4,6 +4,7 @@
   #:use-module (goblins)
   #:use-module (goblins actor-lib methods)
   #:export (enact)
+  #:export (cast)
   #:export (cue)
   #:export (request)
   #:export (context)
@@ -98,27 +99,34 @@
            (display (syntax->datum stx))
            (newline))])))
 
-(define (role _name _scripts)
-  (lambda (bcom _player) ;; aka role-class
+;; This is called when a role is defined, not when it is
+;; instantiated. The function returns a lambda that can be
+;; spawned as a Goblins actor via `spawn <role-class> <player>`.
+(define (init-role _name _scripts)
+  (lambda (bcom _player) ;; to be spawned as Goblins actor
     (extend-methods _scripts
       ((role-name) _name)
       ((player-name) ($ _player 'who))
       ((cue msg) ($ _player 'cue msg))
       ((request msg) ($ _player 'request msg)))))
 
+(define-syntax cast
+  (lambda (stx)
+    (syntax-case stx ()
+      [(_ role-name player-name)
+        #'(begin
+            (let* ((player (get-player player-name))
+                   (role-instance (spawn (registry 'get-role role-name) player)))
+              (registry 'register-role-player role-name role-instance))
+        )])))
+
 (define-syntax define-role
   (lambda (stx)
     (syntax-case stx ()
       [(_ role-name _scripts)
           #'(begin
-              (let ((role-class (role 'role-name _scripts)))
-                (registry 'register-role 'role-name role-class))
-              (define (role-name _player-name)
-                (let ((_player (get-player _player-name)))
-                  (let ((role-instance (spawn (registry 'get-role 'role-name) _player)))
-                    (registry 'register-role-player 'role-name role-instance)
-                    role-instance)
-                )))
+              (let ((role-class (init-role 'role-name _scripts)))
+                (registry 'register-role 'role-name role-class)))
           ])))
 
 (define-syntax roles
