@@ -5,8 +5,6 @@
   #:use-module (goblins actor-lib methods)
   #:export (enact)
   #:export (player)
-  #:export (cue)
-  #:export (request)
   #:export (confirmation)
   #:export (context)
   #:export (context-item)
@@ -27,41 +25,47 @@
    (string-upcase
     (symbol->string sym))))
 
-(define (^registry bcom)
-  (define players (make-hash-table))
-  (methods
-    ((register symbol actor)
-      (hash-set! players symbol actor))
-    ((get-player symbol)
-      (hash-ref players symbol #f))
-    ((list-players)
-      (hash-map->list (lambda (k v) v) players))))
+(define registry
+  (let ((players (make-hash-table))
+        (roles (make-hash-table))
+        (role-players (make-hash-table)))
+    (methods
+      ((register-player symbol actor)
+        (hash-set! players symbol actor))
+      ((get-player symbol)
+        (hash-ref players symbol #f))
+      ((register-role symbol role)
+        (hash-set! roles symbol role))
+      ((get-role symbol)
+        (hash-ref roles symbol #f))
+      ((register-role-player role-symbol player-symbol)
+        (hash-set! role-players role-symbol player-symbol))
+      ((get-role-player role-symbol)
+        (hash-ref role-players role-symbol #f))
+      ((roles) roles)
+      ((players) players)
+      ((role-players) role-players))))
 
 (define (^player bcom name)
   (methods
     ((cue msg) ; cue the player to do something
-      (format #f "Hey ~a! ~a" name msg)
-    )))
+      (format #f "Hey ~a! ~a" name msg))
+    ((request msg)
+      (readline (format #f "~a, ~a: " name msg)))
+    ((who) name)
+  ))
 
-;; TODO: cue and request should implicitly select a
-;; player to send the message to
-
-(define cue display)
-
-(define request readline)
-
-(define confirmation "Confirm here when you're ready: ")
+(define confirmation "confirm here when you're ready: ")
 
 (define-syntax scripts
   (lambda (stx)
     (syntax-case stx ()
       [(_ (script-name script-body ...) ...)
        #`(begin
-           (display "    Scripts:")
-           (newline)
            (methods 
               ((script-name)
-                (begin script-body ...))
+                (begin
+                  script-body ...))
              ...)
           )]
       [_ (begin
@@ -70,47 +74,38 @@
            (newline)
           )])))
 
-(define-syntax role-item
+(define (role _name _scripts)
+  (lambda (bcom _player)
+    (methods
+      ((role-name) _name)
+      ((player) _player)
+      ((cue msg) ($ _player 'cue msg))
+      ((request msg) ($ _player 'request msg)))))
+
+(define-syntax define-role
   (lambda (stx)
-    (syntax-case stx (requires scripts)
-      [(_ (requires req ...))
-        #'(begin
-            (display "    Requires:")
-            (newline)
-            (display "      ")
-            (begin
-              (display req)
-              (display ", ")
-              (display req)) ...
-            (newline)
-          )]
-      [(_ (scripts script-def ...))
-        #'(scripts script-def ...)]
-      [_
-        (begin
-          (display "Unexpected syntax in role-item: ")
-          (display (syntax->datum stx))
-          (newline)
-        )])))
+    (syntax-case stx ()
+      [(_ role-name _scripts)
+          #'(begin
+              (let ((role-class (role 'role-name _scripts)))
+                (registry 'register-role 'role-name role-class))
+            )
+          ])))
 
 (define-syntax roles
   (lambda (stx)
     (syntax-case stx ()
       ;; item = scripts|requires
-      [(_ (role-name item ...) ...)
-       #'(begin
-           (newline)
-           (display "Roles: ")
-           (newline)
-           (begin
-            (newline)
-            (display "  ")
-            (display (symbol-to-uppercase 'role-name))
-            (newline)
-            (define role-name
-              (role-item item) ...))
-           ...
-          )]
+      [(_ (role-name a_scripts) ...)
+         #'(begin ;; roles
+             (newline)
+             (display "Roles: ")
+             (newline)
+             (begin ;; each role
+                (display 'role-name)
+                (newline)
+                (define-role role-name a_scripts)) ...
+         )]
       [_ (begin
            (display "Unexpected syntax in roles: ")
            (display (syntax->datum stx))
@@ -118,27 +113,35 @@
           )])))
 
 (define-syntax enactment
-  (lambda (x)
-    (syntax-case x ()
-      ((_ (role action) ...)
-       #'(begin
-           (newline)
-           (display "Enactment:") (newline)
-           (begin
-             (display "  ") (display 'role) (display " ") (display 'action) (newline))
-           ...
-          )))))
+  (lambda (stx)
+    (syntax-case stx ()
+      ((_ (role-name script) ...)
+        (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
+          #'(define (the-enactment)
+              (let ((role-player (registry 'get-role-player 'role-name)))
+                (if role-player
+                    (begin
+                      (display "Running script: ")
+                      (display 'script)
+                      (newline)
+                      ; ($ role-player script)
+                    )
+                    (begin
+                      (display "No role player found for role: ")
+                      (display 'role-name)
+                      (newline))))
+              ...
+            ))))))
 
 (define-syntax context
   (lambda (stx)
     (syntax-case stx ()
       ;; context-item = enactment|roles
       [(_ name context-item ...)
-       #`(begin
-           (display "Context: ") (display 'name) (newline)
-           (define name (spawn-vat))
-           context-item ...
-          )])))
+          #'(begin
+              (define name (spawn-vat))
+              context-item ...
+            )])))
 
 (define (normalize-name name)
   (string->symbol
@@ -148,38 +151,36 @@
                       #\-))
                 (string-trim name))))
 
-(define (get-player registry name)
+(define (get-player name)
   (let ((player-symbol (normalize-name name)))
-    (let ((existing-player ($ registry 'get-player player-symbol)))
+    (let ((existing-player (registry 'get-player player-symbol)))
       (if existing-player
           existing-player
           (let ((new-player (spawn ^player name)))
-            ($ registry 'register player-symbol new-player)
+            (registry 'register-player player-symbol new-player)
             new-player)))))
 
 (define-syntax player
   (lambda (stx)
     (syntax-case stx ()
       [(_ name)
-        (with-syntax ([registry (datum->syntax stx 'registry)])
-          #'(get-player registry name))])))
+        #'(get-player name)])))
 
 (define-syntax enact
   (lambda (stx)
     (syntax-case stx ()
       [(_ context body ...)
-       (with-syntax ([registry (datum->syntax stx 'registry)])
+       (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
          #'(call-with-vat context
              (lambda ()
-                (let ([registry (spawn ^registry)])
-                  (begin body ...)))))])))
+                (begin body ...)
+                (print-role-players)
+                (the-enactment)
+              )))])))
 
-(define *script-table* (make-hash-table))
-(define *role-requirements* '())
-
-(define (print-script-table)
+(define (print-role-players)
   (display "Current script table:\n")
   (hash-for-each
    (lambda (key value)
      (format #t "~a: ~a\n" key value))
-   *script-table*))
+     (registry 'role-players)))
