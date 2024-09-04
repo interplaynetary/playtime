@@ -1,4 +1,5 @@
 (define-module (playtime interpreter2)
+  #:use-module (playtime telegram)
   #:use-module (srfi srfi-13)
   #:use-module (ice-9 readline)
   #:use-module (goblins)
@@ -142,6 +143,7 @@
 (define-syntax cast
   (lambda (stx)
     (syntax-case stx ()
+      ;; TODO add case for telegram username (or id)
       [(_ role-name player-name)
         #'(begin
             (let* ((player (get-player player-name))

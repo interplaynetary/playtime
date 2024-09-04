@@ -1,0 +1,19 @@
+{
+  "name": "playtime",
+  "version": "1.0.0",
+  "description": "**Playtime** is a _xorganizational_ **runtime** and **DSL** (Domain Specific Language) for _expressing_ and _experimenting_ with organization inspired by the **role-oriented programming** language paradigm.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "rüzgar & fronx",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "grammy": "^1.29.0"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  }
+}

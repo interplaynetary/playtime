@@ -1,2 +1,4 @@
 *.wasm
 *.go
+.env
+node_modules/*
