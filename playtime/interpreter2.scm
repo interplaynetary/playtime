@@ -104,9 +104,6 @@
           #'(begin
               (let ((role-class (role 'role-name _scripts)))
                 (registry 'register-role 'role-name role-class))
-              ;; The function below registers a player for a role.
-              ;; We still need to write a function that runs a script
-              ;; for a role.
               (define (role-name _player-name)
                 (let ((_player (get-player _player-name)))
                   (let ((role-instance (spawn (registry 'get-role 'role-name) _player)))
