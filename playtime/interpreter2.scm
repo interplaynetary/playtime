@@ -69,19 +69,22 @@
     ((who) name)
   ))
 
-(define confirmation "confirm here when you're ready: ")
+(define confirmation "confirm here when you're ready")
 
 (define-syntax scripts
   (lambda (stx)
-    (syntax-case stx ()
+    (syntax-case stx (cue request)
       [(_ (script-name script-body ...) ...)
-       #`(begin
-           (methods 
-              ((script-name)
-                (begin
-                  script-body ...))
-             ...)
-          )]
+        (with-syntax ([cue (datum->syntax stx 'cue)]
+                      [request (datum->syntax stx 'request)])
+        #`(begin
+            (methods 
+                ;; TODO list all player methods here
+                ((script-name cue request)
+                  (begin
+                    script-body ...))
+              ...)
+            ))]
       [_ (begin
            (display "Unexpected syntax in scripts: ")
            (display (syntax->datum stx))
@@ -142,7 +145,9 @@
     (if role-player
         (begin
           (display (format #f "Player \"~a\": ~a -> ~a\n" ($ role-player 'player-name) 'script script))
-          (($ role-player 'script) script))
+          (($ role-player 'script) script
+            (lambda (msg) ($ role-player 'cue msg))
+            (lambda (msg) ($ role-player 'request msg))))
         (begin
           (display "No role player found for role: ")
           (display role-name)
@@ -200,7 +205,11 @@
              (lambda ()
                 (begin body ...)
                 (print-role-players)
+                (newline)
+                (newline)
+                (display "~~~ Enactment ~~~\n")
                 (the-enactment)
+                (display "~~~ The End ~~~\n")
               )))])))
 
 (define (print-role-players)

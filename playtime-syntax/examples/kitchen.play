@@ -47,10 +47,10 @@
 
 (pretty-print (tree-il->scheme (macroexpand (quote
   (enact kitchen
-    (cleaner (player "Alice"))
-    (drier (player "Bob"))
+    (cleaner "Alice")
+    (drier "Bob")
   )))))
 
   (enact kitchen
-    (cleaner (player "Alice"))
-    (drier (player "Bob")))
+    (cleaner "Alice")
+    (drier "Bob"))
