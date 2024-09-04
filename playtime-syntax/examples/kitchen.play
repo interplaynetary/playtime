@@ -18,8 +18,8 @@
             (if (> (date-hour (current-date)) 11)
               (begin
                 (cue "It's time to wash the dishes.")
-                (request confirmation))
-                ;; (drier 'dry-dish))
+                (request confirmation)
+                (drier 'dry-dish))
               (cue "Nah… it's not time yet to wash the dishes."))
           )
           (another-script
@@ -29,7 +29,9 @@
         (scripts
           (dry-dish
             (cue "There's dishes to dry!")
-          ))))
+            (request "Let me know when you're done")
+            (cleaner 'wash-dishes))
+          )))
     (enactment
       (cleaner 'wash-dishes)))
 ;; ))

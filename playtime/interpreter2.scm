@@ -67,6 +67,39 @@
     ((who) name)
   ))
 
+(define (run-role-script role-name script)
+  ; (display "Running script: ")
+  ; (display script)
+  ; (display " of role: ")
+  ; (display role-name)
+  ; (newline)
+  (let ((role-player (registry 'get-role-player role-name)))
+    (if role-player
+        (begin
+          ; (display (format #f "Player \"~a\" -> ~a\n" ($ role-player 'player-name) script))
+          ($ role-player script role-player))
+        (begin
+          (display "No role player found for role: ")
+          (display role-name)
+          (newline)))))
+
+(define (normalize-name name)
+  (string->symbol
+    (string-map (lambda (c)
+                  (if (char-alphabetic? c)
+                      (char-downcase c)
+                      #\-))
+                (string-trim name))))
+
+(define (get-player name)
+  (let ((player-symbol (normalize-name name)))
+    (let ((existing-player (registry 'get-player player-symbol)))
+      (if existing-player
+          existing-player
+          (let ((new-player (spawn ^player name)))
+            (registry 'register-player player-symbol new-player)
+            new-player)))))
+
 (define-syntax cue
   (lambda (stx)
     (syntax-case stx ()
@@ -126,8 +159,11 @@
       [(_ role-name _scripts)
           #'(begin
               (let ((role-class (init-role 'role-name _scripts)))
-                (registry 'register-role 'role-name role-class)))
-          ])))
+                (registry 'register-role 'role-name role-class))
+
+              (define (role-name script-name)
+                (run-role-script (syntax->datum 'role-name) script-name))
+            )])))
 
 (define-syntax roles
   (lambda (stx)
@@ -148,22 +184,6 @@
            (newline)
           )])))
 
-(define (run-role-script role-name script)
-  ; (display "Running script: ")
-  ; (display script)
-  ; (display " of role: ")
-  ; (display role-name)
-  ; (newline)
-  (let ((role-player (registry 'get-role-player role-name)))
-    (if role-player
-        (begin
-          ; (display (format #f "Player \"~a\" -> ~a\n" ($ role-player 'player-name) script))
-          ($ role-player script role-player))
-        (begin
-          (display "No role player found for role: ")
-          (display role-name)
-          (newline)))))
-
 (define-syntax enactment
   (lambda (stx)
     (syntax-case stx ()
@@ -183,23 +203,6 @@
               (define name (spawn-vat))
               context-item ...
             )])))
-
-(define (normalize-name name)
-  (string->symbol
-    (string-map (lambda (c)
-                  (if (char-alphabetic? c)
-                      (char-downcase c)
-                      #\-))
-                (string-trim name))))
-
-(define (get-player name)
-  (let ((player-symbol (normalize-name name)))
-    (let ((existing-player (registry 'get-player player-symbol)))
-      (if existing-player
-          existing-player
-          (let ((new-player (spawn ^player name)))
-            (registry 'register-player player-symbol new-player)
-            new-player)))))
 
 (define-syntax player
   (lambda (stx)
