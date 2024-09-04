@@ -1,14 +1,26 @@
-(use-modules (ice-9 pretty-print))
+(use-modules
+  (ice-9 pretty-print)
+  (srfi srfi-19))
 
-(pretty-print (tree-il->scheme (macroexpand (quote
+(define (print-and-run x)
+  (let ((expanded (macroexpand x)))
+    (pretty-print (tree-il->scheme expanded))
+    (eval x (interaction-environment))))
+
+(define confirmation "confirm here when you're ready")
+
+;; (print-and-run (quote
   (context kitchen
     (roles
       (cleaner
         (scripts
           (wash-dishes
-            (cue "It's time to wash the dishes!\n")
-            (request confirmation)
-            ;; (drier dry-dish)
+            (if (> (date-hour (current-date)) 11)
+              (begin
+                (cue "It's time to wash the dishes.")
+                (request confirmation))
+              (cue "Nah… it's not time yet to wash the dishes."))
+                ;; (drier 'dry-dish)
           )
           (another-script
             (cue "Another script!\n"))
@@ -20,37 +32,10 @@
           ))))
     (enactment
       (cleaner 'wash-dishes)))
-))))
+;; ))
 
-;; (pretty-print (tree-il->scheme (macroexpand (quote
-  (context kitchen
-    (roles
-      (cleaner
-        (scripts
-          (wash-dishes
-            (cue "It's time to wash the dishes!\n")
-            (request confirmation)
-            ;; (drier dry-dish)
-          )
-          (another-script
-            (cue "Another script!\n"))
-        ))
-      (drier
-        (scripts
-          (dry-dish
-            (cue "There's dishes to dry!")
-          ))))
-    (enactment
-      (cleaner 'wash-dishes)))
-;; ))))
-
-
-(pretty-print (tree-il->scheme (macroexpand (quote
-  (enact kitchen
-    (cleaner "Alice")
-    (drier "Bob")
-  )))))
-
+;; (print-and-run (quote
   (enact kitchen
     (cleaner "Alice")
     (drier "Bob"))
+;; ))
