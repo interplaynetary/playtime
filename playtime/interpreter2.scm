@@ -25,6 +25,9 @@
    (string-upcase
     (symbol->string sym))))
 
+(define (hash-keys table)
+  (hash-map->list (lambda (key value) key) table))
+
 (define registry
   (let ((players (make-hash-table))
         (roles (make-hash-table))
@@ -41,7 +44,17 @@
       ((register-role-player role-symbol player-symbol)
         (hash-set! role-players role-symbol player-symbol))
       ((get-role-player role-symbol)
-        (hash-ref role-players role-symbol #f))
+        (let ((existing-role-player (hash-ref role-players role-symbol #f)))
+          (if existing-role-player
+              existing-role-player
+              (let* ((role-class (hash-ref roles role-symbol #f))
+                     (player-symbol (hash-ref players (car (hash-keys players)) #f))
+                     (player (hash-ref players player-symbol #f)))
+                (if (and role-class player)
+                    (let ((new-role-player (spawn role-class player)))
+                      (hash-set! role-players role-symbol new-role-player)
+                      new-role-player)
+                    #f)))))
       ((roles) roles)
       ((players) players)
       ((role-players) role-players))))
@@ -49,7 +62,8 @@
 (define (^player bcom name)
   (methods
     ((cue msg) ; cue the player to do something
-      (format #f "Hey ~a! ~a" name msg))
+      (display (format #f "Hey ~a! ~a" name msg))
+      (newline))
     ((request msg)
       (readline (format #f "~a, ~a: " name msg)))
     ((who) name)
@@ -75,10 +89,11 @@
           )])))
 
 (define (role _name _scripts)
-  (lambda (bcom _player)
+  (lambda (bcom _player) ;; aka role-class
     (methods
       ((role-name) _name)
       ((player) _player)
+      ((script) _scripts)
       ((cue msg) ($ _player 'cue msg))
       ((request msg) ($ _player 'request msg)))))
 
@@ -89,7 +104,15 @@
           #'(begin
               (let ((role-class (role 'role-name _scripts)))
                 (registry 'register-role 'role-name role-class))
-            )
+              ;; The function below registers a player for a role.
+              ;; We still need to write a function that runs a script
+              ;; for a role.
+              (define (role-name _player-name)
+                (let ((_player (get-player _player-name)))
+                  (let ((role-instance (spawn (registry 'get-role 'role-name) _player)))
+                    (registry 'register-role-player 'role-name role-instance)
+                    role-instance)
+                )))
           ])))
 
 (define-syntax roles
@@ -112,24 +135,29 @@
            (newline)
           )])))
 
+(define (run-role-script role-name script)
+  (display "Running script: ")
+  (display script)
+  (display " of role: ")
+  (display role-name)
+  (newline)
+  (let ((role-player (registry 'get-role-player role-name)))
+    (if role-player
+        (begin
+          (display (format #f "Player \"~a\": ~a -> ~a\n" ($ ($ role-player 'player) 'who) 'script script))
+          (($ role-player 'script) script))
+        (begin
+          (display "No role player found for role: ")
+          (display role-name)
+          (newline)))))
+
 (define-syntax enactment
   (lambda (stx)
     (syntax-case stx ()
       ((_ (role-name script) ...)
         (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
           #'(define (the-enactment)
-              (let ((role-player (registry 'get-role-player 'role-name)))
-                (if role-player
-                    (begin
-                      (display "Running script: ")
-                      (display 'script)
-                      (newline)
-                      ; ($ role-player script)
-                    )
-                    (begin
-                      (display "No role player found for role: ")
-                      (display 'role-name)
-                      (newline))))
+              (run-role-script (syntax->datum 'role-name) script)
               ...
             ))))))
 
