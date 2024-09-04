@@ -19,6 +19,7 @@
               (begin
                 (cue "It's time to wash the dishes.")
                 (request confirmation)
+                (cast 'cleaner "Chloe")
                 (drier 'dry-dish))
               (cue "Nah… it's not time yet to wash the dishes."))
           )
@@ -30,6 +31,7 @@
           (dry-dish
             (cue "There's dishes to dry!")
             (request "Let me know when you're done")
+            (cast 'drier "Dirk")
             (cleaner 'wash-dishes))
           )))
     (enactment
