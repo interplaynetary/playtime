@@ -60,19 +60,14 @@
 
 (define (^player bcom name)
   (methods
-    ((cue msg) ; cue the player to do something
+    ((cue msg) ;; cue the player to do something
       (display (format #f "Hey ~a! ~a\n" name msg)))
-    ((request msg)
+    ((request msg) ;; request input from the player
       (readline (format #f "~a, ~a: " name msg)))
     ((who) name)
   ))
 
 (define (run-role-script role-name script)
-  ; (display "Running script: ")
-  ; (display script)
-  ; (display " of role: ")
-  ; (display role-name)
-  ; (newline)
   (let ((role-player (registry 'get-role-player role-name)))
     (if role-player
         (begin
@@ -143,6 +138,7 @@
       ((cue msg) ($ _player 'cue msg))
       ((request msg) ($ _player 'request msg)))))
 
+;; Example: (cast 'cleaner "Alice")
 (define-syntax cast
   (lambda (stx)
     (syntax-case stx ()
