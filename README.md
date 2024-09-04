@@ -21,10 +21,11 @@ Built on top of **[Goblin's distributed object programming environment]([url](ht
 
 ## Run Playtime Environment
 
-```
-guile -s playtime.scm playtime-syntax/examples/team.pt
-```
+Here's how you can run the kitchen dish washing play:
 
+```
+guile --fresh-auto-compile  -s playtime.scm playtime-syntax/examples/kitchen.play
+```
 
 ## Guile Hoot Game Template
 
