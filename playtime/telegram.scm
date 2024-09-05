@@ -9,10 +9,6 @@
 
 (define SOCKET-PATH "/tmp/guile_js_socket")
 
-(define (ensure-socket-available)
-  (when (file-exists? SOCKET-PATH)
-    (delete-file SOCKET-PATH)))
-
 (define (send-to-socket message)
   (let ((sock (socket PF_UNIX SOCK_STREAM 0)))
     (catch 'system-error
@@ -28,25 +24,26 @@
         (format #t "Error: Unable to connect to socket at ~a. Error details: ~a\n" 
                 SOCKET-PATH (strerror (car (last-pair args))))))))
 
-(define (request-from-socket)
-  (ensure-socket-available)
+(define (receive-from-socket)
   (let ((sock (socket PF_UNIX SOCK_STREAM 0)))
-    (bind sock AF_UNIX SOCKET-PATH)
-    (listen sock 1)
-    (let* ((conn (accept sock))
-           (input-port (car conn))
-           (message (json-string->scm (get-string-all input-port))))
-      (close-port input-port)
-      (close-port sock)
-      (delete-file SOCKET-PATH)
-      message)))
+    (catch 'system-error
+      (lambda ()
+        (connect sock AF_UNIX SOCKET-PATH)
+        (let* ((message (json-string->scm (get-string-all sock))))
+          (close-port sock)
+          message))
+      (lambda (key . args)
+        (close-port sock)
+        (format #t "Error: Unable to connect to socket at ~a. Error details: ~a\n" 
+                SOCKET-PATH (strerror (car (last-pair args))))
+        #f))))
 
 (define (^telegram-player bcom username)
   (methods
     ((cue msg) ;; cue the player to do something
      (send-to-socket `((type . "cue") (content . ,(format #f "Hey ~a! ~a" username msg)))))
     ((request msg) ;; request input from the player
-     (send-to-socket `((type . "request") (content . ,(format #f "~a, ~a: " username msg))))
+     (send-to-socket `((type . "request") (content . ,(format #f "~a, ~a" username msg))))
      (let ((response (receive-from-socket)))
        (assoc-ref response 'content)))
     ((who) username)))
@@ -56,6 +53,6 @@
 (call-with-vat context
   (lambda ()
     (let ((player (spawn ^telegram-player 'fronx84)))
-      ($ player 'cue "it's playtime!")
-      (display (request-from-socket))
+      ; ($ player 'cue "it's playtime!")
+      (display ($ player 'request "how's things?"))
     )))
