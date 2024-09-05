@@ -1,5 +1,6 @@
 (define-module (playtime interpreter2)
-  #:use-module (playtime telegram)
+  #:use-module (playtime registry)
+  ; #:use-module (playtime telegram)
   #:use-module (srfi srfi-13)
   #:use-module (ice-9 readline)
   #:use-module (goblins)
@@ -14,50 +15,6 @@
   #:export (scripts))
 
 (activate-readline)
-
-(define (capitalize-symbol sym)
-  (string->symbol
-   (string-capitalize
-    (symbol->string sym))))
-
-(define (symbol-to-uppercase sym)
-  (string->symbol
-   (string-upcase
-    (symbol->string sym))))
-
-(define (hash-keys table)
-  (hash-map->list (lambda (key value) key) table))
-
-(define registry
-  (let ((players (make-hash-table))
-        (roles (make-hash-table))
-        (role-players (make-hash-table)))
-    (methods
-      ((register-player symbol actor)
-        (hash-set! players symbol actor))
-      ((get-player symbol)
-        (hash-ref players symbol #f))
-      ((register-role symbol role)
-        (hash-set! roles symbol role))
-      ((get-role symbol)
-        (hash-ref roles symbol #f))
-      ((register-role-player role-symbol player-symbol)
-        (hash-set! role-players role-symbol player-symbol))
-      ((get-role-player role-symbol)
-        (let ((existing-role-player (hash-ref role-players role-symbol #f)))
-          (if existing-role-player
-              existing-role-player
-              (let* ((role-class (hash-ref roles role-symbol #f))
-                     (player-symbol (hash-ref players (car (hash-keys players)) #f))
-                     (player (hash-ref players player-symbol #f)))
-                (if (and role-class player)
-                    (let ((new-role-player (spawn role-class player)))
-                      (hash-set! role-players role-symbol new-role-player)
-                      new-role-player)
-                    #f)))))
-      ((roles) roles)
-      ((players) players)
-      ((role-players) role-players))))
 
 (define (^player bcom name)
   (methods
