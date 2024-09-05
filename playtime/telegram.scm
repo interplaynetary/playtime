@@ -1,18 +1,35 @@
 (define-module (playtime telegram)
-  #:use-module (ice-9 socket)
+  ; #:use-module (ice-9 socket)
   #:use-module (ice-9 textual-ports)
+  #:use-module (rnrs bytevectors)
   #:use-module (json)
+  #:use-module (goblins)
+  #:use-module (goblins actor-lib methods)
   #:export (^telegram-player))
 
 (define SOCKET-PATH "/tmp/guile_js_socket")
 
-(define (send-to-telegram message)
-  (let ((sock (socket PF_UNIX SOCK_STREAM 0)))
-    (connect sock AF_UNIX SOCKET-PATH)
-    (display (scm->json-string message) (socket-output-port sock))
-    (close-port sock)))
+(define (ensure-socket-available)
+  (when (file-exists? SOCKET-PATH)
+    (delete-file SOCKET-PATH)))
 
-(define (request-from-telegram)
+(define (send-to-socket message)
+  (let ((sock (socket PF_UNIX SOCK_STREAM 0)))
+    (catch 'system-error
+      (lambda ()
+        (connect sock AF_UNIX SOCKET-PATH)
+        (let ((out (open-output-string)))
+          (display (scm->json-string message) out)
+          (let ((data (string->utf8 (get-output-string out))))
+            (send sock data 0)))
+        (close-port sock))
+      (lambda (key . args)
+        (close-port sock)
+        (format #t "Error: Unable to connect to socket at ~a. Error details: ~a\n" 
+                SOCKET-PATH (strerror (car (last-pair args))))))))
+
+(define (request-from-socket)
+  (ensure-socket-available)
   (let ((sock (socket PF_UNIX SOCK_STREAM 0)))
     (bind sock AF_UNIX SOCKET-PATH)
     (listen sock 1)
@@ -20,14 +37,25 @@
            (input-port (car conn))
            (message (json-string->scm (get-string-all input-port))))
       (close-port input-port)
+      (close-port sock)
+      (delete-file SOCKET-PATH)
       message)))
 
 (define (^telegram-player bcom username)
   (methods
     ((cue msg) ;; cue the player to do something
-     (send-to-telegram `((type . "cue") (content . ,(format #f "Hey ~a! ~a" name msg)))))
+     (send-to-socket `((type . "cue") (content . ,(format #f "Hey ~a! ~a" username msg)))))
     ((request msg) ;; request input from the player
-     (send-to-telegram `((type . "request") (content . ,(format #f "~a, ~a: " name msg))))
-     (let ((response (receive-from-telegram)))
+     (send-to-socket `((type . "request") (content . ,(format #f "~a, ~a: " username msg))))
+     (let ((response (receive-from-socket)))
        (assoc-ref response 'content)))
     ((who) username)))
+
+(define context (spawn-vat))
+
+(call-with-vat context
+  (lambda ()
+    (let ((player (spawn ^telegram-player 'fronx84)))
+      ($ player 'cue "it's playtime!")
+      (display (request-from-socket))
+    )))
