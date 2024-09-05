@@ -27,6 +27,13 @@ Here's how you can run the kitchen dish washing play:
 guile --fresh-auto-compile  -s playtime.scm playtime-syntax/examples/kitchen.play
 ```
 
+## Install Guile on Mac
+
+```
+brew install guile
+brew install aconchillo/guile/guile-json
+```
+
 ## Guile Hoot Game Template
 
 This repository is the quickest way to get started building games in

@@ -1,0 +1,3054 @@
+commit 6b6af66710e98ca1a0b0ea3d9a325028ee3035cc
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sun Nov 27 18:59:20 2022 -0800
+
+    fix (json->RECORD)
+
+ json/record.scm       | 2 +-
+ tests/test-record.scm | 8 ++++++++
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+
+commit fcb13775564d191e1a0f75764f760492219fd615
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sun Jun 26 01:41:46 2022 -0700
+
+    record: also fix nested record for vectors
+
+ json/record.scm | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+commit 38d4bf0b10d585401ace263522ed8d67f79f2678
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sun Jun 26 01:36:12 2022 -0700
+
+    bump version to 4.7.2
+
+ NEWS         | 7 +++++++
+ README.md    | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 9 insertions(+), 2 deletions(-)
+
+commit 8104d5bc234441a3d7c8db263a5d1d0e46d35aa1
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sun Jun 26 01:26:46 2022 -0700
+
+    record: don't call scm->record if value is *unspecified* in (define-json-type)
+    
+    Given the following example:
+    
+       (define-json-type <account>
+         (id)
+         (username)
+         (omitted "omitted" <omitted>)
+         (boolean))
+    
+       (define-json-type <omitted>
+         (name))
+    
+    If `omitted` is *unspecified* there's no need to keep going through that field.
+    
+    This also rolls back part of commit 029212e.
+    
+    Fixes #78
+
+ json/record.scm | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
+
+commit 81bc5dad9f588fd49816d2fd3983551e56e078ea
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Tue Apr 19 21:38:49 2022 -0700
+
+    bump version to 4.7.1
+
+ NEWS         |  7 +++++++
+ README.md    | 10 ++++++----
+ configure.ac |  2 +-
+ 3 files changed, 14 insertions(+), 5 deletions(-)
+
+commit 029212e0b74c85b940c4b565e36e97ac26741efd
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Apr 18 22:01:40 2022 -0700
+
+    records: allow optional nested records
+    
+    Fixes #78
+
+ json/record.scm       | 12 ++++++------
+ tests/test-record.scm | 27 ++++++++++++++++++++++++++-
+ 2 files changed, 32 insertions(+), 7 deletions(-)
+
+commit 19410cbf89762c61995e62ed1d229db6ff8881ab
+Author: Vagrant Cascadian <vagrant@debian.org>
+Date:   Wed Jan 5 18:51:50 2022 -0800
+
+    json/record.scm: Fix spelling of "Additionally".
+
+ json/record.scm | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 488b17283723de3429c9e11ad30a21e97c57ecd1
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Jan 5 23:00:05 2022 -0800
+
+    INSTALL: new version
+
+ INSTALL | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit 95514c8ff0c1b50ee1803bc784eb064334f81182
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sun Jan 2 16:34:50 2022 -0800
+
+    bump version to 4.7.0
+
+ NEWS         |  7 +++++++
+ README.md    | 23 ++++++++++++++++-------
+ configure.ac |  4 ++--
+ 3 files changed, 25 insertions(+), 9 deletions(-)
+
+commit 895802eefb28a162a532eb13da302a7fcb07a25a
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sun Jan 2 16:33:57 2022 -0800
+
+    parser: allow JSON object ordering
+    
+    Closes #77
+
+ json/parser.scm       | 71 +++++++++++++++++++++++++++------------------------
+ tests/test-parser.scm |  6 ++++-
+ 2 files changed, 43 insertions(+), 34 deletions(-)
+
+commit 7b42db265d66af52ed097ab672c86ff2c728938d
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Tue Dec 28 07:49:27 2021 -0800
+
+    bump version to 4.6.0
+
+ NEWS         | 9 +++++++++
+ README.md    | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 11 insertions(+), 2 deletions(-)
+
+commit 481bf194cc460db4cbba15dbe06dcd3dcd26719f
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Dec 27 22:11:59 2021 -0800
+
+    tests: add error tests for concatenated documents
+
+ tests/test-parser.scm | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+commit 5e184c41d60f63a15e526d702db4036d879a915a
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Dec 27 15:42:02 2021 -0800
+
+    add support for concatenated documents
+    
+    Closed #76.
+
+ README.md             | 15 ++++++++++++---
+ json/parser.scm       | 19 ++++++++++++-------
+ tests/test-parser.scm | 10 +++++++++-
+ 3 files changed, 33 insertions(+), 11 deletions(-)
+
+commit 467c0d402c233bc36e7d6bc8c8f0259488603a26
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Dec 27 15:28:42 2021 -0800
+
+    README: add JSON text sequences documentation
+
+ README.md | 75 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 69 insertions(+), 6 deletions(-)
+
+commit 52c3f300a53b4a376ffcef02288ff54cafdb66ff
+Merge: f034f82 c38640a
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon May 24 09:00:17 2021 -0700
+
+    Merge pull request #75 from sirikid/feature/json-seq
+    
+    RFC 7464 JSON Text Sequences
+
+commit c38640aea2e094c274ea70f901d8592e2d7ef176
+Author: Ivan Sokolov <ivan-p-sokolov@ya.ru>
+Date:   Sat May 22 20:22:19 2021 +0300
+
+    Add tests for json seq parser
+
+ tests/test-parser.scm | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+commit f6ea3ac95eb682f1d8a2371657ace07ea8ab277b
+Author: Ivan Sokolov <ivan-p-sokolov@ya.ru>
+Date:   Sat May 22 20:21:57 2021 +0300
+
+    Add tests for json seq builder
+
+ tests/test-builder.scm | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+commit 4591cc12896b1bdf837ffa78a313919cbe3284a2
+Author: Ivan Sokolov <ivan-p-sokolov@ya.ru>
+Date:   Thu May 20 13:06:55 2021 +0300
+
+    Add json seq parser
+
+ json/parser.scm | 68 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 67 insertions(+), 1 deletion(-)
+
+commit dd578c2b18d48c0195e0769e5d00ca6c750dad40
+Author: Ivan Sokolov <ivan-p-sokolov@ya.ru>
+Date:   Wed May 19 02:11:42 2021 +0300
+
+    Add json seq builder
+
+ json/builder.scm | 28 +++++++++++++++++++++++++++-
+ 1 file changed, 27 insertions(+), 1 deletion(-)
+
+commit f034f82f0dd33407ae97f383e7c1f4d82f9e2164
+Merge: 201ea1c 82bf335
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Fri May 21 10:31:35 2021 -0700
+
+    Merge pull request #74 from sirikid/feature/test-runner
+    
+    Make test suites portable accross Guile versions
+
+commit 82bf33512d2a0341e76140d6a3a016ce1ffa2e5e
+Author: Ivan Sokolov <ivan-p-sokolov@ya.ru>
+Date:   Fri May 21 20:14:22 2021 +0300
+
+    Make test suites portable
+
+ tests/test-builder.scm | 4 +++-
+ tests/test-parser.scm  | 4 +++-
+ tests/test-record.scm  | 4 +++-
+ 3 files changed, 9 insertions(+), 3 deletions(-)
+
+commit 201ea1cf05b4c604418d76acd1a54739aeade88b
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Fri May 21 10:07:21 2021 -0700
+
+    README: avoid html elements in markdown
+
+ README.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit b678798fdc90984260b122abd09fe7cc931872d0
+Merge: 7cdda5c c663629
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Fri May 21 10:03:56 2021 -0700
+
+    Merge pull request #73 from sirikid/feature/test-runner
+    
+    Fix #72
+
+commit c6636299f523d8dfdf479d4faeb2ac167ca89454
+Author: Ivan Sokolov <ivan-p-sokolov@ya.ru>
+Date:   Fri May 21 19:17:00 2021 +0300
+
+    Simplify test runner
+
+ tests/runner.scm | 13 +++++--------
+ 1 file changed, 5 insertions(+), 8 deletions(-)
+
+commit 22ed451f86a666c487eeed7958da9fbb3b19df28
+Author: Ivan Sokolov <ivan-p-sokolov@ya.ru>
+Date:   Fri May 21 19:16:23 2021 +0300
+
+    Fix #72
+
+ tests/test-builder.scm | 4 ++--
+ tests/test-parser.scm  | 4 ++--
+ tests/test-record.scm  | 2 +-
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+commit 7cdda5ca9e05fd3f7834c865fe4701f32b885f71
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Feb 3 13:14:20 2021 -0800
+
+    bump version to 4.5.2
+
+ NEWS         | 5 +++++
+ README.md    | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 7 insertions(+), 2 deletions(-)
+
+commit fe1b9ba56a5a29b3338bf6bf1b04a03b95da73c3
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Feb 3 13:12:29 2021 -0800
+
+    record: add missing modules
+
+ json/record.scm | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit 8306c6616abf68f24bd4fee65205eb36b96e5f38
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Feb 3 13:12:13 2021 -0800
+
+    remove pkg-list.scm.in
+
+ Makefile.am     |  3 ---
+ README.md       |  3 ---
+ pkg-list.scm.in | 29 -----------------------------
+ 3 files changed, 35 deletions(-)
+ delete mode 100644 pkg-list.scm.in
+
+commit 911777ec6c67e927ecb463b30cb9bf6062e9bc6a
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Feb 3 13:09:19 2021 -0800
+
+    README: fix documentation
+
+ README.md | 31 ++++++++-----------------------
+ 1 file changed, 8 insertions(+), 23 deletions(-)
+
+commit f136a8ae9f8976a8e03860b4ba5c25d32c38279f
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Jan 11 09:32:43 2021 -0800
+
+    bump version to 4.5.1
+
+ NEWS         | 6 ++++++
+ README.md    | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 8 insertions(+), 2 deletions(-)
+
+commit 680e4de46ee23d41869446ae7de414c1a4ec27a5
+Merge: 7036482 2a3846b
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Jan 11 09:30:15 2021 -0800
+
+    Merge pull request #70 from aconchillo/allow-false-values-in-json-mappings
+    
+    record: allow false values in json mappings
+
+commit 2a3846b72174dc76a54b223f418e54f46639b677
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Jan 11 09:21:39 2021 -0800
+
+    record: allow false values in json mappings
+    
+    * json/record.scm (define-json-reader), (define-native-reader): use (assoc)
+    instead of (assoc-ref) so we can distinguish between false values and fields not
+    found. This allows us to identify *unspecified* fields versus fields which have
+    false values.
+    
+    Fixes #69
+
+ json/record.scm       | 20 ++++++++++----------
+ tests/test-record.scm |  7 +++++--
+ 2 files changed, 15 insertions(+), 12 deletions(-)
+
+commit 7036482c67a6c0b67c1048e981a05270772f9526
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sun Jan 3 00:38:53 2021 -0800
+
+    bump version to 4.5.0
+
+ NEWS            | 6 ++++++
+ README.md       | 2 +-
+ configure.ac    | 4 ++--
+ json/record.scm | 2 +-
+ 4 files changed, 10 insertions(+), 4 deletions(-)
+
+commit 5143c47a5fcde617846a6d9abd8272b555fcdf95
+Merge: 99e1a4f 17ad5b1
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sun Jan 3 00:34:29 2021 -0800
+
+    Merge pull request #68 from aconchillo/json-types
+    
+    introduce (define-json-type)
+
+commit 17ad5b1341e7feded17e6b416db4bb96c52be227
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sun Jan 3 00:23:54 2021 -0800
+
+    introduce (define-json-type)
+
+ README.md             | 162 +++++++++++++++++++++++++++++++-------------------
+ json/record.scm       | 104 ++++++++++++++++++++++++++------
+ tests/test-record.scm |  53 ++++++++++++++++-
+ 3 files changed, 238 insertions(+), 81 deletions(-)
+
+commit 99e1a4faf3abbf13243a0d7f27c8ed14112bee8c
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sun Nov 29 00:21:40 2020 -0800
+
+    README: use https for download link
+
+ README.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 4b1f8149a3e8b08020c65b4a98fc3bc1f7e30ada
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sun Nov 29 00:13:35 2020 -0800
+
+    bump version to 4.4.1
+
+ NEWS         | 7 +++++++
+ README.md    | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 9 insertions(+), 2 deletions(-)
+
+commit fba6ce46fdecb97a118c476cd209e4a9a37b08cc
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sun Nov 29 00:11:19 2020 -0800
+
+    README: fix markdown
+
+ README.md | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit cc4b012577ffe7e4a1c1867e825275f8344b1745
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sun Nov 29 00:09:01 2020 -0800
+
+    README: update to markdown
+
+ README                  |   2 +-
+ README.org => README.md | 229 ++++++++++++++++++++++++++----------------------
+ 2 files changed, 127 insertions(+), 104 deletions(-)
+ rename README.org => README.md (52%)
+
+commit d22ca1e2da34561a118623eea22adf22999a9acd
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sat Nov 28 23:50:31 2020 -0800
+
+    parser: improve array parsing
+    
+    Fixes #67
+
+ json/parser.scm       | 44 +++++++++++++++++++++++---------------------
+ tests/test-parser.scm |  2 ++
+ 2 files changed, 25 insertions(+), 21 deletions(-)
+
+commit 04c009f725522d649111baa2a52131dd53d59a97
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sat Nov 28 23:50:06 2020 -0800
+
+    parser: limit exponents to 1000
+    
+    Fixes #67
+
+ json/parser.scm | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+commit ba167eb775c45bcfb904dbbcb158a2ba90d88dad
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sat Nov 28 23:49:54 2020 -0800
+
+    parser: unescaped control characters are not allowed
+    
+    Fixes #67
+
+ json/parser.scm | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+commit 89e2ce975064baf4f434de4d97e54aac704769a0
+Merge: c19851f 656de15
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Thu Oct 22 13:36:58 2020 -0700
+
+    Merge pull request #66 from aconchillo/release-4.4.0
+    
+    bump version to 4.4.0
+
+commit 656de159a9afa552d48a7ffe7adb61c76a5e1388
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Thu Oct 22 13:34:46 2020 -0700
+
+    bump version to 4.4.0
+
+ NEWS         | 2 +-
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+commit c19851f9d2a2e658e7e8272d0d2fc200a5f546cd
+Merge: 90b60b9 627fd12
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Thu Oct 22 13:30:09 2020 -0700
+
+    Merge pull request #65 from aconchillo/support-nested-json-mappings
+    
+    record: support nested records
+
+commit 627fd12e305f7dfdf72ab3c8dddce2c21bf966b9
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Oct 5 15:05:31 2020 -0700
+
+    record: support nested records
+    
+    * json/record.scm (define-json-mapping): add new optional record->scm.
+    
+    * json/record.scm (define-native-writer): new procedure to define record->scm.
+    
+    Fixes #63
+
+ NEWS                  |  4 ++++
+ README.org            | 15 +++++++++++---
+ json/record.scm       | 55 ++++++++++++++++++++++++++++++++++++++++++++++++---
+ tests/test-record.scm | 34 +++++++++++++++++++++++++++++++
+ 4 files changed, 102 insertions(+), 6 deletions(-)
+
+commit 90b60b9739b80b64806c78cf6868ebd5dbd3fda3
+Merge: 5b35f52 5205290
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Oct 5 14:50:36 2020 -0700
+
+    Merge pull request #62 from aconchillo/ignore-unspecified
+    
+    record: allow unspecified values
+
+commit 52052907bcaadd3cb32d06485bafb8434458d08e
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Oct 5 14:49:55 2020 -0700
+
+    updated README and NEWS
+
+ NEWS       | 4 ++++
+ README.org | 3 +++
+ 2 files changed, 7 insertions(+)
+
+commit 499bac076943b2b337655715577e0257ce4e3019
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sat Oct 3 23:30:08 2020 -0700
+
+    record: allow unspecified values
+    
+    In other languages it's possible to ignore empty/null JSON fields when
+    building the resulting JSON object. For example, in Go you would specify
+    `omitempty` in the struct field's tag. In Java, you would use
+    "@JsonInclude(Include.NON_NULL)" on a field or class to indicate that null
+    fields should not be serialized.
+    
+    So, when using records as object with guile-json you can no set a field
+    to *unspecified*. When that happens the field won't be serialzied to JSON.
+    
+    * json/record.scm (define-json-writer): ignore fields with *unspecified*
+    values.
+    
+    * json/record.scm (define-json-reader): assign *unspecified* if field not
+    found in object's alist.
+    
+    Fixes #61
+
+ json/record.scm       |  7 +++++--
+ tests/test-record.scm | 28 +++++++++++++++++++++++++---
+ 2 files changed, 30 insertions(+), 5 deletions(-)
+
+commit 5b35f52592f9c9c8214dc35f45c59f2d2279b3fe
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Oct 5 14:19:50 2020 -0700
+
+    added Jonas Schürmann as a contributor
+
+ AUTHORS | 1 +
+ NEWS    | 6 ++++++
+ 2 files changed, 7 insertions(+)
+
+commit a412c72d6f5974280adfd88e9374aeb8d2a5155e
+Merge: e95ffb2 629974e
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Oct 5 14:14:12 2020 -0700
+
+    Merge pull request #64 from MazeChaZer/improve-pretty-printing
+    
+    Improve pretty printing
+
+commit 629974ef1dc6ab414453b6886a35834166c147f1
+Author: Jonas Schürmann <me@jonas-schuermann.name>
+Date:   Mon Oct 5 23:12:32 2020 +0200
+
+    Fix null check in json-build-array
+
+ json/builder.scm | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 60a9416266723a4c499204a2825c81ada50ed05d
+Author: Jonas Schürmann <me@jonas-schuermann.name>
+Date:   Mon Oct 5 22:28:38 2020 +0200
+
+    Improve pretty printing
+    
+    The pretty printing should now behave in the usual way, just like json.tool in
+    Python or JSON.stringify in NodeJS. List elements are on their own line,
+    opening braces are on the same line and spaces are only after a colon.
+    
+    Fixes #60
+
+ json/builder.scm       | 28 ++++++++++++++++------------
+ tests/test-builder.scm | 24 +++++++++++++++++++++++-
+ 2 files changed, 39 insertions(+), 13 deletions(-)
+
+commit e95ffb24ed0273807e5b495aaf51d5d415878229
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Aug 5 09:50:46 2020 -0700
+
+    README: add JSON arrays->vectors and JSON objects->alist discussion
+
+ README.org | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+commit a09926699899e76101015c72ca3bf41504f254d6
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Thu Jul 23 12:11:16 2020 -0700
+
+    test: add tests for characters between E000-FFFF
+
+ tests/test-parser.scm | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
+
+commit 49714cf3f93ea0282b18f482b65a900cd5979b02
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Thu Jul 23 11:51:08 2020 -0700
+
+    bump version to 4.3.2
+
+ NEWS         | 8 +++++++-
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 9 insertions(+), 3 deletions(-)
+
+commit b72667be9cf9fe4a8e1a1886dac68264ad96760e
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Thu Jul 23 11:48:55 2020 -0700
+
+    parser: hot fix for unicode codepoints
+    
+    Didn't work for E000 and upwards.
+
+ json/parser.scm       | 6 ++++--
+ tests/test-parser.scm | 3 +++
+ 2 files changed, 7 insertions(+), 2 deletions(-)
+
+commit 8a9623e79a5d91b968e0b0496d550ceda2b6fafa
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jul 22 21:37:20 2020 -0700
+
+    bump version to 4.3.1
+
+ NEWS         | 6 ++++++
+ README.org   | 2 +-
+ configure.ac | 8 ++++----
+ 3 files changed, 11 insertions(+), 5 deletions(-)
+
+commit c1735133edc482e290562c7cac275b8c255966dc
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jul 22 21:35:29 2020 -0700
+
+    parser: fix unicode codepoint surrogate pairs
+    
+    Fixes #58
+
+ json/parser.scm       | 38 ++++++++++++++++++++++++++++----------
+ tests/test-parser.scm |  3 +++
+ 2 files changed, 31 insertions(+), 10 deletions(-)
+
+commit 5fc9a1305fb0a9697b8c45c5a0d82f93f2eaeaa6
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Jul 5 20:30:00 2020 -0700
+
+    README: update define-json-mapping example
+
+ README.org | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+commit 30cff05bb6e678cfc7f4fe492c5c951769e848a4
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Fri Jul 3 23:07:26 2020 -0700
+
+    README: make record->json optional
+
+ README.org | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit 23612d387426d9e5ecea80d7c409bdedbdd16957
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Fri Jul 3 23:05:27 2020 -0700
+
+    bump version to 4.3.0
+
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit a37e46a184e410e526d12cfdbbd63f90e72ab573
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Fri Jul 3 23:04:35 2020 -0700
+
+    record: make RECORD->JSON optional
+
+ NEWS                  |  5 +++++
+ json/record.scm       | 43 ++++++++++++++++++++++++++++---------------
+ tests/test-record.scm | 32 ++++++++++++++++++++++----------
+ 3 files changed, 55 insertions(+), 25 deletions(-)
+
+commit b4e8267dae9a3526912d4fff165512cf332b2ab6
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Jun 30 00:27:53 2020 -0700
+
+    vice versa misspellings
+
+ NEWS       | 2 +-
+ README.org | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 4c1de457b1c16b59673939d91f218d8a9dfbaea4
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Jun 30 00:18:18 2020 -0700
+
+    bump version to 4.2.0
+
+ NEWS         | 2 +-
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 7c00d26454c1f8f4cb2216c158c9a4c08b75c06c
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Jun 30 00:17:02 2020 -0700
+
+    README: document json objects and records
+
+ README.org | 75 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 75 insertions(+)
+
+commit 5bd1419480af6893c93b6bf32e3fb41dd4b26ef4
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon Jun 29 23:50:41 2020 -0700
+
+    introduce (define-json-mapping)
+
+ NEWS                  |  7 ++++
+ json.scm              |  8 +++--
+ json/Makefile.am      |  4 +--
+ json/record.scm       | 88 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/Makefile.am     |  4 +--
+ tests/test-record.scm | 89 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 6 files changed, 193 insertions(+), 7 deletions(-)
+ create mode 100644 json/record.scm
+ create mode 100644 tests/test-record.scm
+
+commit 95fa01da52960ce985e5d5ca5781f3dc43f6d35e
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Jun 6 23:04:50 2020 -0700
+
+    Revert "builder: use (string-for-each)" due to performance impact
+    
+    string-for-each:
+    
+       scheme@(json parser)> ,t (->bool (scm->json-string json))
+       $19 = #t
+       ;; 17.909537s real time, 18.063382s run time.  0.207281s spent in GC.
+    
+    vs
+    
+    for-each + string->list:
+    
+       scheme@(json parser)> ,t (->bool (scm->json-string json))
+       $20 = #t
+       ;; 2.998381s real time, 3.319349s run time.  0.471969s spent in GC.
+    
+    This reverts commit 56873ed16d24e927fab701bfafc15d9ec53bd595.
+
+ NEWS             | 7 -------
+ json/builder.scm | 4 ++--
+ 2 files changed, 2 insertions(+), 9 deletions(-)
+
+commit 56873ed16d24e927fab701bfafc15d9ec53bd595
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Jun 6 22:55:43 2020 -0700
+
+    builder: use (string-for-each)
+
+ NEWS             | 7 +++++++
+ json/builder.scm | 4 ++--
+ 2 files changed, 9 insertions(+), 2 deletions(-)
+
+commit 36dd6d9f0f2eb761ea0fcda86d9fe218da45afe0
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Jun 6 17:03:22 2020 -0700
+
+    bump version to 4.1.0
+
+ NEWS         | 6 +++---
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+commit 76693e284eda5681347fbc6bdf0c48bd3ecbb1e9
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Jun 6 17:00:29 2020 -0700
+
+    tests: add builder tests for special characters
+
+ tests/test-builder.scm | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+commit 46b5505226de763cb855947cb157faea81cd5283
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Fri Jun 5 16:27:11 2020 -0700
+
+    builder: simplify and performance improvements
+
+ NEWS                   |  3 +++
+ json/builder.scm       | 33 +++++++++++++++++----------------
+ tests/test-builder.scm |  1 -
+ 3 files changed, 20 insertions(+), 17 deletions(-)
+
+commit 3470b222e303946a550f4a4794740890db29b33e
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Fri Jun 5 14:42:15 2020 -0700
+
+    builder: simplify unicode support
+
+ NEWS             |  2 ++
+ json/builder.scm | 66 ++++++++++++++++++--------------------------------------
+ 2 files changed, 23 insertions(+), 45 deletions(-)
+
+commit 1276613ea3466eeffa068b3c6d7325ab671542dd
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Thu Jun 4 23:02:01 2020 -0700
+
+    parser: remove duplicate code when parsing numbers
+
+ json/parser.scm | 19 +++++++++----------
+ 1 file changed, 9 insertions(+), 10 deletions(-)
+
+commit 846f9c45e27a7c6f5b2680ed49ae80c05ed61e6d
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Thu Jun 4 22:51:39 2020 -0700
+
+    parser: speed up number parsing
+
+ NEWS                  |   5 +++
+ json/parser.scm       | 112 ++++++++++++++++++++++++++++++++------------------
+ tests/test-parser.scm |   4 +-
+ 3 files changed, 80 insertions(+), 41 deletions(-)
+
+commit 472af45ee0fe6674b6c7ed6c01969a6dfff5fa24
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun May 17 10:41:42 2020 -0700
+
+    bump version to 4.0.1
+
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 45f61468dad75b5570b32703502f43553763e3b3
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun May 17 10:39:54 2020 -0700
+
+    builder: (scm->json-string) #:validate argument should default to true
+
+ NEWS             |  6 ++++++
+ README.org       | 28 ++++++++++++++++++++--------
+ json/builder.scm | 27 ++++++++++++++++++---------
+ 3 files changed, 44 insertions(+), 17 deletions(-)
+
+commit 191682d87ecc843d00f59034697e36a11b2bdea1
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat May 16 23:16:45 2020 -0700
+
+    bump version to 4.0.0
+
+ NEWS         | 12 +++++++++++-
+ README.org   | 10 +++++-----
+ configure.ac |  2 +-
+ 3 files changed, 17 insertions(+), 7 deletions(-)
+
+commit 4a3e3ea573abda33366684b75195ff58afa9b312
+Merge: db2648f a643fff
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sat May 16 23:09:20 2020 -0700
+
+    Merge pull request #57 from aconchillo/null-defaults-to-symbol-null
+    
+    introduce 'null symbol as default value for JSON null
+
+commit a643fff3b93b7bf6315161677342322c8a44de7f
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun May 10 01:16:59 2020 -0700
+
+    introduce 'null symbol as default value for JSON null
+    
+    This patch introduces a breaking change since JSON null is now mapped to the
+    symbol 'null (see https://github.com/aconchillo/guile-json/issues/31).
+    
+    However, this default value can be modified in all public function by
+    providing the #:null keyword argument.
+    
+    Fixes #31
+
+ README.org             |  85 +++++++++++++++++-------
+ json/builder.scm       | 174 +++++++++++++++++++++++++++----------------------
+ json/parser.scm        |  39 ++++++-----
+ tests/test-builder.scm |   5 +-
+ tests/test-parser.scm  |   3 +-
+ 5 files changed, 185 insertions(+), 121 deletions(-)
+
+commit db2648f38317c02526527234d564009a6edff99e
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon May 4 15:08:38 2020 -0700
+
+    parse: check for failed string->number conversion
+
+ NEWS                  | 18 ++++++++++++------
+ json/parser.scm       |  8 +++++---
+ tests/test-parser.scm |  1 +
+ 3 files changed, 18 insertions(+), 9 deletions(-)
+
+commit 283994f50d5dbbba8f7b336fe10fb327f65aac8c
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon May 4 09:50:11 2020 -0700
+
+    tests: add more unfinished json checks
+
+ tests/test-parser.scm | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+commit de6fe3e2d58a9f92f13d1217f5bab3f8e4e2bd2d
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon May 4 09:34:13 2020 -0700
+
+    parser: check for space at the beginning of checking whitespace chars
+
+ json/parser.scm | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 5ba0b065175cd92491da9c6cd09d1482b19ac142
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon May 4 09:31:59 2020 -0700
+
+    parser: check for eof-object? at the end instead of the beginning
+
+ json/parser.scm | 35 ++++++++++++++++++++++-------------
+ 1 file changed, 22 insertions(+), 13 deletions(-)
+
+commit 4fdc4f059a0bc8a2afe1f52681625552a6e3bb8a
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun May 3 17:03:07 2020 -0700
+
+    parser: use (reverse!) instead (reverse)
+
+ json/parser.scm | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 209b02519b0ea68a9546748a613325820fb27325
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun May 3 09:40:15 2020 -0700
+
+    parser: use (cons) and (reverse) instead of (append)
+
+ NEWS            | 3 +++
+ json/parser.scm | 4 ++--
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+commit bd0b4d2bcb74e61118a33dbce40e4499b92e12bb
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun May 3 01:28:08 2020 -0700
+
+    update NEWS
+
+ NEWS | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit ad4b06d86e4822466983d00f55474c8f664b538d
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun May 3 00:19:11 2020 -0700
+
+    parse: stop using (match) for performance reasons
+
+ NEWS            |  15 +--
+ json/parser.scm | 292 +++++++++++++++++++++++++++++---------------------------
+ 2 files changed, 161 insertions(+), 146 deletions(-)
+
+commit 4fecb09ec4096df71e445c99be8df7aeeb33c838
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat May 2 16:15:53 2020 -0700
+
+    parser: remove json-parser record type
+
+ NEWS            |   6 +-
+ README.org      |  16 ++--
+ json/parser.scm | 244 ++++++++++++++++++++++++++------------------------------
+ 3 files changed, 123 insertions(+), 143 deletions(-)
+
+commit 68e2cbe98522337cc6875c24cc73ff5b55b75a13
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat May 2 01:43:11 2020 -0700
+
+    tests: make sure we support unicode extended characters (> U+FFFF)
+
+ tests/test-builder.scm | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit 094954275ea0a23e1e48137e0674e0c22ce68233
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat May 2 00:42:40 2020 -0700
+
+    update NEWS
+
+ NEWS | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit e159515d14f3c506af20cc7e9c367fe1daea8e59
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat May 2 00:33:23 2020 -0700
+
+    remove unused imports
+
+ json/parser.scm | 2 --
+ 1 file changed, 2 deletions(-)
+
+commit b802ab653330ee338917a660c356dfd6e7b7f28f
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Fri May 1 23:40:36 2020 -0700
+
+    parser: don't use map to iterate over expected string
+
+ AUTHORS         |  1 +
+ NEWS            | 11 ++++++-----
+ json/parser.scm | 24 ++++++++++--------------
+ 3 files changed, 17 insertions(+), 19 deletions(-)
+
+commit b7721804d5629bdf3ed6e7c1f839e97642809ebd
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Apr 25 23:26:04 2020 -0700
+
+    parser: don't use string ports to build strings
+
+ NEWS            |  3 +++
+ json/parser.scm | 20 ++++++--------------
+ 2 files changed, 9 insertions(+), 14 deletions(-)
+
+commit 0469fa091975e8fe4652ff6c8b2ee03d6f4e7c56
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Apr 25 23:24:46 2020 -0700
+
+    parser: avoid using character sets
+
+ NEWS            | 7 ++++++-
+ json/parser.scm | 8 ++++++--
+ 2 files changed, 12 insertions(+), 3 deletions(-)
+
+commit 86d4973dff25ffc35426b82dc2c03c5e4ea8da34
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Apr 25 23:01:22 2020 -0700
+
+    tests: use upper-case hexadecimal unicode values
+
+ tests/test-parser.scm | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 7a1edb055b73831d2d851cf6542c5ce129fe20c5
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Apr 25 22:55:31 2020 -0700
+
+    parse: simplify unicode parsing
+    
+    Guile uses Unicode to define a character. This is very convenient since in
+    JSON a unicode character is represented as \uXXXX. So, the only way we need to
+    do is parse that hexadecimal value and convert it into a
+    character (integer->char).
+
+ json/parser.scm | 66 ++++++++++++++++++++++++++++++++++++---------------------
+ 1 file changed, 42 insertions(+), 24 deletions(-)
+
+commit 6882f0461a2099a2ef99b70a9d6ad65b5bf419e7
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Apr 22 23:37:28 2020 -0700
+
+    parser: define (parser-peek-char) and (parser-read-char) as macros
+
+ NEWS            | 5 ++++-
+ json/parser.scm | 4 ++--
+ 2 files changed, 6 insertions(+), 3 deletions(-)
+
+commit e6da66e970ee70f8c4d0f9a3a4c4b329f13511ab
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Apr 21 12:05:20 2020 -0700
+
+    minor NEWS update
+
+ NEWS | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit 6d1950e137483afc0895f0183a9d03a9a7a99a0a
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Apr 21 12:03:47 2020 -0700
+
+    builder: use put-string instead of display
+
+ json/builder.scm | 35 ++++++++++++++++++-----------------
+ 1 file changed, 18 insertions(+), 17 deletions(-)
+
+commit c3ff1bc06baa2649133f3aa86816b53a4560e5e7
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Apr 21 11:49:14 2020 -0700
+
+    parser: use string ports instead of string-append
+
+ NEWS            |  6 +++++
+ json/parser.scm | 80 +++++++++++++++++++++++++++++++++------------------------
+ 2 files changed, 53 insertions(+), 33 deletions(-)
+
+commit ee60bdc06a8a0502e0ff773ccfddf9371bab097d
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Apr 21 00:55:26 2020 -0700
+
+    bump version to 3.5.0
+
+ NEWS         | 2 +-
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+commit f1e01ca5f4844bc8331789cb8baa9a9e84dd32a5
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Apr 21 00:47:46 2020 -0700
+
+    parser: simplify and cleanup by using pattern matching
+    
+    Also, fix some errors detected during the refactoring (see NEWS).
+
+ NEWS                  |  16 ++
+ json/parser.scm       | 423 ++++++++++++++++++++++----------------------------
+ tests/test-parser.scm |  25 ++-
+ 3 files changed, 220 insertions(+), 244 deletions(-)
+
+commit 792c3120df41e83beabaaa1ea5aa17b165a7d316
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Apr 11 23:39:34 2020 -0700
+
+    bump version to 3.4.0
+
+ NEWS         | 8 ++++++++
+ README.org   | 4 ++--
+ configure.ac | 4 ++--
+ 3 files changed, 12 insertions(+), 4 deletions(-)
+
+commit 2d4c678f35d1022b82da66fa2cc2a8f405e1f747
+Merge: c60ad09 4a2d3c9
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sat Apr 11 23:37:21 2020 -0700
+
+    Merge pull request #56 from aconchillo/issue-55-fix-exponent-parsing
+    
+    parser: fix parsing 0 with exponent
+
+commit 4a2d3c91c3f932891fe8b23f5b27c41f18e664b2
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Apr 11 23:35:15 2020 -0700
+
+    parser: fix parsing 0 with exponent
+    
+    Fixes #55.
+
+ json/parser.scm       | 1 +
+ tests/test-parser.scm | 3 ++-
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+commit c60ad0936495e090224cdc3b4ff38080f5c050a5
+Author: Jan Nieuwenhuizen <janneke@gnu.org>
+Date:   Wed Mar 4 11:17:02 2020 +0100
+
+    build: Also cross-compile in json directory.
+    
+    * json/Makefile.am (.scm.go): Add missing $(GUILE_TARGET).
+
+ json/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit bb18e75844244936ccf6fabb16394473ba021e5a
+Merge: b724080 775b7b0
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Dec 30 22:48:09 2019 -0800
+
+    Merge pull request #53 from mothacehe/master
+    
+    build: Fix cross-compilation.
+
+commit 775b7b0f2787e3d0f1f8da44d81bae49ace42b21
+Author: Mathieu Othacehe <m.othacehe@gmail.com>
+Date:   Mon Dec 30 09:59:15 2019 +0100
+
+    build: Fix cross-compilation.
+    
+    * configure.ac: Set GUILE_TARGET when cross_compiling.
+    * Makefile.am: Pass it to guild.
+
+ Makefile.am  | 2 +-
+ configure.ac | 5 +++++
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
+commit b724080f3d98c1ae74fe9568127751a874d3fa0a
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Thu Oct 31 10:08:41 2019 -0700
+
+    bump version to 3.3.0
+
+ NEWS         | 11 ++++++-----
+ README.org   |  2 +-
+ configure.ac |  2 +-
+ 3 files changed, 8 insertions(+), 7 deletions(-)
+
+commit db0a81918b8f672ffe4627a6ea93169b393c820d
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Oct 30 22:52:58 2019 -0700
+
+    builder: use string instead of bytevector when throwing exception
+
+ json/builder.scm | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 9b0f1fb112f4296f176bb6106b967cec1382aced
+Merge: 9a464cc e26da26
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Oct 30 22:51:36 2019 -0700
+
+    Merge pull request #51 from aconchillo/add-info-to-json-invalid-exception
+    
+    Add info to json invalid exception
+
+commit e26da267a1fdce1a9c6a716f40befe90efcb974a
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Oct 30 22:47:34 2019 -0700
+
+    builder: add #:validate key argument to skip validation
+
+ NEWS             |  7 +++++++
+ README.org       | 21 +++++++++++++--------
+ json/builder.scm | 22 ++++++++++++++--------
+ 3 files changed, 34 insertions(+), 16 deletions(-)
+
+commit 9c85bfa5276c74f114642cde074762a80cf2c938
+Author: Christopher Lam <christopher.lck@gmail.com>
+Date:   Sun Jan 27 19:48:43 2019 +0800
+
+    json-builder: throw sensible error warning
+    
+    if scm cannot be converted to json, it is nice to display the
+    offending scm
+
+ json/builder.scm | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 9a464cc074571a8d4c385425f5826ebbbef580e7
+Merge: 7c860a5 f635881
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Oct 30 10:31:16 2019 -0700
+
+    Merge pull request #50 from aconchillo/empty-array-slots-invalid
+    
+    parser: make sure empty array slots are considered invalid
+
+commit f63588103bb49a8257ce1158a5842a14c9cb8763
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Oct 30 10:28:44 2019 -0700
+
+    parser: make sure empty array slots are considered invalid
+
+ AUTHORS               |  1 +
+ NEWS                  |  4 +++-
+ README.org            |  2 +-
+ json/parser.scm       | 24 +++++++++++++++++-------
+ tests/test-parser.scm |  2 ++
+ 5 files changed, 24 insertions(+), 9 deletions(-)
+
+commit 7c860a56d97fd3e9d106a177cc02ae74ba54445f
+Merge: f14f334 69b594f
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Tue Oct 29 22:43:42 2019 -0700
+
+    Merge pull request #48 from aconchillo/validate-scheme-object
+    
+    validate scheme object when building JSON document
+    
+    Fixes #36
+
+commit 69b594ffa3acbe58c339d9c637d3d0694c9f5306
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Tue Oct 29 22:37:10 2019 -0700
+
+    added unit tests for scheme object validations
+
+ NEWS                   | 5 +++++
+ README.org             | 2 ++
+ json/builder.scm       | 9 +++------
+ tests/test-builder.scm | 6 ++++++
+ 4 files changed, 16 insertions(+), 6 deletions(-)
+
+commit 40838fcc20bbf292ca0dd4607c9deadb682584e2
+Author: rain1 <rain1@airmail.cc>
+Date:   Thu Apr 4 17:23:21 2019 +0100
+
+    validate scheme object when building JSON document
+    
+    * json/builder.scm: Validate the scheme object using a new function called
+    json-valid? before printing partial contents to the output port.
+
+ json/builder.scm | 27 ++++++++++++++++++++++++++-
+ 1 file changed, 26 insertions(+), 1 deletion(-)
+
+commit f14f334789540d09c5ddd59afe21a93d023a9b42
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Sep 9 14:35:49 2019 -0700
+
+    bump version to 3.2.0
+
+ NEWS         | 5 ++++-
+ README.org   | 2 +-
+ configure.ac | 4 ++--
+ 3 files changed, 7 insertions(+), 4 deletions(-)
+
+commit 3f5e1757bf2130f52e831dd860a26fdd141a6d7a
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Sep 9 14:33:25 2019 -0700
+
+    builder: small simplification
+
+ json/builder.scm | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 39e7626c2b1bcd00061ed45b340e06112899a786
+Merge: c95a727 68ade9d
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Jul 24 15:15:06 2019 -0700
+
+    Merge pull request #46 from ZelphirKaltstahl/master
+    
+    add a case for building the JSON of empty JSON objects
+
+commit 68ade9d55ae637475658546ec80a8cd27d24c728
+Author: Zelphir Kaltstahl <zelphirkaltstahl@posteo.de>
+Date:   Thu Jul 25 00:11:17 2019 +0200
+
+    add a case for building the JSON of empty JSON objects
+    
+    + This prevents the bug described in https://github.com/aconchillo/guile-json/issues/44.
+    + adding tests
+
+ json/builder.scm       | 1 +
+ tests/test-builder.scm | 4 ++++
+ 2 files changed, 5 insertions(+)
+
+commit c95a72735ceb2506ec2a0c1cf7deaf33868a262c
+Merge: b4da471 a78521f
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Jan 2 22:39:46 2019 -0800
+
+    Merge pull request #38 from aconchillo/issue-34-document-object-keys
+    
+    builder: document the use of symbols and numbers as JSON object keys
+
+commit a78521fb1a04481b3f4ab51835a5ce4f4bbc39b9
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 2 22:38:16 2019 -0800
+
+    builder: document the use of symbols and numbers as JSON object keys
+
+ README.org       |  3 +++
+ json/builder.scm | 19 +++++++++++++------
+ 2 files changed, 16 insertions(+), 6 deletions(-)
+
+commit b4da47173916efd9893e726ad74a504ecb8e5900
+Merge: 978125f 8702f80
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Jan 2 22:21:10 2019 -0800
+
+    Merge pull request #37 from aconchillo/issue-32-check-scm-numbers
+    
+    builder: don't allow complex numbers, inf and nan
+
+commit 8702f808ce2130cd01ce4f10fad9d263e3322010
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 2 22:19:59 2019 -0800
+
+    tests: added unit tests for invalid numbers
+
+ tests/test-builder.scm | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+commit 1a6b976533a62464559b64f6360ae26d96afaf6f
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 2 22:13:10 2019 -0800
+
+    builder: don't allow complex numbers, inf and nan
+    
+    Fixes #32
+
+ NEWS             |  7 +++++++
+ json/builder.scm | 10 +++++-----
+ 2 files changed, 12 insertions(+), 5 deletions(-)
+
+commit 978125f47115b48e8ffcb07db8d79594b81a778d
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon Dec 31 21:39:32 2018 -0800
+
+    bump version to 3.1.0
+
+ NEWS         | 8 ++++++++
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 10 insertions(+), 2 deletions(-)
+
+commit 43bd65d83543f84d79204f3b8fb151989872ee7f
+Merge: 51b9853 80eeac6
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Dec 31 21:35:15 2018 -0800
+
+    Merge pull request #30 from aconchillo/escape-unicode-when-requested
+    
+    Escape unicode when requested
+
+commit 80eeac6e237b0c0c66fe819f4c90588d8d07c9fb
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon Dec 31 21:32:34 2018 -0800
+
+    tests: added unit tests for unicode characters
+
+ tests/test-builder.scm | 4 ++++
+ tests/test-parser.scm  | 2 ++
+ 2 files changed, 6 insertions(+)
+
+commit a5f525d80d98657e53f79f39ec0945f51bb348ef
+Merge: 839c6cc a834657
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Dec 31 17:51:10 2018 -0800
+
+    Merge pull request #29 from ZelphirKaltstahl/escape-unicode-when-requested
+    
+    add keyword argument to procedure head in readme
+
+commit a8346572dc5fcb968ae98cb917b4b2da11b96dde
+Author: Zelphir Kaltstahl <zelphirkaltstahl@gmail.com>
+Date:   Mon Dec 31 11:33:01 2018 +0100
+
+    add keyword argument to procedure head in readme
+
+ README.org | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 839c6cce9a552783c8a579fb8c55ed6dc160e694
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon Dec 31 00:23:54 2018 -0800
+
+    builder: escape unicode characters when requested
+    
+    We add a new key argument #:unicode. It allows the user to specifiy if unicode
+    characters should be escaped. It defaults to false.
+    
+    Fixes #28.
+
+ README.org       |  2 ++
+ json/builder.scm | 38 +++++++++++++++++++-------------------
+ 2 files changed, 21 insertions(+), 19 deletions(-)
+
+commit 51b9853a019c7578da3f161f4f34fb712862569c
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Dec 29 22:19:17 2018 -0800
+
+    bump version to 3.0.0
+
+ NEWS         | 15 +++++++++++++++
+ README.org   |  2 +-
+ configure.ac |  2 +-
+ 3 files changed, 17 insertions(+), 2 deletions(-)
+
+commit f1a728d6e691063dbf703f3ea0097661f5cb3993
+Merge: a3ae045 ed10f16
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sat Dec 29 22:08:52 2018 -0800
+
+    Merge pull request #26 from aconchillo/switch-to-alist-and-vectors
+    
+    switch to alist and vectors
+
+commit ed10f16b323eec2b0308a2a4227a38b286323a88
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Dec 29 22:07:17 2018 -0800
+
+    tests: include runner in dist
+
+ tests/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 2241cea00c308620594742d0c7f26b1d68f60d24
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Dec 29 22:02:34 2018 -0800
+
+    tests: copy and use test runner from gnucash
+
+ tests/runner.scm       | 57 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/test-builder.scm |  9 ++++----
+ tests/test-parser.scm  |  9 ++++----
+ 3 files changed, 67 insertions(+), 8 deletions(-)
+ create mode 100644 tests/runner.scm
+
+commit f66eb74ca93dad5f4abe015c674e22b8ea66d4b9
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Dec 29 15:36:52 2018 -0800
+
+    tests: exit status should be non-zero if test fails
+
+ Makefile.am            | 13 +++----------
+ configure.ac           |  2 +-
+ tests/Makefile.am      | 31 +++++++++++++++++++++++++++++++
+ tests/test-builder.scm |  2 ++
+ tests/test-parser.scm  |  4 +++-
+ 5 files changed, 40 insertions(+), 12 deletions(-)
+ create mode 100644 tests/Makefile.am
+
+commit 4c78b8ebb0db315671c29169e83913f3bcd83935
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Fri Dec 21 22:35:03 2018 -0800
+
+    parser: a single number can also be valid JSON
+
+ json/parser.scm | 137 ++++++++++++++++++++++++++++++--------------------------
+ 1 file changed, 73 insertions(+), 64 deletions(-)
+
+commit 828815d983011899d8d56cd47dbb112e895b287a
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Fri Dec 21 22:34:41 2018 -0800
+
+    add unit tests for parsing and building json
+
+ .gitignore             |  5 ++--
+ Makefile.am            | 22 +++++++++++-----
+ tests/test-builder.scm | 68 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/test-parser.scm  | 71 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 157 insertions(+), 9 deletions(-)
+ create mode 100644 tests/test-builder.scm
+ create mode 100644 tests/test-parser.scm
+
+commit 25a8ed78f00a33fb9fb5096720c1f8b47445e7ad
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Thu Dec 20 01:23:36 2018 -0800
+
+    breaking change: JSON objects are now alists and JSON arrays vectors
+    
+    After discussions in the guile-user mailing list, using types with reader
+    syntax seemed the best way to represent JSON types for most people.
+    
+    Most of the time people build JSON objects so it seems logic to map them to
+    the most convenient way to represent them in Scheme which would be alists. For
+    JSON arrays we now use vectors which also have reader syntax #() and therefore
+    are easy to represent.
+
+ README.org       | 40 +++++++++++++++++-----------------------
+ json/builder.scm | 17 ++++++++---------
+ json/parser.scm  |  8 +++-----
+ 3 files changed, 28 insertions(+), 37 deletions(-)
+
+commit a3ae045dcb7f7f5ed3762be4c049a1c429a966c7
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Dec 12 16:07:32 2018 -0800
+
+    bump version to 2.0.0
+
+ NEWS         | 8 ++++++++
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 10 insertions(+), 2 deletions(-)
+
+commit 1cdac60e32f8676901f8f74b77f87aec515d8916
+Merge: 8f5c445 4fd9bb9
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Tue Dec 11 10:13:40 2018 -0800
+
+    Merge pull request #24 from aconchillo/remove-support-alist-to-json-object
+    
+    remove alist to json object support
+
+commit 4fd9bb97d55cbf5980d3223ed4a0776b361b364c
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon Dec 10 21:55:21 2018 -0800
+
+    remove alist to json object support
+    
+    This is a breaking change.
+    
+    Fixes #22
+
+ README.org       | 59 ++++++++++++++++++++++++--------------------------------
+ json/builder.scm |  8 --------
+ 2 files changed, 25 insertions(+), 42 deletions(-)
+
+commit 8f5c44560efed6cfedb24b15fa9d73fbad697dd6
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Dec 2 22:29:10 2018 -0800
+
+    m4: update guile.m4 serial
+
+ m4/guile.m4 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 6197693315f95ff036a6da2f6c7c86a7c5a4bb2c
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Dec 2 22:28:33 2018 -0800
+
+    bump version to 1.3.2
+
+ NEWS         | 7 +++++++
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 9 insertions(+), 2 deletions(-)
+
+commit ef2dedb6846d39b0b1be088a72af435d1085dda1
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Dec 2 22:26:45 2018 -0800
+
+    configure.ac: improve final output
+
+ configure.ac | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+commit 6721625778f2058529547ffdd0dabd036df848f1
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Dec 2 22:16:49 2018 -0800
+
+    output GUILE_LIBDIR in configure
+
+ configure.ac | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+commit eba5420682d88b399d8b1379cf9271a421334eec
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Dec 2 22:03:52 2018 -0800
+
+    don't use GUILE_SITE or GUILE_SITE_CCACHE
+    
+    Using these variables will not allow others to specifiy a different
+    prefix. For helping people to install in the Guile system's directory a
+    message is now printed at the end of configure.
+
+ Makefile.am      |  4 ++--
+ configure.ac     | 17 +++++++++++++++++
+ json/Makefile.am |  4 ++--
+ 3 files changed, 21 insertions(+), 4 deletions(-)
+
+commit 32af8c0f29cf905ef471db83f925dfe1d67d9755
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sat Dec 1 22:12:34 2018 -0800
+
+    updated NEWS
+
+ NEWS | 3 +++
+ 1 file changed, 3 insertions(+)
+
+commit 7dd54d92e44ad127141d1bbcd9183c727ffe811c
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sat Dec 1 22:10:04 2018 -0800
+
+    m4: use AC_PATH_PROGS for multiple candidates
+
+ m4/guile.m4 | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit 33531376bc0baa51e3fc55d4150fa1c4d4d06839
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sat Dec 1 22:06:44 2018 -0800
+
+    m4: provide more candidates for guild, guile-tools and guile-config
+    
+    Some systems might have guile-2.2 and guild instead of guild-2.2.
+
+ m4/guile.m4 | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit 51f38274bee6f4bab0211ec4534c25d334510bc6
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sat Dec 1 21:54:40 2018 -0800
+
+    use GUILD instead of GUILE_TOOLS
+
+ Makefile.am      | 2 +-
+ configure.ac     | 4 ++--
+ json/Makefile.am | 2 +-
+ 3 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 4b3dc5ff3e23a81d591bdf9872a86996aada27ff
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sat Dec 1 21:35:55 2018 -0800
+
+    bump version to 1.3.1
+
+ NEWS         | 6 ++++++
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 8 insertions(+), 2 deletions(-)
+
+commit 29da46887c305d6c4d9746f62827a59a60e2b571
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sat Dec 1 21:33:47 2018 -0800
+
+    use GUILE_SITE as the variable instead of GUILE_SITE_DIR
+    
+    Fixes #20
+
+ Makefile.am      | 2 +-
+ json/Makefile.am | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 6e732cc5e7efc10b27f64e6b34b13c079b2862d4
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Nov 28 23:04:19 2018 -0800
+
+    bump version to 1.3.0
+
+ AUTHORS      | 1 +
+ NEWS         | 6 ++++++
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 4 files changed, 9 insertions(+), 2 deletions(-)
+
+commit ec305c224cfc96fef450ed7e2c746b0ff3ecc4e4
+Merge: f0ada50 a4aff8c
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Nov 28 22:55:08 2018 -0800
+
+    Merge pull request #19 from jason-earl/extend_build
+    
+    Extend build
+
+commit a4aff8c81931f83e69275f30fb55425e28e975b8
+Author: Jason Douglas Earl <jearl@notengoamigos.org>
+Date:   Wed Nov 28 09:15:12 2018 -0700
+
+    build: Look for the newest guile.
+
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 7e259550ab1e6a95bde5f3a8e5b9380cd0de2be4
+Author: Jason Douglas Earl <jearl@notengoamigos.org>
+Date:   Wed Nov 28 08:38:59 2018 -0700
+
+    build: wire up m4 macro directory.
+
+ configure.ac | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 9374e26ddac32f7aa6b8da5a19755396371e2076
+Author: Jason Douglas Earl <jearl@notengoamigos.org>
+Date:   Tue Nov 27 17:42:58 2018 -0700
+
+    build: Older machines need the macros.
+
+ m4/guile.m4 | 394 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 394 insertions(+)
+ create mode 100644 m4/guile.m4
+
+commit f7ae3e9350a2ba47e488f892701d7affcf4ba7b6
+Author: Jason Douglas Earl <jearl@notengoamigos.org>
+Date:   Tue Nov 27 17:33:19 2018 -0700
+
+    build: Use guile.m4 macro GUILE_SITE_DIR
+    
+    * configure.ac: Add GUILE_SITE_DIR macro
+    * Makefile.am: Use $GUILE_SITE_DIR and $GUILE_SITE_CCACHE instead of
+      inventing our own.
+    * json/Makefile.am: Use $GUILE_SITE_DIR and $GUILE_SITE_CCACHE instead
+      of inventing our own.
+
+ Makefile.am      | 4 ++--
+ configure.ac     | 1 +
+ json/Makefile.am | 4 ++--
+ 3 files changed, 5 insertions(+), 4 deletions(-)
+
+commit f0ada50fd14786efe094f16d465b67b5fd79e778
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Thu Aug 23 09:20:04 2018 -0700
+
+    more license stuff
+
+ ChangeLog  | 26 +++++++++++++++++++++-----
+ README.org | 19 ++++++++++++-------
+ 2 files changed, 33 insertions(+), 12 deletions(-)
+
+commit 18775e19d83a94687fad3e169ddca3d3e1cf0df8
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Aug 22 21:48:54 2018 -0700
+
+    env.in: add copyright and license notice
+
+ env.in | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+commit a2b6b3ac5fe1207609ed4593a73781bd7d903ee2
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Aug 22 21:17:59 2018 -0700
+
+    bump version to 1.2.0
+
+ NEWS         | 7 +++++++
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 9 insertions(+), 2 deletions(-)
+
+commit 2699b2f64738d11e83f6454ebd6c3a3d8f18730e
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Wed Aug 22 21:13:55 2018 -0700
+
+    switch to GPLv3
+
+ COPYING.LESSER     | 165 --------------------------
+ ChangeLog          |   5 +-
+ Makefile.am        |  22 ++--
+ README.org         |  17 ++-
+ build-aux/guile.m4 | 341 -----------------------------------------------------
+ configure.ac       |  22 ++--
+ json.scm           |  22 ++--
+ json/Makefile.am   |  22 ++--
+ json/builder.scm   |  22 ++--
+ json/parser.scm    |  22 ++--
+ pkg-list.scm.in    |  26 ++--
+ 11 files changed, 82 insertions(+), 604 deletions(-)
+ delete mode 100644 COPYING.LESSER
+ delete mode 100644 build-aux/guile.m4
+
+commit 7efbc39eaa2db43a4ed344c39e53f4d4e8adb971
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Tue Aug 14 01:18:38 2018 -0700
+
+    bump version to 1.1.1
+
+ NEWS         | 4 ++++
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 6 insertions(+), 2 deletions(-)
+
+commit dc897555936141dbaa8b30614f02f139c1d3e019
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Tue Aug 14 01:12:52 2018 -0700
+
+    builder: don't output extra space unless pretty printing
+
+ json/builder.scm | 15 +++++++++++----
+ 1 file changed, 11 insertions(+), 4 deletions(-)
+
+commit c543d3f63581f686f8de86848c6e4852b364aca9
+Author: Aleix Conchillo Flaqué <aleix@oblong.com>
+Date:   Thu Jul 26 08:58:51 2018 -0700
+
+    re-add extraneous sed '' in dist-hook (os x needs it)
+
+ Makefile.am | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit 35a924df347bd719d2eb3f7842c5e8b0719d08a3
+Author: Aleix Conchillo Flaqué <aleix@oblong.com>
+Date:   Thu Jul 26 08:54:34 2018 -0700
+
+    bump version to 1.1.0
+
+ AUTHORS      | 1 +
+ NEWS         | 6 ++++++
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 4 files changed, 9 insertions(+), 2 deletions(-)
+
+commit e3b2367f1829068f272cc9540b18e21039054f05
+Merge: 5fea4a2 ae0a4c6
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Thu Jul 26 08:37:05 2018 -0700
+
+    Merge pull request #17 from civodul/wip-module-installation
+    
+    Install .go files to $(libdir)/guile
+
+commit ae0a4c67d02f04dbb3e3d2702e8322474d83463b
+Author: Ludovic Courtès <ludo@gnu.org>
+Date:   Thu Jun 28 14:52:52 2018 +0200
+
+    build: Remove extraneous 'sed' argument in 'dist-hook'.
+    
+    * Makefile.am (dist-hook): Remove ''.
+
+ Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit f7c1c5ac7f244d3a2d98967e374e34806bdd5633
+Author: Ludovic Courtès <ludo@gnu.org>
+Date:   Thu Jun 28 14:47:25 2018 +0200
+
+    build: Install .go files to $(libdir)/guile.
+    
+    * Makefile.am (objdir): New variable.
+    (nobase_mod_DATA): Move $(GOBJECTS) to...
+    (nobase_nodist_obj_DATA): ... here.  New variable.
+    * json/Makefile.am (objdir): New variable.
+    (nobase_mod_DATA): Move $(GOBJECTS) to...
+    (nobase_nodist_obj_DATA): ... here.  New variable.
+
+ Makefile.am      | 6 ++++--
+ json/Makefile.am | 5 ++++-
+ 2 files changed, 8 insertions(+), 3 deletions(-)
+
+commit d87c8eb4ca01c890dc43d6e9d7da7529ad203903
+Author: Ludovic Courtès <ludo@gnu.org>
+Date:   Thu Jun 28 14:24:40 2018 +0200
+
+    build: Append Guile's effective version to the module directory.
+    
+    * configure.ac: Use 'GUILE_PKG'.
+    * Makefile.am (moddir): Append @GUILE_EFFECTIVE_VERSION@.
+    * json/Makefile.am (moddir): Likewise.
+
+ Makefile.am      | 2 +-
+ configure.ac     | 7 +++++++
+ json/Makefile.am | 2 +-
+ 3 files changed, 9 insertions(+), 2 deletions(-)
+
+commit 895c94c144e28ae4037f49b2f308d9ce1385dff6
+Author: Ludovic Courtès <ludo@gnu.org>
+Date:   Thu Jun 28 14:23:22 2018 +0200
+
+    build: Define 'moddir' in terms of $(datadir).
+    
+    * Makefile.am (moddir): Define in terms of $(datadir).
+    * json/Makefile.am (moddir): Likewise.
+
+ Makefile.am      | 2 +-
+ json/Makefile.am | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 5fea4a2330444df81596188c0a9e5c51ca803eb1
+Author: Aleix Conchillo Flaqué <aleix@oblong.com>
+Date:   Thu May 24 11:20:52 2018 -0700
+
+    bump version to 1.0.1
+
+ NEWS         | 6 ++++++
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 8 insertions(+), 2 deletions(-)
+
+commit 329c598048400108535ed4e04d3cc5e433a6d1e0
+Author: Aleix Conchillo Flaqué <aleix@oblong.com>
+Date:   Thu May 24 11:15:12 2018 -0700
+
+    builder: allow #nil at the beginning of an array
+    
+    This fixes the following issue:
+    
+      (scm->json '(#nil 123))
+    
+    where it would cause an error expecting a pair instead of #nil. Instead, this
+    should return:
+    
+      [null, 123]
+
+ json/builder.scm | 1 -
+ 1 file changed, 1 deletion(-)
+
+commit 697bb5217edfb00da02bc0dac0baee48b6036cf7
+Author: Aleix Conchillo Flaqué <aleix@oblong.com>
+Date:   Wed May 23 10:55:11 2018 -0700
+
+    bump version to 1.0.0
+
+ AUTHORS      | 3 ++-
+ NEWS         | 9 +++++++++
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 4 files changed, 13 insertions(+), 3 deletions(-)
+
+commit 64fa82adffcd3f04359228b5e76006e594366211
+Author: Aleix Conchillo Flaqué <aleix@oblong.com>
+Date:   Wed May 23 10:54:38 2018 -0700
+
+    remove deprecated json syntax
+
+ json.scm         |  6 ++---
+ json/Makefile.am |  2 +-
+ json/syntax.scm  | 78 --------------------------------------------------------
+ 3 files changed, 3 insertions(+), 83 deletions(-)
+ delete mode 100644 json/syntax.scm
+
+commit 455be85ee2097e0608c75b99ca3946b781677add
+Author: Aleix Conchillo Flaqué <aleix@oblong.com>
+Date:   Wed Apr 25 22:59:37 2018 -0700
+
+    use dual license GPLv3 and LGPLv3
+
+ INSTALL          | 320 +++++++++++++++++++++++++++----------------------------
+ Makefile.am      |  20 ++--
+ README.org       |  15 ++-
+ configure.ac     |  20 ++--
+ json.scm         |  20 ++--
+ json/Makefile.am |  20 ++--
+ json/builder.scm |  20 ++--
+ json/parser.scm  |  20 ++--
+ json/syntax.scm  |  20 ++--
+ pkg-list.scm.in  |  22 ++--
+ 10 files changed, 255 insertions(+), 242 deletions(-)
+
+commit 3061e2ff956b0ff90aa06c6c35992ec23ef9cac8
+Merge: a1c323d 5e669fa
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Thu Apr 26 18:34:54 2018 -0700
+
+    Merge pull request #16 from christopherlam/master-unicode-4-bytes
+    
+    upgrade json encoder to interpret 4-byte unicode
+
+commit 5e669fa9f2535677e6d6c9946262aea7284a14cc
+Author: Christopher Lam <christopher.lck@gmail.com>
+Date:   Thu Apr 26 05:38:57 2018 +0800
+
+    string->json: enable 4-byte unicode chars
+
+ json/builder.scm | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+commit a1c323d77ee60f9008e654b02cfe1ed3232d90e1
+Author: Aleix Conchillo Flaqué <aleix@oblong.com>
+Date:   Fri May 5 18:48:30 2017 -0700
+
+    README: add autoreconf instructions
+
+ README.org | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+commit 932ab41c875ffa4cb3ca1d950a06e48e36adf54c
+Author: Aleix Conchillo Flaqué <aleix@oblong.com>
+Date:   Tue Jan 17 00:30:27 2017 -0800
+
+    README: comply with, please!
+
+ README.org | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 1aa4ef600a955caab4f6a53ed7c09598c5417cd4
+Author: Aleix Conchillo Flaqué <aleix@oblong.com>
+Date:   Tue Jan 17 00:05:43 2017 -0800
+
+    Makefile.am: make sed compatible with os x
+
+ Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit a077bb1d6b35b5519779ae3871878ec9a0f56798
+Author: Aleix Conchillo Flaqué <aleix@oblong.com>
+Date:   Mon Jan 16 23:55:47 2017 -0800
+
+    bump version to 0.6.0
+
+ NEWS         | 5 +++++
+ README.org   | 2 +-
+ configure.ac | 4 ++--
+ 3 files changed, 8 insertions(+), 3 deletions(-)
+
+commit 422f3d0743c62ad9d6215fb1e5c2269d52b54a2b
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Jan 16 23:48:35 2017 -0800
+
+    README: unicode hexadecimal digits are not fully supported
+
+ README.org | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 473b7a6b89f09d7e085cbedbab37dbd7bc357062
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Jan 16 23:45:16 2017 -0800
+
+    README: cosmetic changes
+
+ README.org | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+commit 3fc1e41dd564810bcddd57f7d46dbf01a85c4824
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Jan 16 23:42:10 2017 -0800
+
+    README: remove deprecated macros from examples
+
+ README.org | 60 +++++++++++++++++++++++++++++++++---------------------------
+ 1 file changed, 33 insertions(+), 27 deletions(-)
+
+commit 23e10e33dc99b3f797eb9aebb15f07b8e0b699b1
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Jan 16 23:37:16 2017 -0800
+
+    syntax: deprecate json macro
+    
+    * json/syntax.scm (json): use issue-deprecation-warning to deprecate
+      every syntax rule.
+
+ json/syntax.scm | 35 +++++++++++++++++++++++++++--------
+ 1 file changed, 27 insertions(+), 8 deletions(-)
+
+commit 3078a8e1830d04e3dae4b1437c5cdb274cc026b2
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Tue Feb 23 21:59:27 2016 -0800
+
+    bump configure.ac version to 0.5.0 and update README
+
+ README.org   | 2 +-
+ configure.ac | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 50f76f2324bf5813989d19510186288ea0f4eee5
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Tue Feb 23 21:58:35 2016 -0800
+
+    update AUTHORS and NEWS file
+
+ AUTHORS | 1 +
+ NEWS    | 7 +++++++
+ 2 files changed, 8 insertions(+)
+
+commit 40ae2a81a8e29fd8f0ca80efdb0ed6b7a43a3a27
+Author: Jan Nieuwenhuizen <janneke@gnu.org>
+Date:   Sat Feb 13 21:16:46 2016 +0100
+
+    builder: build objects from alists.
+    
+    * json/builder.scm (atom?): New function.
+    * json/builder.scm (json-alist?): New function.
+    * json/builder.scm (json-build-object): SCM is an alist.
+    * json/builder.scm (json-build): Use it to support building objects from both
+      hash-tables and alists.
+
+ json/builder.scm | 19 ++++++++++++++++---
+ 1 file changed, 16 insertions(+), 3 deletions(-)
+
+commit 0c9e15c186b995e4d164aee95b7d5dc9c01df2d3
+Author: Jan Nieuwenhuizen <janneke@gnu.org>
+Date:   Wed Aug 5 08:21:13 2015 +0200
+
+    builder: convert symbols to string.
+    
+    * json/builder.scm (->string): New function.
+    * json/builder.scm (json-build-string): Use it.
+
+ json/builder.scm | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+commit 3a566d07d63b8a2b4d547e84cb15543aed896e8d
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon Aug 18 11:41:54 2014 +0200
+
+    copy guile.m4 from guile 2.0.11
+
+ build-aux/guile.m4 | 55 ++++++++++++++++++++++++++++++++++++++++++++----------
+ 1 file changed, 45 insertions(+), 10 deletions(-)
+
+commit 8bcfb76a7b7dc1b4df7ab89ba6a57d0848954fbe
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sun Aug 17 10:05:23 2014 +0200
+
+    update INSTALL notes
+
+ INSTALL | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 4267fba1812e61ea260157dbdaa192f02434b6e9
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sun Aug 17 01:09:17 2014 +0200
+
+    bump configure.ac version to 0.4.0 and update README
+
+ README.org   | 10 ++++++++--
+ configure.ac |  4 ++--
+ 2 files changed, 10 insertions(+), 4 deletions(-)
+
+commit 39f007f5b45de857a4f5137baaef647e4ea2f5cb
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sun Aug 17 01:08:34 2014 +0200
+
+    update AUTHORS and NEWS file
+
+ AUTHORS | 1 +
+ NEWS    | 6 ++++++
+ 2 files changed, 7 insertions(+)
+
+commit 0c16fc7ef7136df909dd1edc97c282ad860ffa2b
+Author: David Thompson <dthompson2@worcester.edu>
+Date:   Fri Aug 15 20:44:23 2014 -0400
+
+    Allow unquote-splicing to be used in json form.
+    
+    * json/syntax.scm (list->hash-table): New procedure.
+      (json): Rewrite macro with unquote-splicing support.
+
+ json/syntax.scm | 44 +++++++++++++++++++++++---------------------
+ 1 file changed, 23 insertions(+), 21 deletions(-)
+
+commit 66fe0d0a2b710f756127f39e337e87018e113eaa
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Fri Aug 15 23:32:17 2014 +0200
+
+    README: remove json-parser-row/columns references
+
+ README.org | 12 +++---------
+ 1 file changed, 3 insertions(+), 9 deletions(-)
+
+commit ebeabd3b8daae043bb3bba214f7fcef4b213a1ab
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon Oct 21 17:29:31 2013 -0700
+
+    parser: do not keep column and row, ports already do
+
+ json/parser.scm | 28 +++++++---------------------
+ 1 file changed, 7 insertions(+), 21 deletions(-)
+
+commit 144e2893ccdfbcef3e1c569e895481fa87c86233
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Thu Jul 25 12:16:10 2013 -0700
+
+    add + to LGPLv3
+
+ README.org | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 27b1322f4057a2b8ef72b3f7a1a5f4fc9cbcd90c
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Jul 14 09:26:27 2013 -0700
+
+    add missing colon to README
+
+ README.org | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 111e27bd924f54a3a119744b102af9dab7e8be0c
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Jul 6 23:25:37 2013 -0700
+
+    minor update in INSTALL copyright notice
+
+ INSTALL | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 36bcb44ac749922e0b7b9dc9dd222bcad01c3cdb
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Jul 6 23:15:01 2013 -0700
+
+    bump configure.ac version and update NEWS and README
+
+ NEWS         | 6 ++++++
+ README.org   | 2 +-
+ configure.ac | 2 +-
+ 3 files changed, 8 insertions(+), 2 deletions(-)
+
+commit 55a700d5b9b879e848c57579f416c6d8e480beee
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Jul 6 23:14:43 2013 -0700
+
+    use pure sh script syntax in env.in
+
+ env.in | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
+
+commit 20ce69906a59155a2f7092b92960d7723efadb0e
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed May 15 21:31:10 2013 -0700
+
+    no need to add COPYING.LESSER to EXTRA_DIST
+
+ Makefile.am | 2 --
+ 1 file changed, 2 deletions(-)
+
+commit e4d23a48cbd5a2bede5c4e69d327ba56b600089c
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed May 15 21:26:41 2013 -0700
+
+    just use regular e-mail format
+
+ Makefile.am      | 2 +-
+ json.scm         | 2 +-
+ json/Makefile.am | 2 +-
+ json/builder.scm | 2 +-
+ json/parser.scm  | 2 +-
+ json/syntax.scm  | 2 +-
+ pkg-list.scm.in  | 2 +-
+ 7 files changed, 7 insertions(+), 7 deletions(-)
+
+commit 8622937ca165795595ba96727b6e2ae6b066bc82
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon May 13 23:09:22 2013 -0700
+
+    updated pkg-list.scm.in with LGPLv3
+
+ pkg-list.scm.in | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 81f6eca8d6afb949a295167cf68ee348e37d1bfe
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon May 13 22:17:14 2013 -0700
+
+    bump configure.ac version to 0.3.0 and update README
+
+ README.org   | 4 ++--
+ configure.ac | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 684578da6e9aef775a8ad45a7b8c5ac9a32a5173
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon May 13 22:16:53 2013 -0700
+
+    use new guile.m4 macro
+
+ NEWS               |   2 +
+ build-aux/guile.m4 | 171 ++++++++++++++++++++++++++++++++++++++---------------
+ configure.ac       |  13 ----
+ 3 files changed, 126 insertions(+), 60 deletions(-)
+
+commit cda918a79bb9eccb6dcc72c1e8d3fd1d1f683fa9
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon May 13 22:10:05 2013 -0700
+
+    updated AUTHORS and NEWS
+
+ AUTHORS | 1 +
+ NEWS    | 8 ++++++++
+ 2 files changed, 9 insertions(+)
+
+commit 2e6b032e8f864e79a1af2fb5663b83c3c1a5af39
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon May 13 22:07:40 2013 -0700
+
+    ignore everything guile-json*
+
+ .gitignore | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 6ed50098042ba4c893a987399ba1b4cfc8ce2548
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon May 13 22:07:26 2013 -0700
+
+    relicensing with LGPLv3
+
+ COPYING.LESSER   | 165 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ INSTALL          |   8 +--
+ Makefile.am      |  25 +++++++++
+ configure.ac     |  20 ++++---
+ json.scm         |  20 +++----
+ json/Makefile.am |  23 ++++++++
+ json/builder.scm |  20 +++----
+ json/parser.scm  |  20 +++----
+ json/syntax.scm  |  20 +++----
+ pkg-list.scm.in  |  20 +++----
+ 10 files changed, 273 insertions(+), 68 deletions(-)
+ create mode 100644 COPYING.LESSER
+
+commit 0393cee716c6fd8f57d7baf5679eb455521cc1bc
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon May 13 15:34:56 2013 -0700
+
+    README: fix json.org url
+
+ README.org | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 55e595111ff446c681271cfd6b737de058cf7f47
+Merge: fb16ce8 8b129ca
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Mon May 13 15:02:05 2013 -0700
+
+    Merge pull request #3 from gamechanger/convert-rationals
+    
+    Convert rationals to floats to comply with JSON spec
+
+commit 8b129ca0134c938dc2f8bca54f076be03bdb9bb4
+Author: Doug Woos <doug@gamechanger.io>
+Date:   Mon May 13 17:11:00 2013 -0400
+
+    Convert rationals to floats to comply with JSON spec
+
+ json/builder.scm | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+commit fb16ce894fc043d13a72760b933fcb94dfe9b73c
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Apr 2 00:00:17 2013 -0700
+
+    bump configureac version to 0.2.0
+
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 2ae6606f52e02c23389b57c5136e774328e6f4e6
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon Apr 1 23:52:59 2013 -0700
+
+    update NEWS with 0.2.0 release notes
+
+ NEWS | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+commit 6d6f00637f2f404e160e92bb595b59bb6859fbfb
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon Apr 1 23:50:12 2013 -0700
+
+    configure.ac: check for srfi-9 module
+
+ configure.ac | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit a408cb6921d6be33ef9039b3243ce95c6fc621cb
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon Apr 1 23:49:20 2013 -0700
+
+    README: added exception handling information
+
+ README.org | 23 ++++++++++++++++++++++-
+ 1 file changed, 22 insertions(+), 1 deletion(-)
+
+commit 65965ba5e277a109a52f35c0c90576d5b6bca587
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon Apr 1 23:48:59 2013 -0700
+
+    parser: make some json-parser record type procedures public
+
+ json/parser.scm | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+commit df70e16d3cb8eb614b749962db7ac8719bb1bf46
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon Apr 1 23:22:28 2013 -0700
+
+    improve parser error reporting
+    
+    * json/parser.scm: a json-parser record type has been created. The
+      record contains the port and the current row and column character
+      being read.
+    
+      The parser is now an argument of the json-invalid exception.
+
+ json/parser.scm | 249 ++++++++++++++++++++++++++++++++------------------------
+ 1 file changed, 141 insertions(+), 108 deletions(-)
+
+commit 125548e673dc91bd7282c4b574f466f7d9589d2c
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Mar 26 07:38:36 2013 -0700
+
+    README: use savannah download mirrors
+
+ README.org | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 2765574c7b7915bef7f1050204a05c669bfacc2e
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Feb 10 22:01:16 2013 -0800
+
+    bump configure.ac version to 0.1.3
+
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit adad5d1c83445666ac8a08ce7561c554f21acccb
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Feb 10 22:01:03 2013 -0800
+
+    update README and NEWS
+
+ NEWS       | 8 ++++++++
+ README.org | 2 +-
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+
+commit 494767305294369ec22016cefbc77bf819fc58d0
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Feb 10 21:54:19 2013 -0800
+
+    automatically update pkg-list.scm version
+
+ Makefile.am                     | 6 +++++-
+ pkg-list.scm => pkg-list.scm.in | 2 +-
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+ rename pkg-list.scm => pkg-list.scm.in (97%)
+
+commit 933f30f616e20289c7db83b15c6f8dd55e465499
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Thu Feb 7 22:44:54 2013 -0800
+
+    bump configure.ac verstion to 0.1.2
+
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 19d238fcc830bfadaa512b748f7a65001c323baf
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Thu Feb 7 22:44:28 2013 -0800
+
+    updated README and NEWS
+
+ NEWS       | 6 ++++++
+ README.org | 2 +-
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+commit c4b1f8eaeb7f7a6dce502a6b5050661a6fc82b13
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Thu Feb 7 22:42:50 2013 -0800
+
+    use display instead of simple-format and fix pretty printing
+
+ json/builder.scm | 30 ++++++++++++++++--------------
+ 1 file changed, 16 insertions(+), 14 deletions(-)
+
+commit ed75efe902c6e496333409dfa3ba2b25f5c5a1e6
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Feb 2 17:40:05 2013 -0800
+
+    README: update download url
+
+ README.org | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 6f475593ab5a8d2671122d1ff6351cc218dd0945
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Feb 2 17:37:57 2013 -0800
+
+    bump configure.ac version to 0.1.1
+
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit c07d55b8ff117b5a7e670244629328713952e645
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Feb 2 17:37:26 2013 -0800
+
+    update NEWS file
+
+ NEWS | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 5f8f3d76429fda45d9e1c4437a8b875346293d2e
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Feb 2 13:31:25 2013 -0800
+
+    minor indentation fix
+
+ json/syntax.scm | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 97da107a27f46264721c7ef7a39bd2905d3c9609
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 30 12:08:27 2013 -0800
+
+    builder: preferably use simple-format instead of format
+
+ json/builder.scm | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit a350e6de7aa9f455d250dd17c50a19c598a385f7
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 30 12:00:40 2013 -0800
+
+    builder: use car/cdr instead of drop-right/last
+
+ NEWS             |  5 +++++
+ json/builder.scm | 27 ++++++++++++++-------------
+ 2 files changed, 19 insertions(+), 13 deletions(-)
+
+commit b03826facd72261381a9bd7969896d20ccd7775c
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 30 11:12:03 2013 -0800
+
+    README: update type and add help for loading module
+
+ README.org | 18 +++++++++++++++---
+ 1 file changed, 15 insertions(+), 3 deletions(-)
+
+commit 5c70e927d1de628331e44d69ccaec80ad78f9fe9
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 30 01:41:11 2013 -0800
+
+    ignore distribution file
+
+ .gitignore | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit e2fda38265fb22417dcb8fdf0568442f55deee6c
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 30 01:40:39 2013 -0800
+
+    update NEWS file
+
+ NEWS | 3 +++
+ 1 file changed, 3 insertions(+)
+
+commit b5185f2b2b5bd5999073f8253af32d496e438900
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 30 01:33:59 2013 -0800
+
+    README: fix typo
+
+ README.org | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 125311a0dffcd0b7b5214e71b6a151745b10fddb
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 30 01:31:01 2013 -0800
+
+    README: updated guile-json download link
+
+ README.org | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit f4f878eb9e2060a38f0dfbf198d6d245a9a3e8aa
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 30 01:28:10 2013 -0800
+
+    include pkg-list.scm in dist
+
+ Makefile.am  | 2 +-
+ pkg-list.scm | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit dc89959c50965ea186959860539590c510bb44c6
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 30 01:27:54 2013 -0800
+
+    automatically generate ChangeLog in "make dist"
+
+ .gitignore  | 1 -
+ ChangeLog   | 6 ++++++
+ Makefile.am | 3 +++
+ 3 files changed, 9 insertions(+), 1 deletion(-)
+ create mode 100644 ChangeLog
+
+commit 97987847aa918593fe31d2ea1ad7f0caa7be07c9
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 30 01:26:30 2013 -0800
+
+    README: added pretty print feature
+
+ README.org | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+commit bccccd1fa7ae75c3cfb6637066e623bda22ed240
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 30 01:18:12 2013 -0800
+
+    README: split usage into procedures and macros
+
+ README.org | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+commit d726bde16823d051d11c6930f1477844f8f6bd40
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 30 01:12:48 2013 -0800
+
+    README: added (json) macro syntax help
+
+ README.org | 48 ++++++++++++++++++++++++++++++++++++++----------
+ 1 file changed, 38 insertions(+), 10 deletions(-)
+
+commit 463257e23835eb2becb74233715711fc1238d738
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 30 01:12:17 2013 -0800
+
+    syntax: fix hash-table construction
+
+ json/syntax.scm | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+commit 15fbd16dae0d37687b38506b85c6c0e98779c42d
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 30 00:44:27 2013 -0800
+
+    README: added usage section (missing json macro)
+
+ README.org | 42 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 42 insertions(+)
+
+commit 9db09d77c6feca4c559bba87db6b10067166ccfc
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Wed Jan 30 00:23:02 2013 -0800
+
+    builder: allow pretty printing and optional escaping / (slash)
+
+ json/builder.scm | 60 +++++++++++++++++++++++++++++++++++---------------------
+ 1 file changed, 38 insertions(+), 22 deletions(-)
+
+commit 41221b7071541008423db6a49cc41dac81c340de
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Jan 29 21:32:13 2013 -0800
+
+    builder: only use one simple-format in json-build-string
+
+ json/builder.scm | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+commit 5784873123e1119a9104221b19052da74ba7d002
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Jan 29 21:27:26 2013 -0800
+
+    added json-string->scm (takes a JSON string)
+
+ json/parser.scm | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+commit 237b69949763ff7eeb8994a430b873a1b1ab3744
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Jan 29 21:26:43 2013 -0800
+
+    scm->json know writes to a port (added scm->json-string)
+
+ AUTHORS          |   6 +++-
+ json/builder.scm | 100 +++++++++++++++++++++++++++++++++++--------------------
+ 2 files changed, 68 insertions(+), 38 deletions(-)
+
+commit f1cf70b06796a64258dc36e9c5623d87dd8cc3da
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Jan 29 12:05:33 2013 -0800
+
+    pkg-list: added missing copyright notice
+
+ pkg-list.scm | 27 +++++++++++++++++++++++++--
+ 1 file changed, 25 insertions(+), 2 deletions(-)
+
+commit 270ab1c525e8cdaf8324091704995812c4d7dd93
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Jan 29 11:53:14 2013 -0800
+
+    reuse (unicode->string)
+
+ json/builder.scm | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+commit 244ccbeb7c4d440264858bbc19994009b560e456
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Jan 29 11:48:29 2013 -0800
+
+    correctly escape control characters (issue #1)
+
+ json/builder.scm | 16 +++++++++++-----
+ 1 file changed, 11 insertions(+), 5 deletions(-)
+
+commit e3496de2f2207378706711318f9054c0c52cf093
+Merge: c387c6a a3dc446
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Tue Jan 29 11:09:46 2013 -0800
+
+    Merge pull request #2 from ijp/master
+    
+    Add pkg-list.scm
+
+commit a3dc446b9a75d4679c4a5d47e962daa910ec5d31
+Author: Ian Price <ianprice90@googlemail.com>
+Date:   Tue Jan 29 18:52:16 2013 +0000
+
+    Add pkg-list.scm
+
+ AUTHORS      |  1 +
+ README.org   |  2 ++
+ pkg-list.scm | 10 ++++++++++
+ 3 files changed, 13 insertions(+)
+ create mode 100644 pkg-list.scm
+
+commit c387c6ab621e792d05314995c29b421a221cc0ca
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Jan 29 08:39:46 2013 -0800
+
+    builder: add support for two byte utf-8
+
+ configure.ac     |  1 +
+ json/builder.scm | 34 ++++++++++++++++++++++++----------
+ 2 files changed, 25 insertions(+), 10 deletions(-)
+
+commit abc2aaa4a80b0a65d8c38b4ff7e9c713b7f89e3c
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Jan 29 00:58:43 2013 -0800
+
+    README: remove source code repo reference
+
+ README.org | 15 ++-------------
+ 1 file changed, 2 insertions(+), 13 deletions(-)
+
+commit 5e76336ba4926016d072acad702da26aad3e4199
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Jan 29 00:53:39 2013 -0800
+
+    README: fix some typos
+
+ README.org | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit d03b841d385861fcb5d775dc00668076e27a5ddd
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Jan 29 00:50:13 2013 -0800
+
+    trying github markup
+
+ README     | 56 +-------------------------------------------------------
+ README.org | 55 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 56 insertions(+), 55 deletions(-)
+ mode change 100644 => 120000 README
+ create mode 100644 README.org
+
+commit 8c6af7fc2a85eff7ed1bc4b841c558830adb6cee
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Jan 29 00:42:03 2013 -0800
+
+    README: added installation instructions
+
+ README | 50 +++++++++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 47 insertions(+), 3 deletions(-)
+
+commit c72259d980ac8a41838eea8a21b2fe7403c18874
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Jan 29 00:41:47 2013 -0800
+
+    added missing builder.scm
+
+ json/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit c44017aa44db8a1c77c624d831c79eae8ca9ce1f
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Tue Jan 29 00:11:06 2013 -0800
+
+    minimal update to README
+
+ README | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+commit 737ad38104099dccb14df08876c8bbeb2eb555ea
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon Jan 28 23:58:18 2013 -0800
+
+    builder: just added a couple of comments
+
+ json/builder.scm | 3 +++
+ 1 file changed, 3 insertions(+)
+
+commit e8ea3bdfe494e705c245b9c395e3cfcbb99cecaf
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon Jan 28 23:53:19 2013 -0800
+
+    add support for unicode characters in builder
+
+ configure.ac     |  1 +
+ json/builder.scm | 23 ++++++++++++++++++++++-
+ 2 files changed, 23 insertions(+), 1 deletion(-)
+
+commit 30787ef43e3047def1679f4f0407ed5ae4974355
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Mon Jan 28 23:16:13 2013 -0800
+
+    add string builder (working on unicode chars)
+
+ json/builder.scm | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
+
+commit ec32899d4e32925bc1471210c2f7d6c59b8f1c6f
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Jan 27 22:02:59 2013 -0800
+
+    use values as keys nstead of symbols (strings can have spaces)
+
+ json/builder.scm | 2 +-
+ json/parser.scm  | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 498d76420982dac607e7588004bd53ae6937529d
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Jan 27 21:48:11 2013 -0800
+
+    initial scm->json implementation
+
+ json.scm         |  4 ++-
+ json/builder.scm | 81 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 84 insertions(+), 1 deletion(-)
+ create mode 100644 json/builder.scm
+
+commit beb1bb7d4cec6d5270dd2810f2e8cbff6ae4b09d
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Jan 27 19:02:22 2013 -0800
+
+    accept unquote in syntax so we can add code
+
+ json/syntax.scm | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+commit 97b4e8cf596e6d0c39899f93655d7cd2f399cec8
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Jan 27 18:44:20 2013 -0800
+
+    split moduel into different files
+
+ Makefile.am                     | 18 ++++++++++++-
+ configure.ac                    |  4 +--
+ json.scm                        | 45 +++++++++++++++++++++++++++++++++
+ {src => json}/Makefile.am       |  4 +--
+ src/json.scm => json/parser.scm |  6 ++---
+ json/syntax.scm                 | 56 +++++++++++++++++++++++++++++++++++++++++
+ 6 files changed, 125 insertions(+), 8 deletions(-)
+ create mode 100644 json.scm
+ rename {src => json}/Makefile.am (82%)
+ rename src/json.scm => json/parser.scm (98%)
+ create mode 100644 json/syntax.scm
+
+commit e49b0377774ce11c96729db8562794e8a067ea7c
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Jan 27 10:22:13 2013 -0800
+
+    rename json-read-complex -> json-read-delimited
+
+ src/json.scm | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+commit 1f85df1523d62e0394478fc610f752b989e5aeab
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Jan 27 10:18:12 2013 -0800
+
+    throw expcetion if eof is find too soon
+
+ src/json.scm | 32 ++++++++++++++++++--------------
+ 1 file changed, 18 insertions(+), 14 deletions(-)
+
+commit a3f012c1b7f39be4813b0058909b370a557232d7
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Jan 27 10:11:31 2013 -0800
+
+    json->scm now reads from port instead of string
+
+ src/json.scm | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+commit 16d96fa904869def688f4296b349cdcb05f88a75
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sun Jan 27 09:55:51 2013 -0800
+
+    use macro to simplify json-read-[array,object,string]
+
+ src/json.scm | 41 +++++++++++++++++------------------------
+ 1 file changed, 17 insertions(+), 24 deletions(-)
+
+commit e1158b5aefb2dc71716585c9da3eb024f5cad3bb
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Jan 26 23:28:03 2013 -0800
+
+    prepare guile-json library for installation
+
+ .gitignore             |  15 ++
+ AUTHORS                |   1 +
+ COPYING                | 674 +++++++++++++++++++++++++++++++++++++++++++++++++
+ INSTALL                | 370 +++++++++++++++++++++++++++
+ Makefile.am            |   3 +
+ NEWS                   |   0
+ README.org => README   |   0
+ build-aux/guile.m4     | 229 +++++++++++++++++
+ configure.ac           |  45 ++++
+ env.in                 |  16 ++
+ src/Makefile.am        |  15 ++
+ {json => src}/json.scm |  32 +++
+ 12 files changed, 1400 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 AUTHORS
+ create mode 100644 COPYING
+ create mode 100644 INSTALL
+ create mode 100644 Makefile.am
+ create mode 100644 NEWS
+ rename README.org => README (100%)
+ create mode 100644 build-aux/guile.m4
+ create mode 100644 configure.ac
+ create mode 100644 env.in
+ create mode 100644 src/Makefile.am
+ rename {json => src}/json.scm (88%)
+
+commit 5e2b0cf5faac6a9950efdbf06bb6b77d6a62bb26
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Jan 26 23:11:35 2013 -0800
+
+    minor procedures ordering
+
+ json/json.scm | 24 ++++++++++++++----------
+ 1 file changed, 14 insertions(+), 10 deletions(-)
+
+commit 9ab2dbca51a21a0a5caeca4ac2014fdeeff9d956
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Jan 26 23:08:39 2013 -0800
+
+    json objects are really hash tables
+
+ json/json.scm | 22 +++++++++++++++++-----
+ 1 file changed, 17 insertions(+), 5 deletions(-)
+
+commit bf47aad7e8850e2d8eea9820cde89d196b4496d6
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Jan 26 22:43:00 2013 -0800
+
+    simplify exception usage only json-invalid is thrown
+
+ json/json.scm | 36 ++++++++++++++++++------------------
+ 1 file changed, 18 insertions(+), 18 deletions(-)
+
+commit 67aad00c732df78360339e8695a316783ce5644a
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Jan 26 22:40:21 2013 -0800
+
+    add support for objects and some cleanup
+
+ json/json.scm | 160 ++++++++++++++++++++++++++++++++++++++++------------------
+ 1 file changed, 110 insertions(+), 50 deletions(-)
+
+commit afd4b27ff837e15bbab8ea2e275d54baa61571ca
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Jan 26 15:28:40 2013 -0800
+
+    allow array nestings
+
+ json/json.scm | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+commit 662f6ff383788b0241da46d8b1c16b2a307739d4
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Jan 26 15:19:01 2013 -0800
+
+    cleanup whitespace parsing
+
+ json/json.scm | 211 +++++++++++++++++++++++++++-------------------------------
+ 1 file changed, 98 insertions(+), 113 deletions(-)
+
+commit 93ee12dbfe6c401df67c4bbdd01bd3105950ebfd
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Jan 26 15:03:16 2013 -0800
+
+    allow whitespaces between array elements
+
+ json/json.scm | 32 +++++++++++++++++++-------------
+ 1 file changed, 19 insertions(+), 13 deletions(-)
+
+commit e710de589a544cd2f326cd81f292d11c576a2758
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Jan 26 14:25:23 2013 -0800
+
+    fix number parsing inside objects and arrays
+
+ json/json.scm | 179 ++++++++++++++++++++++++++++++++++------------------------
+ 1 file changed, 104 insertions(+), 75 deletions(-)
+
+commit af3890584ff3ea2ea9bda7d2cd98a5cad2fac9f4
+Author: Aleix Conchillo Flaque <aconchillo@gmail.com>
+Date:   Sat Jan 26 13:19:57 2013 -0800
+
+    initial module import
+
+ README.md     |   4 --
+ README.org    |   3 +
+ json/json.scm | 196 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 199 insertions(+), 4 deletions(-)
+ delete mode 100644 README.md
+ create mode 100644 README.org
+ create mode 100644 json/json.scm
+
+commit c2952206fc911488f1f31811ea0466b258f358e9
+Author: Aleix Conchillo Flaqué <aconchillo@gmail.com>
+Date:   Sat Jan 26 13:18:26 2013 -0800
+
+    Initial commit
+
+ README.md | 4 ++++
+ 1 file changed, 4 insertions(+)
+ create mode 100644 README.md

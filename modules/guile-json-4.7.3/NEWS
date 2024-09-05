@@ -1,0 +1,355 @@
+
+* Version 4.7.3 (Nov 27, 2022)
+
+  - Fix a regression introduced in 4.7.1 where (json->RECORD) was not working
+    with nested fields.
+
+
+* Version 4.7.2 (Jun 26, 2022)
+
+  - Fix breaking change introduced in 4.7.1 and properly allow optional nested
+    records in other records.
+    (Closes #78, again)
+
+
+* Version 4.7.1 (Apr 19, 2022)
+
+  - Allow optional nested records in other records. Not defined record fields
+    will be set to *unspecified* as any other value.
+    (Closes #78)
+
+
+* Version 4.7.0 (Jan 2, 2022)
+
+  - Allow returning ordered JSON objects key/value pairs by using the keyword
+    argument #:ordered.
+    (Closes #77)
+
+
+* Version 4.6.0 (Dec 28, 2021)
+
+  - Add support for Concatenated JSON.
+    (Closes #76)
+
+  - Add support for JSON Text Sequences.
+    (thanks to Ivan Sokolov)
+
+
+* Version 4.5.2 (Feb 3, 2021)
+
+  - Add missing modules to record.scm.
+
+
+* Version 4.5.1 (Jan 11, 2020)
+
+  - Allow false values in JSON mappings.
+    (Fixes #70)
+
+
+* Version 4.5.0 (Jan 3, 2020)
+
+  - Introduce (define-json-type) a much simpler way to define JSON objects and
+    record mappings. It makes use of the existing (define-json-mapping).
+
+
+* Version 4.4.1 (Nov 29, 2020)
+
+  - Fixed a few parsing issues from JSON Parsing Test Suite
+    (https://github.com/nst/JSONTestSuite).
+    (Fixes #67)
+
+
+* Version 4.4.0 (Oct 22, 2020)
+
+  - Record-JSON mapping now can define another optional procedure record->scm
+    to convert a record to an alist.
+    (Fixes #63)
+
+  - Record-JSON mapping now allows using *unspecified* values to indicate a
+    field record should not be serialized.
+    (Fixes #61)
+
+  - Improve pretty printing.
+    (thanks to Jonas Schürmann)
+
+
+* Version 4.3.2 (Jul 23, 2020)
+
+  - Fix unicode for values from E000 and upwards.
+    (thanks again to pkill9 and RhodiumToad from #guile)
+
+
+* Version 4.3.1 (Jul 22, 2020)
+
+  - Fix unicode codepoint with surrogate pairs.
+    (thanks to pkill9 and RhodiumToad from #guile)
+
+
+* Version 4.3.0 (Jul 3, 2020)
+
+  - Make RECORD->JSON optional in (define-json-mapping).
+
+
+* Version 4.2.0 (Jun 30, 2020)
+
+  - Introduce (define-json-mapping) which allows converting a JSON object into
+    a record type and vice versa. The initial code for this feature was copied
+    from the GNU Guix project.
+
+
+* Version 4.1.0 (Jun 6, 2020)
+
+  - Speed up number parsing by a 2x factor by avoiding using textual ports.
+
+  - Simplify unicode string builder.
+
+  - Improve string builder performance by not going back and forth with lists,
+    strings and characters.
+
+
+* Version 4.0.1 (May 17, 2020)
+
+  - (scm->json-string) #:validate keyword argument should default to true as
+    stated in the documentation.
+
+
+* Version 4.0.0 (May 16, 2020)
+
+Breaking changes:
+
+  - (scm->json) and (scm->json-string) #:espace keyword argument has been
+    renamed to #:solidus.
+
+  - JSON null now defaults to the null symbol. This can be changed in all
+    public functions with the #:null keyword argument.
+
+Bug fixes and improvements:
+
+  - Fix parsing of invalid numbers (e.g. "-").
+
+  - Go back to using (cond) instead of (match) since (match) reduces
+    performance.
+
+  - The json-parser record type has been removed as the record only contained
+    the port. Removing the need to access records also had a slight
+    performance increase.
+
+  - Use a plain list to read strings which brings significant speed
+    improvements.
+
+  - Replace `display` with `put-string` on JSON builder.
+
+  - Don't use map to parse expected string, simply use (string-ref).
+    (thanks to Linus Björnstam)
+
+  - Build array list with (cons) and (reverse). Big performance increase.
+    (suggested by Linus Björnstam)
+
+  - Check (eof-object?) last instead of first. This avoids unnecessary checks
+    which is the regular use-case.
+    (suggested by Linus Björnstam)
+
+  - Use string ports to parse numbers.
+    (suggested by Linus Björnstam)
+
+  - Don't need to use character-sets to detect whitespaces. JSON only defines
+    four possible types of whitespaces: space, linefeed, carriage return and
+    horizontal tab.
+    (suggested by Linus Björnstam)
+
+
+* Version 3.5.0 (Apr 21, 2020)
+
+  - Simplify parser by using `match`. Idea taken from Chickadee's JSON parser
+    (https://dthompson.us/projects/chickadee.html). This also made it easier
+    to clean up some functions.
+
+  - Better handling of invalid numbers.
+
+  - Improve handling of EOF. Most parsing functions were not taking care of
+    it.
+
+  - Fix error when parsing objects with commas and no following elements are
+    found.
+
+
+* Version 3.4.0 (Apr 11, 2020)
+
+  - Fix parsing 0 with an exponent.
+    (Fixes #55)
+
+  - Fix cross compilation.
+    (thanks to Jan Nieuwenhuizen)
+
+
+* Version 3.3.0 (Oct 31, 2019)
+
+  - When building a JSON document from a native value a json-invalid exception
+    will be thrown with the offending value as an argument.
+
+  - Add an additional key argument #:validate to (scm->json) and
+    (scm->json-string) to avoid native value validation. This could improve
+    performance with big native values that we are certain are correct.
+
+  - Empty array slots are now considered invalid and a json-invalid exception
+    will be thrown (e.g. "[1,2,,4,5]").
+
+  - Validate scheme objects before writing output.
+    (Fixes #36)
+
+
+* Version 3.2.0 (Sep 9, 2019)
+
+  - Fix writing empty objects to JSON (e.g. (scm->json-string '())).
+    (Fixes #44 and #47)
+
+  - Complex numbers, inf and nan are not allowed anymore as valid numbers when
+    building JSON.
+    (Fixes #32)
+
+
+* Version 3.1.0 (Dec 31, 2018)
+
+  - scm->json and scm->json-string now support an additional key argument
+    #:unicode. If #:unicode is set to true unicode characters will be escaped
+    when needed, otherwise characters won't be escaped (which now becomes the
+    default).
+
+
+* Version 3.0.0 (Dec 29, 2018)
+
+  - This is another breaking change release.
+
+  - JSON objects are now defined as alists (instead of hash tables) and JSON
+    arrays are now defined as vectors (instead of lists). Both of these
+    changes are mainly to use types that have read syntax. This will simplify
+    things for the user when defining JSON objects which is probably the most
+    common case.
+
+  - Fixed and issue when parsing only JSON numbers.
+
+  - Added unit tests.
+
+
+* Version 2.0.0 (Dec 12, 2018)
+
+  - This is a breaking change release. It is not possible anymore to specify a
+    JSON object using alists. Instead alist->hash-table needs to be explicitly
+    used. This makes the bidirectional mapping between Guile hash-tables and
+    JSON objects consistent.
+
+
+* Version 1.3.2 (Dec 2, 2018)
+
+  - Don't use GUILE_SITE and GUILE_SITE_CCACHE, build them as before. Print a
+    helper message at the end of configure output to help users to install in
+    Guile system's directory.
+
+
+* Version 1.3.1 (Dec 1, 2018)
+
+  - Fix guile.m4 to allow multiple candidates for guild, guile-config and
+    guile-tools.
+
+  - Use GUILE_SITE as the variable instead of GUILE_SITE_DIR.
+    (Fixes #20)
+
+
+* Version 1.3.0 (Nov 28, 2018)
+
+  - Properly use guile.m4 macros to install to the right paths.
+   (thanks to Jason Douglas Earl)
+
+
+* Version 1.2.0 (Aug 22, 2018)
+
+  - Switch to GPLv3.
+
+
+* Version 1.1.1 (Aug 14, 2018)
+
+  - Don't output extra spaces except with pretty printing.
+
+
+* Version 1.1.0 (Jul 26, 2018)
+
+  - Install .go files to $(libdir)/guile.
+    (thanks to Ludovic Courtès)
+
+
+* Version 1.0.1 (May 24, 2018)
+
+  - Fixes an issue while handling alists with #nil at the beginning.
+
+
+* Version 1.0.0 (May 23, 2018)
+
+  - Support 4-byte unicode characters.
+    (thanks to Christopher Lam)
+
+  - Remove deprecated `json` macro.
+
+  - Dual GPLv3 and LGPLv3 license.
+
+
+* Version 0.6.0 (Jan 16, 2017)
+
+  - Deprecate json macro in favor of scheme data types.
+
+
+* Version 0.5.0 (Feb 21, 2015)
+
+  - Allow converting simple alists to json
+      e.g.: (scm->json-string '((a . 1) (b . 2))))
+    (thanks to Jan Nieuwenhuizen)
+
+
+* Version 0.4.0 (Aug 17, 2014)
+
+  - Add unquote-splicing support to json form.
+    (thanks to David Thompson)
+
+
+* Version 0.3.1 (Jul 6, 2013)
+
+  - Use pure sh script syntax in env.in.
+    (thanks to Andrew Gaylard)
+
+
+* Version 0.3.0 (May 13, 2013)
+
+  - Re-licensed under LGPLv3.
+
+  - Use new guile.m4 macro.
+
+  - Convert rationals to floats to comply with JSON spec.
+    (closes github #3, patch from Doug Woos)
+
+
+* Version 0.2.0 (Apr 2, 2013)
+
+  - Improve parser errors by providing an additional parser argument to
+    the json-invalid exception.
+
+
+* Version 0.1.3 (Feb 10, 2013)
+
+  - Automatically update pkg-list.scm version.
+
+
+* Version 0.1.2 (Feb 7, 2013)
+
+  - Fix pretty printing.
+
+  - Use (display) instead of (simple-format) when possible.
+
+
+* Version 0.1.1 (Feb 2, 2013)
+
+  - Use (car)/(cdr) instead of (drop-right)/(last). This should be more
+    efficient.
+
+
+* Version 0.1.0 (Jan 30, 2013)
+
+  Initial release.
