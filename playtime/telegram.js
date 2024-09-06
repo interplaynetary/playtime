@@ -1,121 +1,94 @@
 const { Bot } = require("grammy");
-const net = require('net');
-const fs = require('fs');
+const express = require('express');
 require('dotenv').config();
 
 const telegramApiToken = process.env.TELEGRAM_API_TOKEN;
 const bot = new Bot(telegramApiToken);
+const app = express();
+const port = 3000;
 
-let player = { id: 725085107, first_name: "Fronx", username: "fronx84" };
-// bot.api.sendMessage(player.id, "Hey " + player.first_name + ", it's playtime!")
-let awaitingResponse = false;
-
-const SOCKET_PATH = '/tmp/guile_js_socket';
-
-// Create server to listen for messages from Guile
-const server = net.createServer((socket) => {
-  console.log('Guile connected');
-
-  socket.on('data', (data) => {
-    const message = JSON.parse(data.toString());
-    console.log('Received from Guile:', message);
-
-    if (message.type === 'cue') {
-      if (player) {
-        bot.api.sendMessage(player.id, message.content);
-      } else {
-        console.log('No player connected yet');
-      }
-    } else if (message.type === 'request') {
-      if (player) {
-        awaitingResponse = true;
-        bot.api.sendMessage(player.id, message.content);
-      } else {
-        console.log('No player connected yet');
-      }
-    }
-  });
+// Add this middleware to log all incoming requests
+app.use((req, res, next) => {
+  console.log(`Received ${req.method} request to ${req.path}`);
+  console.log('Query parameters:', req.query);
+  console.log('Body:', req.body);
+  next();
 });
 
-// Remove existing socket file if it exists
-if (fs.existsSync(SOCKET_PATH)) {
-  fs.unlinkSync(SOCKET_PATH);
-}
-
-server.listen(SOCKET_PATH, () => {
-  console.log('Server listening on', SOCKET_PATH);
+// Add this new endpoint near the top of your Express routes
+app.get('/hello', (req, res) => {
+  console.log('Received GET request to /hello');
+  res.status(200).send('Hello');
 });
 
-// Function to send messages to Guile
-function sendToGuile(message) {
-  const client = net.createConnection(SOCKET_PATH, () => {
-    client.write(JSON.stringify(message));
-    client.end();
-  });
-  client.on('error', (err) => {
-    console.error('Failed to send to Guile:', err.message);
-  });
-}
+// Store pending requests
+const pendingRequests = new Map();
 
-bot.on("message:text", (ctx) => {
-  if (!player) {
-    player = ctx.update.message.from;
-    bot.api.sendMessage(player.id, "Hey " + player.first_name + ", it's playtime!");
-    sendToGuile({ type: 'player_connected', name: player.first_name });
-  } else if (awaitingResponse) {
-    sendToGuile({ type: 'response', content: ctx.message.text });
-    awaitingResponse = false;
-  } else {
-    bot.api.sendMessage(player.id, "I'm waiting for the game to give me instructions.");
+// Endpoint for Guile to send messages to players
+app.post('/send-message', (req, res) => {
+  console.log('Processing /send-message request');
+  const { userId, content } = req.query;
+  bot.api.sendMessage(userId, content)
+    .then(() => {
+      console.log('Message sent successfully');
+      res.status(200).send('Message sent');
+    })
+    .catch(error => {
+      console.error('Error sending message:', error);
+      res.status(500).send('Error sending message: ' + error.message);
+    });
+});
+
+// Endpoint for Guile to request input from a player
+app.get('/request-input', async (req, res) => {
+  console.log('Processing /request-input request');
+  const { userId, content } = req.query;
+  
+  try {
+    await bot.api.sendMessage(userId, content);
+    console.log('Message sent, waiting for user response');
+    
+    const responsePromise = new Promise((resolve, reject) => {
+      pendingRequests.set(userId, { resolve, reject });
+      
+      // Set a timeout for the request (e.g., 5 minutes)
+      setTimeout(() => {
+        if (pendingRequests.has(userId)) {
+          pendingRequests.delete(userId);
+          console.log('Request timed out for user:', userId);
+          reject(new Error('Request timed out'));
+        }
+      }, 5 * 60 * 1000);
+    });
+
+    const response = await responsePromise;
+    console.log('Received user response:', response);
+    res.json(response);
+  } catch (error) {
+    console.error('Error in /request-input:', error);
+    res.status(500).send('Error: ' + error.message);
   }
+});
+
+// Handle incoming messages from Telegram
+bot.on("message:text", async (ctx) => {
+  const userId = ctx.message.from.id.toString();
+  const text = ctx.message.text;
+
+  console.log('Received message from Telegram:', { userId, text });
+
+  if (pendingRequests.has(userId)) {
+    const { resolve } = pendingRequests.get(userId);
+    pendingRequests.delete(userId);
+    resolve({ content: text });
+    console.log('Resolved pending request for user:', userId);
+  }
+});
+
+// Start the Express server
+app.listen(port, () => {
+  console.log(`Server listening at http://localhost:${port}`);
 });
 
 // Start the bot (using long polling)
 bot.start();
-
-
-
-
-
-
-
-
-// {
-//   "update": {
-//     "update_id": 787119119,
-//     "message": {
-//       "message_id": 7,
-//       "from": {
-//         "id": 725085107,
-//         "is_bot": false,
-//         "first_name": "Fronx",
-//         "username": "fronx84",
-//         "language_code": "en"
-//       },
-//       "chat": {
-//         "id": 725085107,
-//         "first_name": "Fronx",
-//         "username": "fronx84",
-//         "type": "private"
-//       },
-//       "date": 1725484467,
-//       "text": "whoop"
-//     }
-//   },
-//   "api": {
-//     "token": "6529984216:AAEJfa4UB2ge_rB2AzXMkz28q3uytPnQp5U",
-//     "raw": { },
-//     "config": { }
-//   },
-//   "me": {
-//     "id": 6529984216,
-//     "is_bot": true,
-//     "first_name": "playtime",
-//     "username": "the_playtime_bot",
-//     "can_join_groups": true,
-//     "can_read_all_group_messages": false,
-//     "supports_inline_queries": true,
-//     "can_connect_to_business": false,
-//     "has_main_web_app": false
-//   }
-// }
