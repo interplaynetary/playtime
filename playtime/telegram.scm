@@ -85,5 +85,5 @@
   (lambda ()
     (display "Starting telegram player\n")
     (let ((player (spawn ^telegram-player "Fronx" "725085107")))
-      (display ($ player 'cue "what's up"))
+      (display ($ player 'request "what's up"))
       (newline))))
