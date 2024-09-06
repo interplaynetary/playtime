@@ -10,25 +10,33 @@
   #:use-module (ice-9 receive)
   #:use-module (ice-9 format)
   #:use-module (ice-9 pretty-print)
-  #:export (^telegram-player))
+  #:export (^telegram-player)
+  #:export (send-http-get))
 
 
 (define SERVER-URL "http://localhost:3000")
 
 (define (params->query-string params)
   (string-join (map (lambda (pair)
-                      (string-append (uri-encode (car pair))
+                      (string-append (uri-encode (if (string? (car pair))
+                                                     (car pair)
+                                                     (symbol->string (car pair))))
                                      "="
-                                     (uri-encode (cdr pair))))
+                                     (uri-encode (if (string? (cdr pair))
+                                                     (cdr pair)
+                                                     (number->string (cdr pair))))))
                     params)
                "&"))
 
 (define (send-http-request-base http-method endpoint params)
   (let* ((base-uri (string->uri SERVER-URL))
+         (query-string (params->query-string params))
          (uri (build-uri (uri-scheme base-uri)
                          #:host (uri-host base-uri)
                          #:port (uri-port base-uri)
-                         #:path endpoint))
+                         #:path (if (eq? http-method http-get)
+                                    (string-append endpoint "?" query-string)
+                                    endpoint)))
          (uri-string (uri->string uri))
          (json-body (and (eq? http-method http-post)
                          (scm->json-string params)))
@@ -39,15 +47,13 @@
                          #:headers ,headers
                          ,@(if (eq? http-method http-post)
                                `(#:body ,json-body)
-                               `(#:query ,(params->query-string params))))))
+                               '()))))
     (catch #t
       (lambda ()
         (receive (response body)
             (apply http-method request-args)
           (if (= (response-code response) 200)
-              (if (eq? http-method http-get)
-                  (utf8->string body)
-                  (json-string->scm (utf8->string body)))  ; Parse JSON response for POST requests
+              (json-string->scm (utf8->string body))  ; Parse JSON response for POST requests          
               (begin
                 (display (format #f "HTTP request failed with code ~a\n" (response-code response)))
                 #f))))

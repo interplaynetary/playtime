@@ -2,3 +2,4 @@
 *.go
 .env
 node_modules/*
+users.csv

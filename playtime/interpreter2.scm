@@ -3,6 +3,7 @@
   #:use-module (playtime telegram)
   #:use-module (srfi srfi-13)
   #:use-module (ice-9 readline)
+  #:use-module (web uri)
   #:use-module (goblins)
   #:use-module (goblins actor-lib methods)
   #:export (enact)
@@ -45,15 +46,17 @@
                 (string-trim name))))
 
 (define* (get-player name #:optional telegram-user-id)
-  (let ((player-symbol (normalize-name name)))
-    (let ((existing-player (registry 'get-player player-symbol)))
+  (begin
+    ; (display (format #f "Getting player: ~a, ~a\n" name telegram-user-id))
+    (let ((player-symbol (normalize-name name)))
+      (let ((existing-player (registry 'get-player player-symbol)))
       (if existing-player
           existing-player
           (let ((new-player (if telegram-user-id
                                 (spawn ^telegram-player name telegram-user-id)
                                 (spawn ^player name))))
             (registry 'register-player player-symbol new-player)
-            new-player)))))
+            new-player))))))
 
 ;; This is called when a role is defined, not when it is
 ;; instantiated. The function returns a lambda that can be
@@ -98,21 +101,32 @@
            (display (syntax->datum stx))
            (newline))])))
 
-(define* (cast-helper role-name player-name #:optional telegram-user-id)
-  (let* ((player (if telegram-user-id
-                    (get-player player-name telegram-user-id)
-                    (get-player player-name)))
-         (role-instance (spawn (registry 'get-role role-name) player)))
-    (registry 'register-role-player role-name role-instance)))
+(define (find-user-by-username username)
+  (let ((response (send-http-get
+                    (string-append "/find-user-by-username/" (uri-encode username))
+                    `())))
+    (if (assoc-ref response 'error)
+        (throw 'user-not-found-error (assoc-ref response 'error))
+        response)))
 
 ;; Example: (cast 'cleaner "Alice")
 (define-syntax cast
   (lambda (stx)
-    (syntax-case stx ()
+    (syntax-case stx (telegram)
       [(_ role-name player-name)
-       #'(cast-helper role-name player-name)]
-      [(_ role-name player-name telegram-user-id)
-       #'(cast-helper role-name player-name telegram-user-id)])))
+       #'(let* ((player (get-player player-name))
+                (role-instance (spawn (registry 'get-role role-name) player)))
+           (registry 'register-role-player role-name role-instance))]
+      
+      [(_ role-name telegram telegram-username)
+       #'(let ((user (find-user-by-username telegram-username)))
+           (if user
+              (let* ((player (get-player (assoc-ref user "name") (assoc-ref user "id")))
+                  (role-instance (spawn (registry 'get-role role-name) player)))
+                (registry 'register-role-player role-name role-instance))
+              (begin
+                (display (format #f "\n===> Telegram player @~a not found.\n     Open a chat with ~a and say hi to register.\n\n" telegram-username "https://t.me/the_playtime_bot"))
+              )))])))
 
 ;; TODO recast
 ; (define-syntax recast

@@ -1,5 +1,8 @@
 const { Bot } = require("grammy");
 const express = require('express');
+const fs = require('fs');
+const csv = require('csv-parser');
+const fastcsv = require('fast-csv');
 require('dotenv').config();
 
 const telegramApiToken = process.env.TELEGRAM_API_TOKEN;
@@ -38,6 +41,63 @@ app.get('/hello', (req, res) => {
 
 // Store pending requests
 const pendingRequests = new Map();
+
+// User database
+const users = new Map();
+const USER_DB_FILE = 'users.csv';
+
+function ensureUserDBExists() {
+  if (!fs.existsSync(USER_DB_FILE)) {
+    fs.writeFileSync(USER_DB_FILE, 'username,id,name\n');
+    console.log('Created new users.csv file');
+  }
+}
+
+function loadUsers() {
+  ensureUserDBExists();
+  fs.createReadStream(USER_DB_FILE)
+    .pipe(csv())
+    .on('data', (row) => {
+      users.set(row.username, { username: row.username, id: row.id, name: row.name });
+    })
+    .on('end', () => {
+      console.log('Users loaded from CSV file');
+    });
+}
+
+function saveUser(user) {
+  const writer = fs.createWriteStream(USER_DB_FILE, { flags: 'a' });
+  fastcsv.write([user], { headers: false }).pipe(writer);
+}
+
+function checkAndAddUser(userId, name, username) {
+  if (!username) {
+    console.log('User has no username, skipping database entry');
+    return;
+  }
+  if (!users.has(username)) {
+    const newUser = { username, id: userId, name };
+    users.set(username, newUser);
+    saveUser(newUser);
+    console.log('New user added:', newUser);
+  }
+}
+
+loadUsers();
+
+app.get('/find-user-by-username/:username', (req, res) => {
+  const { username } = req.params;
+  // console.log(`Searching for user with username: ${username}`);
+
+  const user = users.get(username);
+  if (user) {
+    // console.log(`User found: ${JSON.stringify(user)}`);
+    res.json(user);
+  } else {
+    console.log(`User not found for username: ${username}`);
+    res.status(404).json({ error: 'User not found' });
+  }
+});
 
 // Endpoint for Guile to send messages to players
 app.post('/send-message', (req, res) => {
@@ -94,8 +154,13 @@ app.post('/request-input', async (req, res) => {
 bot.on("message:text", async (ctx) => {
   const userId = ctx.message.from.id.toString();
   const text = ctx.message.text;
+  const name = `${ctx.message.from.first_name} ${ctx.message.from.last_name || ''}`.trim();
+  const username = ctx.message.from.username || '';
 
-  console.log('Received message from Telegram:', { userId, text });
+  console.log('Received message from Telegram:', { userId, text, username });
+
+  // Check and add user to the database
+  checkAndAddUser(userId, name, username);
 
   if (pendingRequests.has(userId)) {
     const { resolve } = pendingRequests.get(userId);
