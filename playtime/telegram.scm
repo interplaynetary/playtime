@@ -46,8 +46,8 @@
             (apply http-method request-args)
           (if (= (response-code response) 200)
               (if (eq? http-method http-get)
-                  body
-                  (json-string->scm body))  ; Parse JSON response for POST requests
+                  (utf8->string body)
+                  (json-string->scm (utf8->string body)))  ; Parse JSON response for POST requests
               (begin
                 (display (format #f "HTTP request failed with code ~a\n" (response-code response)))
                 #f))))
