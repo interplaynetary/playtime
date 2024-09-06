@@ -1,6 +1,6 @@
 (define-module (playtime interpreter2)
   #:use-module (playtime registry)
-  ; #:use-module (playtime telegram)
+  #:use-module (playtime telegram)
   #:use-module (srfi srfi-13)
   #:use-module (ice-9 readline)
   #:use-module (goblins)
@@ -44,14 +44,27 @@
                       #\-))
                 (string-trim name))))
 
-(define (get-player name)
+(define* (get-player name #:optional telegram-user-id)
   (let ((player-symbol (normalize-name name)))
     (let ((existing-player (registry 'get-player player-symbol)))
       (if existing-player
           existing-player
-          (let ((new-player (spawn ^player name)))
+          (let ((new-player (if telegram-user-id
+                                (spawn ^telegram-player name telegram-user-id)
+                                (spawn ^player name))))
             (registry 'register-player player-symbol new-player)
             new-player)))))
+
+;; This is called when a role is defined, not when it is
+;; instantiated. The function returns a lambda that can be
+;; spawned as a Goblins actor via `spawn <role-class> <player>`.
+(define (init-role _name _scripts)
+  (lambda (bcom _player) ;; to be spawned as Goblins actor
+    (extend-methods _scripts
+      ((role-name) _name)
+      ((player-name) ($ _player 'who))
+      ((cue msg) ($ _player 'cue msg))
+      ((request msg) ($ _player 'request msg)))))
 
 (define-syntax cue
   (lambda (stx)
@@ -85,28 +98,32 @@
            (display (syntax->datum stx))
            (newline))])))
 
-;; This is called when a role is defined, not when it is
-;; instantiated. The function returns a lambda that can be
-;; spawned as a Goblins actor via `spawn <role-class> <player>`.
-(define (init-role _name _scripts)
-  (lambda (bcom _player) ;; to be spawned as Goblins actor
-    (extend-methods _scripts
-      ((role-name) _name)
-      ((player-name) ($ _player 'who))
-      ((cue msg) ($ _player 'cue msg))
-      ((request msg) ($ _player 'request msg)))))
+(define* (cast-helper role-name player-name #:optional telegram-user-id)
+  (let* ((player (if telegram-user-id
+                    (get-player player-name telegram-user-id)
+                    (get-player player-name)))
+         (role-instance (spawn (registry 'get-role role-name) player)))
+    (registry 'register-role-player role-name role-instance)))
 
 ;; Example: (cast 'cleaner "Alice")
 (define-syntax cast
   (lambda (stx)
     (syntax-case stx ()
-      ;; TODO add case for telegram username (or id)
       [(_ role-name player-name)
-        #'(begin
-            (let* ((player (get-player player-name))
-                   (role-instance (spawn (registry 'get-role role-name) player)))
-              (registry 'register-role-player role-name role-instance))
-        )])))
+       #'(cast-helper role-name player-name)]
+      [(_ role-name player-name telegram-user-id)
+       #'(cast-helper role-name player-name telegram-user-id)])))
+
+;; TODO recast
+; (define-syntax recast
+;   (lambda (stx)
+;     (syntax-case stx ()
+;       [(_ role-name)
+;         #'(begin
+;             (let* ((player (get-player player-name))
+;                    (role-instance (spawn (registry 'get-role role-name) player)))
+;               (registry 'register-role-player role-name role-instance))
+;         )])))
 
 (define-syntax define-role
   (lambda (stx)

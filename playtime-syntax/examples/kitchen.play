@@ -15,7 +15,7 @@
       (cleaner
         (scripts
           (wash-dishes
-            (if (> (date-hour (current-date)) 11)
+            (if (> (date-hour (current-date)) 8)
               (begin
                 (cue "It's time to wash the dishes.")
                 (request confirmation)
@@ -40,6 +40,6 @@
 
 ;; (print-and-run (quote
   (enact kitchen
-    (cast 'cleaner "Alice")
+    (cast 'cleaner "Fronx" "725085107")
     (cast 'drier "Bob"))
 ;; ))

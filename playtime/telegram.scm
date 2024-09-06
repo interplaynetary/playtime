@@ -72,18 +72,13 @@
      (send-http-post "/request-input"
                     `((userId . ,telegram-user-id)
                       (content . ,(format #f "~a, ~a" name msg)))))
-    ((who) name)
-    ((hello) ;; hello method
-     (let ((response (send-http-get "/hello" '())))
-       (if response
-           (format #f "Server says: ~a" response)
-           "Failed to get response from server")))))
+    ((who) name)))
 
-(define context (spawn-vat))
+; (define context (spawn-vat))
 
-(call-with-vat context
-  (lambda ()
-    (display "Starting telegram player\n")
-    (let ((player (spawn ^telegram-player "Fronx" "725085107")))
-      (display ($ player 'request "what's up"))
-      (newline))))
+; (call-with-vat context
+;   (lambda ()
+;     (display "Starting telegram player\n")
+;     (let ((player (spawn ^telegram-player "Fronx" "725085107")))
+;       (display ($ player 'request "what's up"))
+;       (newline))))
