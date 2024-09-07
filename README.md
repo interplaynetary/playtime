@@ -21,7 +21,13 @@ Built on top of **[Goblin's distributed object programming environment]([url](ht
 
 ## Run Playtime Environment
 
-Here's how you can run the kitchen dish washing play:
+First, start the JS server (it runs the telegram bot):
+
+```
+node playtime/telegram.js
+```
+
+Then start one of the plays (e.g. the kitchen play):
 
 ```
 guile --fresh-auto-compile  -s playtime.scm playtime-syntax/examples/kitchen.play
