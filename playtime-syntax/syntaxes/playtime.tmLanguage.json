@@ -75,6 +75,9 @@
 			"patterns": [
 				{
 					"include": "#role-list"
+				},
+				{
+					"include": "#comment"
 				}
 			]
 		},
@@ -93,6 +96,9 @@
 				},
 				{
 					"include": "#requires"
+				},
+				{
+					"include": "#comment"
 				}
 			]
 		},
@@ -107,18 +113,45 @@
 			"patterns": [
 				{
 					"include": "#script-list"
+				},
+				{
+					"include": "#comment"
 				}
 			]
 		},
 		"script-list": {
 			"name": "meta.script-list.playtime",
-			"begin": "\\(\\s*(([\\w-]+))\\s*",
+			"begin": "\\(\\s*\\(",
+			"end": "\\)",
+			"patterns": [
+				{
+					"include": "#script-head"
+				},
+				{
+					"include": "#script-body"
+				}
+			]
+		},
+		"script-head": {
+			"name": "meta.function-declaration.playtime",
+			"begin": "\\s*([\\w-]+)\\s*",
 			"beginCaptures": {
 				"1": {
 					"name": "entity.name.function.playtime"
 				}
 			},
 			"end": "\\)",
+			"patterns": [
+				{
+					"match": "([\\w-]+)",
+					"name": "variable.parameter.function.playtime"
+				}
+			]
+		},
+		"script-body": {
+			"name": "meta.function-body.playtime",
+			"begin": "(?<=\\))",
+			"end": "(?=\\))",
 			"patterns": [
 				{
 					"include": "source.scheme"
@@ -159,21 +192,6 @@
 				}
 			],
 			"end": "\\)"
-		},
-		"play": {
-			"name": "meta.play.playtime",
-			"begin": "\\(\\s*(([\\w-]+))\\s*",
-			"beginCaptures": {
-				"1": {
-					"name": "entity.name.class.playtime"
-				}
-			},
-			"end": "\\)",
-			"patterns": [
-				{
-					"include": "#casting-role"
-				}
-			]
 		},
 		"casting-role": {
 			"name": "meta.role.casting.playtime",
