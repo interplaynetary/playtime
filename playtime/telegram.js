@@ -48,7 +48,7 @@ const USER_DB_FILE = 'users.csv';
 
 function ensureUserDBExists() {
   if (!fs.existsSync(USER_DB_FILE)) {
-    fs.writeFileSync(USER_DB_FILE, 'username,id,name\n');
+    fs.writeFileSync(USER_DB_FILE, 'username,id,name');
     console.log('Created new users.csv file');
   }
 }
@@ -67,6 +67,7 @@ function loadUsers() {
 
 function saveUser(user) {
   const writer = fs.createWriteStream(USER_DB_FILE, { flags: 'a' });
+  writer.write('\n'); // Add a new line before writing the new user
   fastcsv.write([user], { headers: false }).pipe(writer);
 }
 
