@@ -1,0 +1,29 @@
+;; (print-and-run (quote
+(context photowalk
+  (roles
+    (organizer
+      (scripts
+        ((pick-a-theme)
+          (let ((response (request "Pick a theme for the photo walk")))
+            (photographer 'intro (assoc-ref response "text"))))
+      ))
+    (photographer
+      (scripts
+        ((intro theme)
+          (cue (format #f "Welcome to the photo walk! The theme is: ~a" theme))
+          (self 'take-photo)
+        )
+        ((take-photo)
+          (request "Post your photo here to upload it to the pool.")
+          (self 'take-photo)
+        )
+      )))
+  (enactment
+    (organizer 'pick-a-theme)))
+;; ))
+
+(enact photowalk
+  (cast 'organizer telegram "fronx84")
+  (cast 'photographer telegram "fronx84")
+  ;; (cast 'photographer telegram "ruzgarimski")
+)

@@ -1,4 +1,5 @@
 const { Bot } = require("grammy");
+const { hydrateFiles } = require("@grammyjs/files");
 const express = require('express');
 const fs = require('fs');
 const csv = require('csv-parser');
@@ -7,6 +8,8 @@ require('dotenv').config();
 
 const telegramApiToken = process.env.TELEGRAM_API_TOKEN;
 const bot = new Bot(telegramApiToken);
+bot.api.config.use(hydrateFiles(bot.token));
+
 const app = express();
 const port = 3000;
 
@@ -142,24 +145,44 @@ app.post('/request-input', async (req, res) => {
   }
 });
 
+bot.on("message:voice", async (ctx) => {
+  // TODO: transcribe voice message
+})
+
 // Handle incoming messages from Telegram
 bot.on("message:text", async (ctx) => {
   const userId = ctx.message.from.id.toString();
-  const text = ctx.message.text;
-  // TODO: handle photo/video/voice messages
   const name = `${ctx.message.from.first_name} ${ctx.message.from.last_name || ''}`.trim();
   const username = ctx.message.from.username || '';
-
-  console.log('Received message from Telegram:', { userId, text, username });
-
-  // Check and add user to the database
   checkAndAddUser(userId, name, username);
+
+  const text = ctx.message.text;
+  console.log('Received message from Telegram:', { userId, text, username });
 
   if (pendingRequests.has(userId)) {
     const { resolve } = pendingRequests.get(userId);
     pendingRequests.delete(userId);
     // TODO: handle photo/video/voice messages
     resolve({ text: text });
+    console.log('Resolved pending request for user:', userId);
+  }
+});
+
+bot.on("message:photo", async (ctx) => {
+  const userId = ctx.message.from.id.toString();
+  const name = `${ctx.message.from.first_name} ${ctx.message.from.last_name || ''}`.trim();
+  const username = ctx.message.from.username || '';
+  checkAndAddUser(userId, name, username);
+
+  const text = ctx.message.caption;
+  console.log('Received photo message from Telegram:', { userId, text, username });
+  const file = await ctx.getFile();
+  const path = await file.download(`assets/photos/${file.file_id}.jpg`);
+
+  if (pendingRequests.has(userId)) {
+    const { resolve } = pendingRequests.get(userId);
+    pendingRequests.delete(userId);
+    resolve({ text: text, photo_file_id: file.file_id });
     console.log('Resolved pending request for user:', userId);
   }
 });
