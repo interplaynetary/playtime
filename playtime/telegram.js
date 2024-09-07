@@ -131,15 +131,6 @@ app.post('/request-input', async (req, res) => {
 
     const responsePromise = new Promise((resolve, reject) => {
       pendingRequests.set(userId, { resolve, reject });
-
-      // Set a timeout for the request (e.g., 5 minutes)
-      setTimeout(() => {
-        if (pendingRequests.has(userId)) {
-          pendingRequests.delete(userId);
-          console.log('Request timed out for user:', userId);
-          reject(new Error('Request timed out'));
-        }
-      }, 5 * 60 * 1000);
     });
 
     const response = await responsePromise;
