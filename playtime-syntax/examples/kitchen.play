@@ -1,34 +1,27 @@
 (use-modules
-  (ice-9 pretty-print)
-  (srfi srfi-19))
-
-(define (print-and-run x)
-  (let ((expanded (macroexpand x)))
-    (pretty-print (tree-il->scheme expanded))
-    (eval x (interaction-environment))))
-
-(define confirmation "confirm here when you're ready")
+  (srfi srfi-19)) ;; for date-hour
 
 ;; (print-and-run (quote
   (context kitchen
     (roles
       (cleaner
         (scripts
-          (wash-dishes
+          ((wash-dishes)
             (if (> (date-hour (current-date)) 8)
               (begin
-                (cue "It's time to wash the dishes.")
-                (request confirmation)
+                (cue "It's time to wash the dishes")
+                ;; (self 'another-script)
+                (request "Confirm here when you're ready")
                 (cast 'cleaner "Chloe")
                 (drier 'dry-dish))
-              (cue "Nah… it's not time yet to wash the dishes."))
+              (cue "Nah… it's not time yet to wash the dishes"))
           )
-          (another-script
+          ((another-script)
             (cue "Another script!\n"))
         ))
       (drier
         (scripts
-          (dry-dish
+          ((dry-dish)
             (cue "There's dishes to dry!")
             (request "Let me know when you're done")
             (cast 'drier "Dirk")

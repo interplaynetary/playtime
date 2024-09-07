@@ -73,11 +73,11 @@
     ((cue msg) ;; cue the player to do something
      (send-http-post "/send-message"
                      `((userId . ,telegram-user-id)
-                       (content . ,(format #f "Hey ~a! ~a" name msg)))))
+                       (text . ,(format #f "Hey ~a! ~a" name msg)))))
     ((request msg) ;; request input from the player
      (send-http-post "/request-input"
                     `((userId . ,telegram-user-id)
-                      (content . ,(format #f "~a, ~a" name msg)))))
+                      (text . ,(format #f "~a" msg)))))
     ((who) name)))
 
 ; (define context (spawn-vat))

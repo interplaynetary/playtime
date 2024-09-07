@@ -103,9 +103,9 @@ app.get('/find-user-by-username/:username', (req, res) => {
 // Endpoint for Guile to send messages to players
 app.post('/send-message', (req, res) => {
   console.log('Processing /send-message request');
-  const { userId, content } = req.body;
-  console.log('Sending to user:', userId, 'content:', content);
-  bot.api.sendMessage(userId, content)
+  const { userId, text } = req.body;
+  console.log('Sending to user:', userId, 'text:', text);
+  bot.api.sendMessage(userId, text)
     .then(() => {
       console.log('Message sent successfully');
       res.status(200).json({ message: 'Message sent' });
@@ -119,14 +119,14 @@ app.post('/send-message', (req, res) => {
 // Updated endpoint for Guile to request input from a player
 app.post('/request-input', async (req, res) => {
   console.log('Processing /request-input request');
-  const { userId, content } = req.body;
+  const { userId, text } = req.body;
 
-  if (!userId || !content) {
-    return res.status(400).json({ error: 'Missing userId or content in request body' });
+  if (!userId || !text) {
+    return res.status(400).json({ error: 'Missing userId or text in request body' });
   }
 
   try {
-    await bot.api.sendMessage(userId, content);
+    await bot.api.sendMessage(userId, text);
     console.log('Message sent, waiting for user response');
 
     const responsePromise = new Promise((resolve, reject) => {
@@ -146,6 +146,7 @@ app.post('/request-input', async (req, res) => {
 bot.on("message:text", async (ctx) => {
   const userId = ctx.message.from.id.toString();
   const text = ctx.message.text;
+  // TODO: handle photo/video/voice messages
   const name = `${ctx.message.from.first_name} ${ctx.message.from.last_name || ''}`.trim();
   const username = ctx.message.from.username || '';
 
@@ -157,7 +158,8 @@ bot.on("message:text", async (ctx) => {
   if (pendingRequests.has(userId)) {
     const { resolve } = pendingRequests.get(userId);
     pendingRequests.delete(userId);
-    resolve({ content: text });
+    // TODO: handle photo/video/voice messages
+    resolve({ text: text });
     console.log('Resolved pending request for user:', userId);
   }
 });
