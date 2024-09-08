@@ -13,6 +13,7 @@
   #:export (enact)
   #:export (cast)
   #:export (self)
+  #:export (every)
   #:export (cue)
   #:export (request)
   #:export (context)
@@ -32,7 +33,9 @@
     ((cue msg) ;; cue the player to do something
       (display (format #f "Hey ~a! ~a\n" name msg)))
     ((request msg) ;; request input from the player
-      (readline (format #f "~a, ~a: " name msg)))
+      (make-promise
+        (lambda (resolve reject)
+          (resolve (readline (format #f "~a, ~a: " name msg))))))
     ((who) name)
   ))
 
@@ -66,7 +69,8 @@
       ((role-name) _name)
       ((player-name) ($ _player 'who))
       ((cue msg) ($ _player 'cue msg))
-      ((request msg) ($ _player 'request msg)))))
+      ((request msg) (<- _player 'request msg))
+    )))
 
 (define-syntax cue
   (lambda (stx)
@@ -91,6 +95,30 @@
         (with-syntax ([__player (datum->syntax stx '__player)])
           #'($ __player script-name __player args ...))
       ])))
+
+(define-syntax every
+  (lambda (stx)
+    (syntax-case stx ()
+      [(_ role-name script-name args ...)
+        #'(begin
+            (display (format #f "# Every player in role ~a: ~a\n" 'role-name script-name))
+            (for-each
+              (lambda (role-instance)
+                (begin
+                  (display (format #f "-  [ ] ~a\n" ($ role-instance 'player-name)))
+                  (run-script role-instance script-name args ...)
+                  ; (on (<- role-instance script-name role-instance args ...)
+                  ;   (lambda (x)
+                  ;     (display (format #f "  [x] ~a\n" ($ role-instance 'player-name))))
+                  ;    #:catch
+                  ;   (lambda (err)
+                  ;     (format #t "Got an error: ~a\n" err))
+                  ;   #:finally
+                  ;   (lambda ()
+                  ;     (display "Whew, it's over!\n")))
+                ))
+              (registry 'get-role-players 'role-name))
+          )])))
 
 (define-syntax scripts
   (lambda (stx)
@@ -123,14 +151,16 @@
       [(_ role-name player-name)
        #'(let* ((__player (get-player player-name))
                 (role-instance (spawn (registry 'get-role role-name) __player)))
-           (registry 'register-role-player role-name role-instance))]
+           (registry 'register-role-player role-name role-instance)
+           (display (format #f "Cast ~a as ~a\n" player-name role-name)))]
       
       [(_ role-name telegram telegram-username)
        #'(let ((user (find-user-by-username telegram-username)))
            (if user
               (let* ((__player (get-player (assoc-ref user "name") (assoc-ref user "id")))
                   (role-instance (spawn (registry 'get-role role-name) __player)))
-                (registry 'register-role-player role-name role-instance))
+                (registry 'register-role-player role-name role-instance)
+                (display (format #f "Cast ~a as ~a\n" (assoc-ref user "name") role-name)))
               (begin
                 (display (format #f "\n===> Telegram player @~a not found.\n     Open a chat with ~a and say hi to register.\n\n" telegram-username "https://t.me/the_playtime_bot"))
               )))])))
@@ -146,15 +176,18 @@
 ;               (registry 'register-role-player role-name role-instance))
 ;         )])))
 
+(define (run-script role-instance script-name . args)
+  (apply <- (append (list role-instance script-name role-instance) args)))
+
 (define (run-role-script role-name script . args)
   (let ((role-player (registry 'get-role-player role-name)))
     (if role-player
       (begin
         (display (format #f "Player \"~a\" -> ~a~a\n" ($ role-player 'player-name) script args))
-        (apply $ (append (list role-player script role-player) args)))
+        (apply run-script (append (list role-player script) args)))
       (begin
-        (display "No role player found for role: ")
-        (display role-name)
+        (display (format #f "No role player found for role: ~a -- ~a\n" role-name role-player))
+        (print-role-players)
         (newline))
     )))
 
@@ -217,6 +250,7 @@
        (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
          #'(call-with-vat context
              (lambda ()
+                (newline)
                 (begin body ...)
                 ; (print-role-players)
                 ; (newline)

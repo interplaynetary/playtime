@@ -34,5 +34,6 @@
 ;; (print-and-run (quote
   (enact kitchen
     (cast 'cleaner telegram "fronx84")
+    (cast 'cleaner "Other Fronx")
     (cast 'drier "Bob"))
 ;; ))

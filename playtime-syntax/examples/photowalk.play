@@ -1,11 +1,11 @@
-;; (print-and-run (quote
+(print-and-run (quote
 (context photowalk
   (roles
     (organizer
       (scripts
         ((pick-a-theme)
           (let ((response (request "Pick a theme for the photo walk")))
-            (photographer 'intro (assoc-ref response "text"))))
+            (every photographer 'intro (assoc-ref response "text"))))
       ))
     (photographer
       (scripts
@@ -20,10 +20,14 @@
       )))
   (enactment
     (organizer 'pick-a-theme)))
-;; ))
+))
 
+(print-and-run (quote
 (enact photowalk
   (cast 'organizer telegram "fronx84")
+  (cast 'photographer "ruz")
   (cast 'photographer telegram "fronx84")
+  (cast 'photographer "gar")
   ;; (cast 'photographer telegram "ruzgarimski")
 )
+))
