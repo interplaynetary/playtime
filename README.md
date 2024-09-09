@@ -8,11 +8,11 @@
 Accordingly, the same **play** when _viewed_ from different **perspectives** can be _composed_ of entirely different **roles**, **scripts**, **role-players, role-play requirements, point/reward distributions**, etc.
 
 ## Playnet
-**Playtime creation** is a **performance** of the **playnet**.
+**Playtime creation** is a **performance** of **playnet-0**.
 
-**Playnet** _xorganizes_ (_expresses/experiments_ with the **organization** of) **plays** (playful organizational forms) and **interfaces** (analog, digital, natural, social, material, ecological, communicational, economic etc.) that _augment_ the **capacities** of **players** to _**recognize, read, (re)-write,**_ and _**perform**_ **plays** for _creating_ **valuable effects**.
+**Playnet-0** _xorganizes_ (_expresses/experiments_ with the **organization** of) **plays** (playful organizational forms) and **interfaces** (analog, digital, natural, social, material, ecological, communicational, economic etc.) that _augment_ the **capacities** of **players** to _**recognize, read, (re)-write,**_ and _**perform**_ **plays** for _creating_ **valuable effects**.
 
-We **playtime creators** believe **playtime** to be an expression that alligns with the **valued effects** of the **playnet** in _augmenting_ the **capacities** of **players** to _**recognize, read, (re)-write,**_ and _**perform**_ **plays** for _creating_ **valuable effects**.
+We **playtime creators** believe **playtime** to be an expression that alligns with the **valued effects** of the **playnet-0** in _augmenting_ the **capacities** of **players** to _**recognize, read, (re)-write,**_ and _**perform**_ **plays** for _creating_ **valuable effects**.
 
 ### Goblins
 Built on top of **[Goblin's distributed object programming environment]([url](https://spritely.institute/goblins/))**. **Playtime** - and **organizations/games** expressed through it - can easily be **distributed, P2P,** and can **run in the browser.**
@@ -40,10 +40,49 @@ brew install guile
 brew install aconchillo/guile/guile-json
 ```
 
-## Guile Hoot Game Template
+### Guix on Mac (At your own risk)
+
+It is possible to set up a virtual machine in which Guix is available. However, you'd still need to transfer the code of this repository to that box in order to benefit from it. Alternatively, read the instructions for a manual installation of dependencies in the following section.
+
+If you want to give it a try, follow the instructions here to install msg, a Guix environment for Mac: https://superkamiguru.org/projects/msg.html
+
+Then run the following commands in order to set up and connect to the virtual machine in which Guix is available:
+
+```
+msg machine init
+msg machine start
+msg shell
+```
+
+### Manual installation of dependencies on Mac (Recommended)
+
+Follow the instructions here to install Hoot: https://gitlab.com/spritely/guile-hoot
+
+Also add the following path exports to your ~/.bashrc or similar:
+
+```
+export GUILE_LOAD_PATH="/opt/homebrew/share/guile/site/3.0"
+export GUILE_LOAD_COMPILED_PATH="/opt/homebrew/lib/guile/3.0/site-ccache"
+export GUILE_SYSTEM_EXTENSIONS_PATH="/opt/homebrew/lib/guile/3.0/extensions"
+```
+
+You also need to install Guile Goblins:
+
+```
+brew tap aconchillo/guile
+brew install guile-goblins
+```
+
+When loading the goblins module, if you get segfaults or errors related to guile-fibers, install it from a tar ball (https://github.com/wingo/fibers) and update your GUILE_LOAD_PATH and GUILE_LOAD_COMPILED_PATH accordingly.
+
+## Guile Goblins
+
+See https://spritely.institute/static/papers/spritely-core.html for an intro. It uses Wisp syntax whose main feature is that instead of using parentheses for separating expressions from each other, it uses linebreaks. See https://spritely.institute/static/papers/spritely-core.html#appendix-lisp-wisp.
+
+## Playtime Guile Hoot
 
 This repository is the quickest way to get started building games in
-Scheme that run in web browsers with Guile Hoot!
+Playtime that run in web browsers with Guile Hoot!
 
 It has everything you need:
 
@@ -101,46 +140,6 @@ make bundle
 
 Upload the resulting zip file to your itch.io game page and share your
 game with others!  Have fun!
-
-### Guix on Mac (At your own risk)
-
-It is possible to set up a virtual machine in which Guix is available. However, you'd still need to transfer the code of this repository to that box in order to benefit from it. Alternatively, read the instructions for a manual installation of dependencies in the following section.
-
-If you want to give it a try, follow the instructions here to install msg, a Guix environment for Mac: https://superkamiguru.org/projects/msg.html
-
-Then run the following commands in order to set up and connect to the virtual machine in which Guix is available:
-
-```
-msg machine init
-msg machine start
-msg shell
-```
-
-### Manual installation of dependencies on Mac (Recommended)
-
-Follow the instructions here to install Hoot: https://gitlab.com/spritely/guile-hoot
-
-Also add the following path exports to your ~/.bashrc or similar:
-
-```
-export GUILE_LOAD_PATH="/opt/homebrew/share/guile/site/3.0"
-export GUILE_LOAD_COMPILED_PATH="/opt/homebrew/lib/guile/3.0/site-ccache"
-export GUILE_SYSTEM_EXTENSIONS_PATH="/opt/homebrew/lib/guile/3.0/extensions"
-```
-
-You also need to install Guile Goblins:
-
-```
-brew tap aconchillo/guile
-brew install guile-goblins
-```
-
-When loading the goblins module, if you get segfaults or errors related to guile-fibers, install it from a tar ball (https://github.com/wingo/fibers) and update your GUILE_LOAD_PATH and GUILE_LOAD_COMPILED_PATH accordingly.
-
-## Guile Goblins
-
-See https://spritely.institute/static/papers/spritely-core.html for an intro. It uses Wisp syntax whose main feature is that instead of using parentheses for separating expressions from each other, it uses linebreaks. See https://spritely.institute/static/papers/spritely-core.html#appendix-lisp-wisp.
-
 
 ## Getting help
 
