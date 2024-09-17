@@ -32,7 +32,7 @@
 ;; ))
 
 ;; (print-and-run (quote
-  (enact kitchen
+  (play kitchen
     (cast 'cleaner telegram "fronx84")
     (cast 'drier "Bob"))
 ;; ))

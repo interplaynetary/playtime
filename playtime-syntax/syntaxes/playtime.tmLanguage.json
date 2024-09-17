@@ -7,9 +7,6 @@
 			"include": "#context"
 		},
 		{
-			"include": "#enact"
-		},
-		{
 			"include": "#play"
 		},
 		{
@@ -172,9 +169,9 @@
 				}
 			]
 		},
-		"enact": {
-			"name": "meta.enact.playtime",
-			"begin": "\\(\\s*(enact)\\s*([\\w-]+)\\s*",
+		"play": {
+			"name": "meta.play.playtime",
+			"begin": "\\(\\s*(play)\\s*([\\w-]+)\\s*",
 			"beginCaptures": {
 				"1": {
 					"name": "keyword.control.playtime"

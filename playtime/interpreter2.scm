@@ -10,7 +10,7 @@
   #:use-module (goblins)
   #:use-module (goblins actor-lib methods)
   #:export (print-and-run)
-  #:export (enact)
+  #:export (play)
   #:export (cast)
   #:export (self)
   #:export (cue)
@@ -210,7 +210,7 @@
               context-item ...
             )])))
 
-(define-syntax enact
+(define-syntax play
   (lambda (stx)
     (syntax-case stx ()
       [(_ context body ...)
