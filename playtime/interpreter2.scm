@@ -32,13 +32,21 @@
     (pretty-print (tree-il->scheme expanded))
     (eval x (interaction-environment))))
 
-(define (^player bcom name)
+(define* (^player bcom name #:optional [telegram-user-id #f])
+  (define telegram-player
+    (if telegram-user-id
+        (spawn ^telegram-player name telegram-user-id)
+        #f))
   (methods
     ((cue msg) ;; cue the player to do something
-      (display (format #f "Hey ~a! ~a\n" name msg)))
+      (if telegram-player
+          (<- telegram-player 'cue msg)
+          (display (format #f "Hey ~a! ~a\n" name msg))))
     ((request msg) ;; request input from the player
-      (let ((response (readline (format #f "~a, ~a: " name msg))))
-        `(("text" . ,response))))
+      (if telegram-player
+          (<- telegram-player 'request msg)
+          (let ((response (readline (format #f "~a, ~a: " name msg))))
+            `(("text" . ,response)))))
     ((who) name)
   ))
 
@@ -58,9 +66,7 @@
       (let ((existing-player (registry 'get-player player-symbol)))
       (if existing-player
           existing-player
-          (let ((new-player (if telegram-user-id
-                                (spawn ^telegram-player name telegram-user-id)
-                                (spawn ^player name))))
+          (let ((new-player (spawn ^player name telegram-user-id)))
             (registry 'register-player player-symbol new-player)
             new-player))))))
 
