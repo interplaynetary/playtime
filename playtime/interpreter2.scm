@@ -16,6 +16,7 @@
   #:export (player)
   #:export (this)
   #:export (any)
+  #:export (every)
   #:export (cue)
   #:export (request)
   #:export (context)
@@ -73,14 +74,6 @@
       ((cue msg) ($ _player 'cue msg))
       ((request msg) ($ _player 'request msg)))))
 
-(define-syntax player
-  (lambda (stx)
-    (syntax-case stx ()
-      [(_ script-name args ...)
-        (with-syntax ([__player (datum->syntax stx '__player)])
-          #'($ __player script-name __player args ...))
-      ])))
-
 (define-syntax define-player-call
   (syntax-rules ()
     [(define-request-call name transformer)
@@ -106,6 +99,14 @@
   (lambda (p msg)
     (assoc-ref ($ p 'request msg) "text")))
 
+(define-syntax player
+  (lambda (stx)
+    (syntax-case stx ()
+      [(_ script-name args ...)
+        (with-syntax ([__player (datum->syntax stx '__player)])
+          #'($ __player 'script-name __player args ...))
+      ])))
+
 ;; Alternative to 'player', which should be preferred.
 ;; 'this' is not recommended, because we can't check the (redundant)
 ;; role-name parameter.
@@ -114,7 +115,7 @@
     (syntax-case stx ()
       [(_ role-name script-name args ...)
         (with-syntax ([__player (datum->syntax stx '__player)])
-          #'($ __player script-name __player args ...))
+          #'($ __player 'script-name __player args ...))
       ])))
 
 (define-syntax scripts
@@ -176,21 +177,31 @@
 ;         )])))
 
 (define (run-role-script selector role-name script . args)
-  (let ((role-player (registry 'get-role-player role-name selector)))
-    (if role-player
-      (begin
-        (display (format #f "Player \"~a\" -> ~a~a\n" ($ role-player 'who) script args))
-        (apply $ (append (list role-player script role-player) args)))
-      (begin
-        (display "No role player found for role: ")
-        (display role-name)
-        (newline))
-    )))
+  (let ((role-players (case selector
+                        ((any) (list (registry 'get-role-player role-name 'any)))
+                        ((every) (registry 'get-role-players role-name))
+                        (else (error "Invalid selector for run-role-script")))))
+    (if (null? role-players)
+        (begin
+          (display (format #f "No role players found for role: ~a\n" role-name)))
+        (for-each
+         (lambda (role-player)
+          ;  (display (format #f "Player \"~a\" -> ~a -- ~a\n"
+          ;   ($ role-player 'who)
+          ;   script
+          ;   (append (list role-player script role-player) (or args '()))))
+           (apply $ (append (list role-player script role-player) (or args '()))))
+         role-players))))
 
 (define-syntax any
   (syntax-rules ()
     [(any role-name script-name . args)
-      (run-role-script 'any 'role-name script-name . args)]))
+     (run-role-script 'any 'role-name 'script-name . args)]))
+
+(define-syntax every
+  (syntax-rules ()
+    [(every role-name script-name . args)
+     (run-role-script 'every 'role-name 'script-name . args)]))
 
 (define-syntax define-role
   (lambda (stx)

@@ -28,6 +28,8 @@
         (let ((current-players (hash-ref role-players role-symbol '())))
           (hash-set! role-players role-symbol 
             (cons role-instance current-players))))
+      ((get-role-players role-symbol)
+        (hash-ref role-players role-symbol '()))
       ((get-role-player role-symbol selector)
         (let ((existing-players (hash-ref role-players role-symbol '())))
           (newline)

@@ -5,22 +5,21 @@
       (scripts
         ((pick-a-theme)
           (let ((theme (request-text "Pick a theme for the photo walk")))
-            (any photographer 'intro theme)))
+            (every photographer intro theme)))
       ))
     (photographer
       (scripts
         ((intro theme)
           (cue (format #f "Welcome to the photo walk! The theme is: ~a" theme))
-          (player 'take-photo)
-          ;; Alternative: (this photographer 'take-photo)
+          (player take-photo) ;; Alternative: (this photographer take-photo)
         )
         ((take-photo)
           (request "Post your photo here to upload it to the pool.")
-          (any photographer 'take-photo)
+          ;; (any photographer take-photo)
         )
       )))
   (enactment
-    (any organizer 'pick-a-theme)))
+    (any organizer pick-a-theme)))
 ;; ))
 
 ;; (print-and-run (quote
