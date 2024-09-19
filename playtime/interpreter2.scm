@@ -73,30 +73,6 @@
       ((cue msg) ($ _player 'cue msg))
       ((request msg) ($ _player 'request msg)))))
 
-(define-syntax cue
-  (lambda (stx)
-    (syntax-case stx ()
-      [(_ msg)
-        (with-syntax ([__player (datum->syntax stx '__player)])
-          #'($ __player 'cue msg))
-      ])))
-
-(define-syntax request
-  (lambda (stx)
-    (syntax-case stx ()
-      [(_ msg)
-        (with-syntax ([__player (datum->syntax stx '__player)])
-          #'($ __player 'request msg))
-      ])))
-
-(define-syntax request-text
-  (lambda (stx)
-    (syntax-case stx ()
-      [(_ prompt)
-        (with-syntax ([__player (datum->syntax stx '__player)])
-          #'(assoc-ref ($ __player 'request prompt) "text"))
-      ])))
-
 (define-syntax player
   (lambda (stx)
     (syntax-case stx ()
@@ -104,6 +80,31 @@
         (with-syntax ([__player (datum->syntax stx '__player)])
           #'($ __player script-name __player args ...))
       ])))
+
+(define-syntax define-player-call
+  (syntax-rules ()
+    [(define-request-call name transformer)
+     (define-syntax name
+       (lambda (stx)
+        (with-ellipsis :::
+          (syntax-case stx ()
+            [(_ args :::)
+              (with-syntax ([__player (datum->syntax stx '__player)])
+                  #'(transformer __player args :::))
+            ]))))
+    ]))
+
+(define-player-call cue
+  (lambda (p msg)
+    ($ p 'cue msg)))
+
+(define-player-call request
+  (lambda (p msg)
+    ($ p 'request msg)))
+
+(define-player-call request-text
+  (lambda (p msg)
+    (assoc-ref ($ p 'request msg) "text")))
 
 ;; Alternative to 'player', which should be preferred.
 ;; 'this' is not recommended, because we can't check the (redundant)
