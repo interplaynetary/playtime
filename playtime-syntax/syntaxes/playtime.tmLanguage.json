@@ -182,7 +182,7 @@
 			},
 			"patterns": [
 				{
-					"include": "#casting-role"
+					"include": "#casting-list"
 				},
 				{
 					"include": "source.scheme"
@@ -190,27 +190,15 @@
 			],
 			"end": "\\)"
 		},
-		"casting-role": {
-			"name": "meta.role.casting.playtime",
-			"begin": "\\(\\s*(([\\w-]+))\\s*",
-			"beginCaptures": {
-				"1": {
-					"name": "entity.name.class.playtime"
-				}
-			},
-			"end": "\\)",
-			"patterns": [
-				{
-					"include": "source.scheme"
-				}
-			]
-		},
 		"casting-list": {
 			"name": "meta.list.casting.playtime",
-			"begin": "\\(\\s*(([\\w-]+))\\s*",
+			"begin": "\\(\\s*(cast)\\s*([\\w-]+)\\s*",
 			"beginCaptures": {
 				"1": {
 					"name": "entity.name.variable.playtime"
+				},
+				"2": {
+					"name": "entity.name.class.playtime"
 				}
 			},
 			"end": "\\)"
