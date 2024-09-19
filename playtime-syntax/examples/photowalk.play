@@ -5,25 +5,30 @@
       (scripts
         ((pick-a-theme)
           (let ((response (request "Pick a theme for the photo walk")))
-            (photographer 'intro (assoc-ref response "text"))))
+            (any photographer 'intro (assoc-ref response "text"))))
       ))
     (photographer
       (scripts
         ((intro theme)
           (cue (format #f "Welcome to the photo walk! The theme is: ~a" theme))
-          (self 'take-photo)
+          (player 'take-photo)
+          ;; Alternative: (this photographer 'take-photo)
         )
         ((take-photo)
           (request "Post your photo here to upload it to the pool.")
-          (self 'take-photo)
+          (any photographer 'take-photo)
         )
       )))
   (enactment
-    (organizer 'pick-a-theme)))
+    (any organizer 'pick-a-theme)))
 ;; ))
 
-(enact photowalk
-  (cast 'organizer telegram "fronx84")
+;; (print-and-run (quote
+(play photowalk
+  (cast 'organizer "fronx84")
   (cast 'photographer telegram "fronx84")
+  (cast 'photographer "other1")
+  (cast 'photographer "other2")
   ;; (cast 'photographer telegram "ruzgarimski")
 )
+;; ))
