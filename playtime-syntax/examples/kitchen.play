@@ -11,12 +11,12 @@
             (if (> (date-hour (current-date)) 8)
               (begin
                 (cue "It's time to wash the dishes")
-                (this cleaner 'another-script)
-                (any cleaner 'another-script)
-                ;; (player 'draw-circle 'blue)
+                (this cleaner another-script)
+                (any cleaner another-script)
+                ;; (player draw-circle 'blue)
                 (request "Confirm here when you're ready")
                 (cast cleaner "Chloe")
-                (any drier 'dry-dish))
+                (any drier dry-dish))
               (cue "Nah… it's not time yet to wash the dishes"))
           )
           ((another-script)
@@ -28,10 +28,10 @@
             (cue "There's dishes to dry!")
             (request "Let me know when you're done")
             (cast drier "Dirk")
-            (any cleaner 'wash-dishes))
+            (any cleaner wash-dishes))
           )))
     (enactment
-      (any cleaner 'wash-dishes)))
+      (any cleaner wash-dishes)))
 ;; ))
 
 ;; (print-and-run (quote
