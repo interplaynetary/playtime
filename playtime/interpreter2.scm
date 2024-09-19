@@ -148,7 +148,7 @@
         (throw 'user-not-found-error (assoc-ref response 'error))
         response)))
 
-;; Example: (cast 'cleaner "Alice")
+;; Example: (cast cleaner "Alice")
 (define-syntax cast
   (lambda (stx)
     (syntax-case stx (telegram)
@@ -156,7 +156,7 @@
        #'(let* ((player-to-cast (get-player player-name))
                 (role-instance (spawn (registry 'get-role 'role-name) player-to-cast)))
            (registry 'register-role-player 'role-name role-instance))]
-      
+
       [(_ role-name telegram telegram-username)
        #'(let ((user (find-user-by-username telegram-username)))
            (if user
