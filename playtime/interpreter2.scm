@@ -9,6 +9,7 @@
   #:use-module (web uri)
   #:use-module (goblins)
   #:use-module (goblins actor-lib methods)
+  #:use-module (fibers conditions)
   #:export (print-and-run)
   #:export (request-text)
   #:export (play)
@@ -63,17 +64,6 @@
             (registry 'register-player player-symbol new-player)
             new-player))))))
 
-;; This is called when a role is defined, not when it is
-;; instantiated. The function returns a lambda that can be
-;; spawned as a Goblins actor via `spawn <role-class> <player>`.
-(define (init-role _name _scripts)
-  (lambda (bcom _player) ;; to be spawned as Goblins actor
-    (extend-methods _scripts
-      ((role-name) _name)
-      ((who) ($ _player 'who))
-      ((cue msg) ($ _player 'cue msg))
-      ((request msg) ($ _player 'request msg)))))
-
 (define-syntax define-player-call
   (syntax-rules ()
     [(define-request-call name transformer)
@@ -87,24 +77,39 @@
             ]))))
     ]))
 
+;; This is called when a role is defined, not when it is
+;; instantiated. The function returns a lambda that can be
+;; spawned as a Goblins actor via `spawn <role-class> <player>`.
+(define (init-role _name _scripts)
+  (lambda (bcom _player) ;; to be spawned as Goblins actor
+    (extend-methods _scripts
+      ((role-name) _name)
+      ((who)         ($ _player 'who))
+      ((cue msg)     (<- _player 'cue msg))
+      ((request msg) (<- _player 'request msg))
+    )))
+
 (define-player-call cue
   (lambda (p msg)
-    ($ p 'cue msg)))
+    (<- p 'cue msg)))
 
 (define-player-call request
-  (lambda (p msg)
-    ($ p 'request msg)))
+  (lambda (p msg handler)
+    (on (<- p 'request msg) handler)))
 
 (define-player-call request-text
-  (lambda (p msg)
-    (assoc-ref ($ p 'request msg) "text")))
+  (lambda (p msg handler)
+    (display (format #f "Requesting text from ~a\n" ($ p 'who)))
+    (on (<- p 'request msg)
+      (lambda (response) (handler (assoc-ref response "text")))
+    )))
 
 (define-syntax player
   (lambda (stx)
     (syntax-case stx ()
       [(_ script-name args ...)
         (with-syntax ([__player (datum->syntax stx '__player)])
-          #'($ __player 'script-name __player args ...))
+          #'(<- __player 'script-name __player args ...))
       ])))
 
 ;; Alternative to 'player', which should be preferred.
@@ -115,7 +120,7 @@
     (syntax-case stx ()
       [(_ role-name script-name args ...)
         (with-syntax ([__player (datum->syntax stx '__player)])
-          #'($ __player 'script-name __player args ...))
+          #'(<- __player 'script-name __player args ...))
       ])))
 
 (define-syntax scripts
@@ -186,11 +191,8 @@
           (display (format #f "No role players found for role: ~a\n" role-name)))
         (for-each
          (lambda (role-player)
-          ;  (display (format #f "Player \"~a\" -> ~a -- ~a\n"
-          ;   ($ role-player 'who)
-          ;   script
-          ;   (append (list role-player script role-player) (or args '()))))
-           (apply $ (append (list role-player script role-player) (or args '()))))
+           (display (format #f "Player \"~a\" -> ~a ~a\n" ($ role-player 'who) script args))
+           (apply <- (append (list role-player script role-player) (or args '()))))
          role-players))))
 
 (define-syntax any
@@ -263,6 +265,8 @@
                 ; (newline)
                 (display "\n~~~ Enactment ~~~\n\n")
                 (the-enactment)
+                ; (define forever (make-condition))
+                ;   (wait forever)
                 (display "~~~ The End ~~~\n")
               )))])))
 

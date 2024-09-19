@@ -182,7 +182,7 @@ bot.on("message:photo", async (ctx) => {
   if (pendingRequests.has(userId)) {
     const { resolve } = pendingRequests.get(userId);
     pendingRequests.delete(userId);
-    resolve({ text: text, photo_file_id: file.file_id });
+    resolve({ text: text, path: path, photo_file_id: file.file_id });
     console.log('Resolved pending request for user:', userId);
   }
 });

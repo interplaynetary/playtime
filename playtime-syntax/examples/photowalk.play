@@ -4,8 +4,9 @@
     (organizer
       (scripts
         ((pick-a-theme)
-          (let ((theme (request-text "Pick a theme for the photo walk")))
-            (every photographer intro theme)))
+          (request-text "Pick a theme for the photo walk"
+            (lambda (theme)
+              (every photographer intro theme))))
       ))
     (photographer
       (scripts
@@ -14,7 +15,13 @@
           (player take-photo) ;; Alternative: (this photographer take-photo)
         )
         ((take-photo)
-          (request "Post your photo here to upload it to the pool.")
+          (request "Post your photo here to upload it to the pool."
+            (lambda (response)
+              (if (assoc-ref response "path")
+                (cue (format #f "Photo uploaded: ~a" (assoc-ref response "path")))
+                (begin
+                  (cue "That's not a photo, is it?")
+                  (player take-photo)))))
           ;; (any photographer take-photo)
         )
       )))
@@ -26,8 +33,8 @@
 (play photowalk
   (cast organizer "fronx84")
   (cast photographer telegram "fronx84")
-  (cast photographer "other1")
-  (cast photographer "other2")
+  ;; (cast photographer "other1")
+  ;; (cast photographer "other2")
   ;; (cast photographer telegram "ruzgarimski")
 )
 ;; ))
