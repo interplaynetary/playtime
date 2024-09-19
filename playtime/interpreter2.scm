@@ -138,16 +138,16 @@
     (syntax-case stx (telegram)
       [(_ role-name player-name)
        #'(let* ((player-to-cast (get-player player-name))
-                (role-instance (spawn (registry 'get-role role-name) player-to-cast)))
-           (registry 'register-role-player role-name role-instance))]
+                (role-instance (spawn (registry 'get-role 'role-name) player-to-cast)))
+           (registry 'register-role-player 'role-name role-instance))]
       
       [(_ role-name telegram telegram-username)
        #'(let ((user (find-user-by-username telegram-username)))
            (if user
               (let* ((player-to-cast (get-player (assoc-ref user "name") (assoc-ref user "id")))
-                  (role-instance (spawn (registry 'get-role role-name) player-to-cast)))
+                  (role-instance (spawn (registry 'get-role 'role-name) player-to-cast)))
                 (begin
-                  (registry 'register-role-player role-name role-instance)
+                  (registry 'register-role-player 'role-name role-instance)
                   (display (format #f "\nTelegram player @~a registered.\n" telegram-username)))
                 )
               (begin
