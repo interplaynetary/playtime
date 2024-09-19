@@ -4,8 +4,8 @@
     (organizer
       (scripts
         ((pick-a-theme)
-          (let ((response (request "Pick a theme for the photo walk")))
-            (any photographer 'intro (assoc-ref response "text"))))
+          (let ((theme (request-text "Pick a theme for the photo walk")))
+            (any photographer 'intro theme)))
       ))
     (photographer
       (scripts

@@ -10,6 +10,7 @@
   #:use-module (goblins)
   #:use-module (goblins actor-lib methods)
   #:export (print-and-run)
+  #:export (request-text)
   #:export (play)
   #:export (cast)
   #:export (player)
@@ -86,6 +87,14 @@
       [(_ msg)
         (with-syntax ([__player (datum->syntax stx '__player)])
           #'($ __player 'request msg))
+      ])))
+
+(define-syntax request-text
+  (lambda (stx)
+    (syntax-case stx ()
+      [(_ prompt)
+        (with-syntax ([__player (datum->syntax stx '__player)])
+          #'(assoc-ref ($ __player 'request prompt) "text"))
       ])))
 
 (define-syntax player
