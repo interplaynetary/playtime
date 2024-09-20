@@ -18,8 +18,16 @@
 
 (define (is-suitable requirements)
   (lambda (player)
-    (every (lambda (req) ($ player 'has-capability? req))
-           requirements)))
+    (let ((missing-requirements
+           (filter (lambda (req) (not ($ player 'has-capability? req)))
+                   requirements)))
+      (if (null? missing-requirements)
+          #t
+          (begin
+            ($ player 'cue
+               (format #f "Oops, you don't currently meet the following requirements for this role: ~a"
+                  missing-requirements))
+            #f)))))
 
 (define registry
   (let ((players (make-hash-table))
