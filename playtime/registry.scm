@@ -16,18 +16,20 @@
          (requires (and role (procedure-property role 'requires))))
     (or requires '())))
 
-(define (is-suitable requirements)
-  (lambda (player)
-    (let ((missing-requirements
+(define (is-suitable role-symbol)
+  (let ((reqs (requirements role-symbol)))
+    (lambda (player)
+      (display (format #f "[~a] Checking requirements ~a for ~a\n" role-symbol reqs ($ player 'who)))
+      (let ((missing-reqs
            (filter (lambda (req) (not ($ player 'has-capability? req)))
-                   requirements)))
-      (if (null? missing-requirements)
+                   reqs)))
+      (if (null? missing-reqs)
           #t
           (begin
             ($ player 'cue
-               (format #f "Oops, you don't currently meet the following requirements for this role: ~a"
-                  missing-requirements))
-            #f)))))
+               (format #f "Oops, you don't currently meet the requirements ~a for the ~a role"
+                  missing-reqs role-symbol))
+            #f))))))
 
 (define registry
   (let ((players (make-hash-table))
@@ -48,15 +50,11 @@
           (hash-set! role-players role-symbol 
             (cons role-instance current-players))))
       ((get-role-players role-symbol)
-        (let* ((all-players (hash-ref role-players role-symbol '()))
-               (role-requirements (requirements role-symbol)))
-          (display (format #f "Checking role requirements for ~a: ~a\n" role-symbol role-requirements))
-          (filter (is-suitable role-requirements) all-players)))
+        (let ((all-players (hash-ref role-players role-symbol '())))
+          (filter (is-suitable role-symbol) all-players)))
       ((get-role-player role-symbol selector)
-        (let* ((role-requirements (requirements role-symbol))
-               (a (display (format #f "Checking role requirements for ~a: ~a\n" role-symbol role-requirements)))
-               (all-players (hash-ref role-players role-symbol '()))
-               (suitable-players (filter (is-suitable role-requirements) all-players)))
+        (let* ((all-players (hash-ref role-players role-symbol '()))
+               (suitable-players (filter (is-suitable role-symbol) all-players)))
           (if (null? suitable-players)
               (begin
                 (display (format #f "No players registered for role ~a who meet the requirements ~a\n" role-symbol role-requirements))
@@ -66,7 +64,7 @@
                  (let* ((selected (car suitable-players))
                         (rotated-list (append (cdr suitable-players) (list selected))))
                    (display (format #f "[any ~a] Selected player: ~a\n" role-symbol ($ selected 'who)))
-                   (display (format #f "[any ~a] Rotated list: ~a\n" role-symbol (player-names rotated-list)))
+                  ;  (display (format #f "[any ~a] Rotated list: ~a\n" role-symbol (player-names rotated-list)))
                    (hash-set! role-players role-symbol rotated-list)
                    (hash-set! last-selected role-symbol selected)
                    selected))
