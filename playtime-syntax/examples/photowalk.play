@@ -1,4 +1,4 @@
-;; (print-and-run (quote
+(print-and-run (quote
 (context photowalk
   (roles
     (organizer
@@ -9,6 +9,7 @@
               (every photographer intro theme))))
       ))
     (photographer
+      (requires 'telegram)
       (scripts
         ((intro theme)
           (cue (format #f "Welcome to the photo walk! The theme is: ~a" theme))
@@ -22,19 +23,18 @@
                 (begin
                   (cue "That's not a photo, is it?")
                   (player take-photo)))))
-          ;; (any photographer take-photo)
         )
       )))
   (enactment
     (any organizer pick-a-theme)))
-;; ))
+))
 
-;; (print-and-run (quote
+(print-and-run (quote
 (play photowalk
-  (cast organizer "fronx84")
-  (cast photographer telegram "fronx84")
-  ;; (cast photographer "other1")
+  (cast organizer "Fronx")
+  (cast photographer "Fronx" (telegram "fronx84"))
+  (cast photographer "other1")
   ;; (cast photographer "other2")
   ;; (cast photographer telegram "ruzgarimski")
 )
-;; ))
+))

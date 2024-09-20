@@ -38,6 +38,9 @@
         (spawn ^telegram-player name telegram-user-id)
         #f))
   (methods
+    ((add-telegram _telegram-user-id)
+      (display (format #f "Adding telegram user id ~a to player ~a\n" _telegram-user-id name))
+      (bcom (^player bcom name _telegram-user-id)))
     ((cue msg) ;; cue the player to do something
       (if telegram-player
           (<- telegram-player 'cue msg)
@@ -59,14 +62,13 @@
                     (else #\-)))
                 (string-trim name))))
 
-(define* (get-player name #:optional telegram-user-id)
+(define* (get-player name)
   (begin
-    ; (display (format #f "Getting player: ~a, ~a\n" name telegram-user-id))
     (let ((player-symbol (normalize-name name)))
       (let ((existing-player (registry 'get-player player-symbol)))
       (if existing-player
           existing-player
-          (let ((new-player (spawn ^player name telegram-user-id)))
+          (let ((new-player (spawn ^player name)))
             (registry 'register-player player-symbol new-player)
             new-player))))))
 
@@ -76,24 +78,20 @@
      (define-syntax name
        (lambda (stx)
         (with-ellipsis :::
-          (syntax-case stx ()
+          (syntax-case stx (script-player)
             [(_ args :::)
-              (with-syntax ([__player (datum->syntax stx '__player)])
-                  #'(transformer __player args :::))
+              (with-syntax ([script-player (datum->syntax stx 'script-player)])
+                  #'(transformer script-player args :::))
             ]))))
     ]))
 
-;; This is called when a role is defined, not when it is
-;; instantiated. The function returns a lambda that can be
-;; spawned as a Goblins actor via `spawn <role-class> <player>`.
-(define (init-role _name _scripts)
-  (lambda (bcom _player) ;; to be spawned as Goblins actor
-    (extend-methods _scripts
-      ((role-name) _name)
-      ((who)         ($ _player 'who))
-      ((cue msg)     (<- _player 'cue msg))
-      ((request msg) (<- _player 'request msg))
-    )))
+; (define-syntax cue
+;   (lambda (stx)
+;     (syntax-case stx ()
+;       [(_ msg)
+;         (with-syntax ([script-player (datum->syntax stx 'script-player)])
+;           #'(<- script-player 'cue msg))
+;       ])))
 
 (define-player-call cue
   (lambda (p msg)
@@ -114,8 +112,8 @@
   (lambda (stx)
     (syntax-case stx ()
       [(_ script-name args ...)
-        (with-syntax ([__player (datum->syntax stx '__player)])
-          #'(<- __player 'script-name __player args ...))
+        (with-syntax ([script-player (datum->syntax stx 'script-player)])
+          #'(<- script-player 'script-name script-player args ...))
       ])))
 
 ;; Alternative to 'player', which should be preferred.
@@ -125,28 +123,11 @@
   (lambda (stx)
     (syntax-case stx ()
       [(_ role-name script-name args ...)
-        (with-syntax ([__player (datum->syntax stx '__player)])
-          #'(<- __player 'script-name __player args ...))
+        (with-syntax ([script-player (datum->syntax stx 'script-player)])
+          #'(<- script-player 'script-name script-player args ...))
       ])))
 
-(define-syntax scripts
-  (lambda (stx)
-    (syntax-case stx (__player)
-      [(_ ((script-name args ...) body ...) ...)
-       (with-syntax ([__player (datum->syntax stx '__player)])
-          #'(begin
-              (methods
-                ;; this is where __player is bound to the player
-                ((script-name __player args ...)
-                  (begin body ...))
-                ...))
-        )]
-      [_ (begin
-           (display "Unexpected syntax in scripts: ")
-           (display (syntax->datum stx))
-           (newline))])))
-
-(define (find-user-by-username username)
+(define (find-user-by-telegram-username username)
   (let ((response (send-http-get
                     (string-append "/find-user-by-username/" (uri-encode username))
                     `())))
@@ -154,29 +135,39 @@
         (throw 'user-not-found-error (assoc-ref response 'error))
         response)))
 
+(define-syntax add-capability
+  (lambda (stx)
+    (syntax-case stx (telegram)
+      [(_ player telegram telegram-username)
+       #'(let* ((user (find-user-by-telegram-username telegram-username))
+                (telegram-user-id (and user (assoc-ref user "id"))))
+          (if telegram-user-id
+            ($ player 'add-telegram telegram-user-id)
+            (display (format #f "\n===> Telegram player @~a not found.\n     Open a chat with ~a and say hi to register.\n\n" 
+              telegram-username "https://t.me/the_playtime_bot")))
+         )])))
+
 ;; Example: (cast cleaner "Alice")
 (define-syntax cast
   (lambda (stx)
-    (syntax-case stx (telegram)
+    (syntax-case stx ()
       [(_ role-name player-name)
-       #'(let* ((player-to-cast (get-player player-name))
-                (role-instance (spawn (registry 'get-role 'role-name) player-to-cast)))
+       #'(let* ((player (get-player player-name))
+                (role-instance (and player (spawn (registry 'get-role 'role-name) player))))
            (registry 'register-role-player 'role-name role-instance))]
+      [(_ role-name player-name (key value) ...)
+       #'(let* ((player (get-player player-name))
+                (role-instance (and player (spawn (registry 'get-role 'role-name) player))))
+           (if role-instance
+             (begin
+               (registry 'register-role-player 'role-name role-instance)
+               (begin
+                 (add-capability player key 'value) ;; key can be e.g. telegram
+                 ...))
+             (error "Player not found:" player-name player)
+          ))]
+    )))
 
-      [(_ role-name telegram telegram-username)
-       #'(let ((user (find-user-by-username telegram-username)))
-           (if user
-              (let* ((player-to-cast (get-player (assoc-ref user "name") (assoc-ref user "id")))
-                  (role-instance (spawn (registry 'get-role 'role-name) player-to-cast)))
-                (begin
-                  (registry 'register-role-player 'role-name role-instance)
-                  (display (format #f "\nTelegram player @~a registered.\n" telegram-username)))
-                )
-              (begin
-                (display (format #f "\n===> Telegram player @~a not found.\n     Open a chat with ~a and say hi to register.\n\n" telegram-username "https://t.me/the_playtime_bot"))
-              )))])))
-
-;; TODO recast
 ; (define-syntax recast
 ;   (lambda (stx)
 ;     (syntax-case stx ()
@@ -211,28 +202,71 @@
     [(every role-name script-name . args)
      (run-role-script 'every 'role-name 'script-name . args)]))
 
-(define-syntax define-role
+; (define-syntax requires
+;   (lambda (stx)
+;     (syntax-case stx ()
+;       [(_ capability ...)
+;         #'(begin
+;             (display (format #f "Role ~a requires ~a\n" 'role-name capability ...))
+;           )])))
+
+(define-syntax scripts
   (lambda (stx)
     (syntax-case stx ()
-      [(_ role-name _scripts)
+      [(_ script-player ((script-name args ...) body ...) ...)
           #'(begin
-              (let ((role-class (init-role 'role-name _scripts)))
-                (registry 'register-role 'role-name role-class))
-            )])))
+              (methods
+                ((script-name script-player args ...)
+                  (begin body ...))
+                ...)
+        )]
+      [_ (begin
+           (display "Unexpected syntax in scripts: ")
+           (display (syntax->datum stx))
+           (newline))])))
+
+;; This is called when a role is defined, not when it is
+;; instantiated. The function returns a lambda that can be
+;; spawned as a Goblins actor via `spawn <role-class> <player>`.
+(define (init-role _name _requires _scripts)
+  (lambda (bcom _player) ;; to be spawned as Goblins actor
+    (extend-methods _scripts
+      ((role-name) _name)
+      ((who)         ($ _player 'who))
+      ((cue msg)     (<- _player 'cue msg))
+      ((request msg) (<- _player 'request msg))
+    )))
+
+(define-syntax define-role
+  (lambda (stx)
+    (syntax-case stx (requires scripts)
+      [(_ script-player role-name (requires _req ...) (scripts _script ...))
+          #'(begin (let ((role-class (init-role 'role-name '() (scripts script-player _script ...))))
+                (registry 'register-role 'role-name role-class)))]
+      [(_ script-player role-name (scripts _script ...) (requires _req ...))
+          #'(begin (let ((role-class (init-role 'role-name '() (scripts script-player _script ...))))
+                (registry 'register-role 'role-name role-class)))]
+      [(_ script-player role-name (scripts _script ...))
+          #'(begin (let ((role-class (init-role 'role-name '() (scripts script-player _script ...))))
+                (registry 'register-role 'role-name role-class)))]
+      [(_ script-player role-name)
+          #'(begin (let ((role-class (init-role 'role-name '() '())))
+                (registry 'register-role 'role-name role-class)))]
+    )))
 
 (define-syntax roles
   (lambda (stx)
     (syntax-case stx ()
-      ;; item = scripts|requires
-      [(_ (role-name a_scripts) ...)
-         #'(begin ;; roles
-             (newline)
-             (display "Roles: ")
-             (newline)
-             (begin ;; each role
-                (display (format #f "  ~a\n" 'role-name))
-                (define-role role-name a_scripts)) ...
-         )]
+      [(_ (role-name role-body ...) ...)
+        (with-syntax ([script-player (datum->syntax stx 'script-player)])
+          #'(begin ;; roles
+              (newline)
+              (display "Roles: ")
+              (newline)
+              (begin ;; each role
+                  (display (format #f "  ~a\n" 'role-name))
+                  (define-role script-player role-name role-body ...)) ...)
+        )]
       [_ (begin
            (display "Unexpected syntax in roles: ")
            (display (syntax->datum stx))
@@ -267,12 +301,8 @@
          #'(call-with-vat context
              (lambda ()
                 (begin body ...)
-                ; (print-role-players)
-                ; (newline)
                 (display "\n~~~ Enactment ~~~\n\n")
                 (the-enactment)
-                ; (define forever (make-condition))
-                ;   (wait forever)
                 (display "~~~ The End ~~~\n")
               )))])))
 
