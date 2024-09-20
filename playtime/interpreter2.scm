@@ -33,13 +33,21 @@
     (eval x (interaction-environment))))
 
 (define* (^player bcom name #:optional [telegram-user-id #f])
+  (define capabilities
+    (make-hash-table))
   (define telegram-player
     (if telegram-user-id
         (spawn ^telegram-player name telegram-user-id)
         #f))
   (methods
+    ((add-capability key value)
+      (display (format #f "Adding capability ~a for player ~a\n" key name))
+      (hash-set! capabilities key value))
+    ((has-capability? key)
+      (hash-ref capabilities key #f))
     ((add-telegram _telegram-user-id)
       (display (format #f "Adding telegram user id ~a to player ~a\n" _telegram-user-id name))
+      (hash-set! capabilities 'telegram #t)
       (bcom (^player bcom name _telegram-user-id)))
     ((cue msg) ;; cue the player to do something
       (if telegram-player
@@ -145,7 +153,10 @@
             ($ player 'add-telegram telegram-user-id)
             (display (format #f "\n===> Telegram player @~a not found.\n     Open a chat with ~a and say hi to register.\n\n" 
               telegram-username "https://t.me/the_playtime_bot")))
-         )])))
+         )]
+      [(_ player key value)
+        #'($ player 'add-capability 'key value)]
+    )))
 
 ;; Example: (cast cleaner "Alice")
 (define-syntax cast
