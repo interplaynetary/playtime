@@ -11,7 +11,7 @@
   #:use-module (goblins actor-lib methods)
   #:use-module (fibers conditions)
   #:export (print-and-run)
-  #:export (request-text)
+  #:export (request-get)
   #:export (play)
   #:export (cast)
   #:export (player)
@@ -99,15 +99,16 @@
     (<- p 'cue msg)))
 
 (define-player-call request
-  (lambda (p msg handler)
-    (on (<- p 'request msg) handler)))
+  (lambda (p msg)
+    (<- p 'request msg)))
 
-(define-player-call request-text
-  (lambda (p msg handler)
+(define-player-call request-get
+  (lambda (p key msg)
     (display (format #f "Requesting text from ~a\n" ($ p 'who)))
     (on (<- p 'request msg)
-      (lambda (response) (handler (assoc-ref response "text")))
-    )))
+      (lambda (response) (assoc-ref response key))
+      #:promise? #t)
+    ))
 
 (define-syntax player
   (lambda (stx)
@@ -303,5 +304,4 @@
                 (begin body ...)
                 (display "\n~~~ Enactment ~~~\n\n")
                 (the-enactment)
-                (display "~~~ The End ~~~\n")
               )))])))

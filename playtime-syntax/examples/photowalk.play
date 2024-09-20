@@ -1,3 +1,5 @@
+(use-modules (goblins))
+
 ;; (print-and-run (quote
 (context photowalk
   (roles
@@ -5,9 +7,9 @@
       (requires 'has-ideas)
       (scripts
         ((pick-a-theme)
-          (request-text "Pick a theme for the photo walk"
-            (lambda (theme)
-              (every photographer intro theme))))
+          (define pick-theme (request-get "text" "Pick a theme for the photo walk"))
+          (on pick-theme (lambda (theme)
+            (every photographer intro theme))))
       ))
     (photographer
       (requires 'telegram)
@@ -17,13 +19,13 @@
           (player take-photo) ;; Alternative: (this photographer take-photo)
         )
         ((take-photo)
-          (request "Post your photo here to upload it to the pool."
-            (lambda (response)
-              (if (assoc-ref response "path")
-                (cue (format #f "Photo uploaded: ~a" (assoc-ref response "path")))
-                (begin
-                  (cue "That's not a photo, is it?")
-                  (player take-photo)))))
+          (define post (request-get "path" "Post your photo here to upload it to the pool."))
+          (on post (lambda (path)
+            (if path
+              (cue (format #f "Photo uploaded: ~a" (path)))
+              (begin
+                (cue "That's not a photo, is it?")
+                (player take-photo)))))
         )
       )))
   (enactment
