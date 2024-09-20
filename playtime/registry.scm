@@ -1,4 +1,5 @@
 (define-module (playtime registry)
+  #:use-module (srfi srfi-1) ;; for `every`
   #:use-module (srfi srfi-13)
   #:use-module (goblins)
   #:use-module (goblins actor-lib methods)
@@ -9,6 +10,16 @@
 
 (define (player-names player-symbols)
   (map (lambda (p) ($ p 'who)) player-symbols))
+
+(define (requirements role-symbol)
+  (let* ((role (registry 'get-role role-symbol))
+         (requires (and role (procedure-property role 'requires))))
+    (or requires '())))
+
+(define (is-suitable requirements)
+  (lambda (player)
+    (every (lambda (req) ($ player 'has-capability? req))
+           requirements)))
 
 (define registry
   (let ((players (make-hash-table))
@@ -29,32 +40,28 @@
           (hash-set! role-players role-symbol 
             (cons role-instance current-players))))
       ((get-role-players role-symbol)
-        (hash-ref role-players role-symbol '()))
+        (let* ((all-players (hash-ref role-players role-symbol '()))
+               (role-requirements (requirements role-symbol)))
+          (display (format #f "Checking role requirements for ~a: ~a\n" role-symbol role-requirements))
+          (filter (is-suitable role-requirements) all-players)))
       ((get-role-player role-symbol selector)
-        (let ((existing-players (hash-ref role-players role-symbol '())))
-          (newline)
-          (if (null? existing-players)
+        (let* ((role-requirements (requirements role-symbol))
+               (a (display (format #f "Checking role requirements for ~a: ~a\n" role-symbol role-requirements)))
+               (all-players (hash-ref role-players role-symbol '()))
+               (suitable-players (filter (is-suitable role-requirements) all-players)))
+          (if (null? suitable-players)
               (begin
-                (display (format #f "No players registered for role ~a\n" role-symbol))
-                #f)  ; Return #f if no players are registered for this role
+                (display (format #f "No players registered for role ~a who meet the requirements ~a\n" role-symbol role-requirements))
+                #f)  ; Return #f if no players meet the requirements
               (case selector
                 ((any)
-                 (let* ((selected (car existing-players))
-                        (rotated-list (append (cdr existing-players) (list selected))))
+                 (let* ((selected (car suitable-players))
+                        (rotated-list (append (cdr suitable-players) (list selected))))
                    (display (format #f "[any ~a] Selected player: ~a\n" role-symbol ($ selected 'who)))
                    (display (format #f "[any ~a] Rotated list: ~a\n" role-symbol (player-names rotated-list)))
                    (hash-set! role-players role-symbol rotated-list)
                    (hash-set! last-selected role-symbol selected)
                    selected))
-                ((this)
-                 (let ((last (hash-ref last-selected role-symbol #f)))
-                   (display (format #f "[this ~a] Select last selected player: ~a\n" 
-                                    role-symbol
-                                    (and last ($ last 'who))))
-                   (or last
-                       (let ((selected (car existing-players)))
-                         (hash-set! last-selected role-symbol selected)
-                         selected))))
                 (else (error "Invalid selector"))))))
       ((roles) roles)
       ((players) players)

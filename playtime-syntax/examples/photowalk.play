@@ -2,6 +2,7 @@
 (context photowalk
   (roles
     (organizer
+      (requires 'has-ideas)
       (scripts
         ((pick-a-theme)
           (request-text "Pick a theme for the photo walk"
@@ -31,8 +32,8 @@
 
 ;; (print-and-run (quote
 (play photowalk
-  (cast organizer "Fronx")
-  (cast photographer "Fronx" (telegram "fronx84") (has-drivers-licence #t))
+  (cast organizer "Fronx" (has-ideas #t))
+  (cast photographer "Fronx" (telegram "fronx84"))
   (cast photographer "other1")
   ;; (cast photographer "other2")
   ;; (cast photographer telegram "ruzgarimski")

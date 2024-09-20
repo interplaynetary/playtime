@@ -32,23 +32,29 @@
     (pretty-print (tree-il->scheme expanded))
     (eval x (interaction-environment))))
 
-(define* (^player bcom name #:optional [telegram-user-id #f])
-  (define capabilities
-    (make-hash-table))
+(define (print-hash hash)
+  (hash-for-each (lambda (key value)
+                  (format #t "  ~a => ~a~%" key value))
+               hash))
+
+(define* (^player bcom name #:optional [telegram-user-id #f] [capabilities (make-hash-table)])
   (define telegram-player
     (if telegram-user-id
         (spawn ^telegram-player name telegram-user-id)
         #f))
   (methods
     ((add-capability key value)
-      (display (format #f "Adding capability ~a for player ~a\n" key name))
-      (hash-set! capabilities key value))
+      ; (display (format #f "Adding capability ~a for player ~a\n" key name))
+      (hash-set! capabilities key value)
+      ; (display (format #f "Capabilities of player ~a:\n" name)) (print-hash capabilities)
+    )
     ((has-capability? key)
       (hash-ref capabilities key #f))
     ((add-telegram _telegram-user-id)
-      (display (format #f "Adding telegram user id ~a to player ~a\n" _telegram-user-id name))
+      ; (display (format #f "Adding telegram user id ~a to player ~a\n" _telegram-user-id name))
       (hash-set! capabilities 'telegram #t)
-      (bcom (^player bcom name _telegram-user-id)))
+      ; (display (format #f "Capabilities of player ~a:\n" name)) (print-hash capabilities)
+      (bcom (^player bcom name _telegram-user-id capabilities)))
     ((cue msg) ;; cue the player to do something
       (if telegram-player
           (<- telegram-player 'cue msg)
@@ -191,17 +197,16 @@
 
 (define (run-role-script selector role-name script . args)
   (let ((role-players (case selector
-                        ((any) (list (registry 'get-role-player role-name 'any)))
+                        ((any) (let ((p (registry 'get-role-player role-name 'any)))
+                                 (if p (list p) '())))
                         ((every) (registry 'get-role-players role-name))
                         (else (error "Invalid selector for run-role-script")))))
-    (if (null? role-players)
-        (begin
-          (display (format #f "No role players found for role: ~a\n" role-name)))
-        (for-each
-         (lambda (role-player)
-           (display (format #f "Player \"~a\" -> ~a ~a\n" ($ role-player 'who) script args))
-           (apply <- (append (list role-player script role-player) (or args '()))))
-         role-players))))
+    (if (not (null? role-players))
+      (for-each
+        (lambda (role-player)
+          (display (format #f "Player \"~a\" -> ~a ~a\n" ($ role-player 'who) script args))
+          (apply <- (append (list role-player script role-player) (or args '()))))
+        role-players))))
 
 (define-syntax any
   (syntax-rules ()
@@ -238,31 +243,36 @@
 
 ;; This is called when a role is defined, not when it is
 ;; instantiated. The function returns a lambda that can be
-;; spawned as a Goblins actor via `spawn <role-class> <player>`.
+;; spawned as a Goblins actor via `spawn <^role> <player>`.
 (define (init-role _name _requires _scripts)
-  (lambda (bcom _player) ;; to be spawned as Goblins actor
-    (extend-methods _scripts
-      ((role-name) _name)
-      ((who)         ($ _player 'who))
-      ((cue msg)     (<- _player 'cue msg))
-      ((request msg) (<- _player 'request msg))
-    )))
+  (let ((^role
+          (lambda (bcom _player) ;; to be spawned as Goblins actor
+            (extend-methods _scripts
+              ((role-name) _name)
+              ((who)         ($ _player 'who))
+              ((cue msg)     (<- _player 'cue msg))
+              ((request msg) (<- _player 'request msg))
+              ((has-capability? key) ($ _player 'has-capability? key))
+            ))))
+    (display (format #f "Init role ~a with requires: ~a\n" _name _requires))
+    (set-procedure-property! ^role 'requires _requires)
+    ^role))
 
 (define-syntax define-role
   (lambda (stx)
     (syntax-case stx (requires scripts)
       [(_ script-player role-name (requires _req ...) (scripts _script ...))
-          #'(begin (let ((role-class (init-role 'role-name '() (scripts script-player _script ...))))
-                (registry 'register-role 'role-name role-class)))]
+          #`(begin (let ((^role (init-role 'role-name `(,_req ...) (scripts script-player _script ...))))
+                (registry 'register-role 'role-name ^role)))]
       [(_ script-player role-name (scripts _script ...) (requires _req ...))
-          #'(begin (let ((role-class (init-role 'role-name '() (scripts script-player _script ...))))
-                (registry 'register-role 'role-name role-class)))]
+          #`(begin (let ((^role (init-role 'role-name `(,_req ...) (scripts script-player _script ...))))
+                (registry 'register-role 'role-name ^role)))]
       [(_ script-player role-name (scripts _script ...))
-          #'(begin (let ((role-class (init-role 'role-name '() (scripts script-player _script ...))))
-                (registry 'register-role 'role-name role-class)))]
+          #`(begin (let ((^role (init-role 'role-name '() (scripts script-player _script ...))))
+                (registry 'register-role 'role-name ^role)))]
       [(_ script-player role-name)
-          #'(begin (let ((role-class (init-role 'role-name '() '())))
-                (registry 'register-role 'role-name role-class)))]
+          #`(begin (let ((^role (init-role 'role-name '() '())))
+                (registry 'register-role 'role-name ^role)))]
     )))
 
 (define-syntax roles
