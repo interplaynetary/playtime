@@ -44,16 +44,11 @@
         #f))
   (methods
     ((add-capability key value)
-      ; (display (format #f "Adding capability ~a for player ~a\n" key name))
-      (hash-set! capabilities key value)
-      ; (display (format #f "Capabilities of player ~a:\n" name)) (print-hash capabilities)
-    )
+      (hash-set! capabilities key value))
     ((has-capability? key)
       (hash-ref capabilities key #f))
     ((add-telegram _telegram-user-id)
-      ; (display (format #f "Adding telegram user id ~a to player ~a\n" _telegram-user-id name))
       (hash-set! capabilities 'telegram #t)
-      ; (display (format #f "Capabilities of player ~a:\n" name)) (print-hash capabilities)
       (bcom (^player bcom name _telegram-user-id capabilities)))
     ((cue msg) ;; cue the player to do something
       (if telegram-player
@@ -98,14 +93,6 @@
                   #'(transformer script-player args :::))
             ]))))
     ]))
-
-; (define-syntax cue
-;   (lambda (stx)
-;     (syntax-case stx ()
-;       [(_ msg)
-;         (with-syntax ([script-player (datum->syntax stx 'script-player)])
-;           #'(<- script-player 'cue msg))
-;       ])))
 
 (define-player-call cue
   (lambda (p msg)
@@ -218,14 +205,6 @@
     [(every role-name script-name . args)
      (run-role-script 'every 'role-name 'script-name . args)]))
 
-; (define-syntax requires
-;   (lambda (stx)
-;     (syntax-case stx ()
-;       [(_ capability ...)
-;         #'(begin
-;             (display (format #f "Role ~a requires ~a\n" 'role-name capability ...))
-;           )])))
-
 (define-syntax scripts
   (lambda (stx)
     (syntax-case stx ()
@@ -326,10 +305,3 @@
                 (the-enactment)
                 (display "~~~ The End ~~~\n")
               )))])))
-
-(define (print-role-players)
-  (display "Current script table:\n")
-  (hash-for-each
-   (lambda (key value)
-     (format #t "  ~a: ~a\n" key value))
-     (registry 'role-players)))
