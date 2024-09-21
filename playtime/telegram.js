@@ -31,7 +31,7 @@ const menuContexts = new Menu("contexts-menu")
   .text("Photowalk", (ctx) => startContext(ctx, "photowalk"));
 
 const startContext = (ctx, context) => {
-  if (runningContexts.has(context)) {
+  if (Contexts.getRunning().has(context)) {
     ctx.reply(`Context ${context} is already running.`);
     return;
   } else {
@@ -132,7 +132,7 @@ app.get('/find-user-by-username/:username', (req, res) => {
   const { username } = req.params;
   // console.log(`Searching for user with username: ${username}`);
 
-  const user = users.get(username);
+  const user = Users.get(username);
   if (user) {
     // console.log(`User found: ${JSON.stringify(user)}`);
     res.json(user);
@@ -198,7 +198,7 @@ app.post('/terminate-context', (req, res) => {
 
 // Add an endpoint to list running contexts
 app.get('/list-contexts', (req, res) => {
-  const contexts = Array.from(runningContexts.keys());
+  const contexts = Array.from(Contexts.getRunning().keys());
   res.status(200).json({ runningContexts: contexts });
 });
 

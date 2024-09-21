@@ -43,7 +43,12 @@ function checkAndAdd(userId, name, username) {
   }
 }
 
+function get(username) {
+  return users.get(username);
+}
+
 module.exports = {
   load,
+  get,
   checkAndAdd
 };
