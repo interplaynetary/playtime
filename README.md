@@ -27,11 +27,7 @@ First, start the JS server (it runs the telegram bot):
 node playtime/telegram.js
 ```
 
-Then start one of the plays (e.g. the kitchen play):
-
-```
-guile --fresh-auto-compile  -s playtime.scm playtime-syntax/examples/kitchen.play
-```
+The server has its own CLI for starting and stopping contexts and for interacting with them.
 
 ## Install Guile on Mac
 
