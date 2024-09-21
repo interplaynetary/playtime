@@ -202,8 +202,9 @@
                                  (if p (list p) '())))
                         ((every) (registry 'get-role-players role-name))
                         (else (error "Invalid selector for run-role-script")))))
-    (if (not (null? role-players))
-      (for-each
+    (if (null? role-players)
+      '()
+      (map
         (lambda (role-player)
           ; (display (format #f "Player \"~a\" -> ~a ~a\n" ($ role-player 'who) script args))
           (apply <- (append (list role-player script role-player) (or args '()))))

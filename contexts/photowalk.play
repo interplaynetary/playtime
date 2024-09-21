@@ -1,4 +1,6 @@
-(use-modules (goblins))
+(use-modules
+  (goblins)
+  (goblins actor-lib joiners))
 
 ;; (print-and-run (quote
 (context photowalk
@@ -9,7 +11,9 @@
         ((pick-a-theme)
           (define pick-theme (request-get "text" "Pick a theme for the photo walk"))
           (on pick-theme (lambda (theme)
-            (every photographer intro theme))))
+            (on (all-of* (every photographer intro theme))
+              (lambda (photos)
+                (cue "All photographers have uploaded their photos"))))))
       ))
     (photographer
       (requires 'telegram)
@@ -22,7 +26,7 @@
           (define post (request-get "path" "Post your photo here to upload it to the pool."))
           (on post (lambda (path)
             (if path
-              (cue (format #f "Photo uploaded: ~a" (path)))
+              (cue (format #f "Photo uploaded: ~a" path))
               (begin
                 (cue "That's not a photo, is it?")
                 (player take-photo)))))
