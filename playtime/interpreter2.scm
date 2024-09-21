@@ -5,6 +5,7 @@
   #:use-module (srfi srfi-19)
   #:use-module (ice-9 readline)
   #:use-module (ice-9 pretty-print)
+  #:use-module (ice-9 textual-ports)
   #:use-module (language tree-il)
   #:use-module (web uri)
   #:use-module (goblins)
@@ -33,6 +34,12 @@
 
 (activate-readline)
 
+(define (display-flush . args)
+  (for-each (lambda (arg)
+              (display arg)
+              (force-output (current-output-port)))
+            args))
+
 (define (print-and-run x)
   (let ((expanded (macroexpand x)))
     (pretty-print (tree-il->scheme expanded))
@@ -59,7 +66,7 @@
     ((cue msg) ;; cue the player to do something
       (if telegram-player
           (<- telegram-player 'cue msg)
-          (display (format #f "Hey ~a! ~a\n" name msg))))
+          (display-flush (format #f "Hey ~a! ~a\n" name msg))))
     ((request msg) ;; request input from the player
       (if telegram-player
           (<- telegram-player 'request msg)

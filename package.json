@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@grammyjs/files": "^1.1.1",
+    "@grammyjs/menu": "github:grammyjs/menu",
     "csv-parser": "^3.0.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
