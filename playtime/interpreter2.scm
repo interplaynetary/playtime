@@ -8,6 +8,7 @@
   #:use-module (language tree-il)
   #:use-module (web uri)
   #:use-module (goblins)
+  #:use-module (goblins actor-lib cell)
   #:use-module (goblins actor-lib methods)
   #:use-module (fibers conditions)
   #:export (print-and-run)
@@ -23,6 +24,7 @@
   #:export (context)
   #:export (enactment)
   #:export (roles)
+  #:export (state)
   #:export (scripts))
 
 (activate-readline)
@@ -284,15 +286,39 @@
               ...
             ))))))
 
+(define-syntax state
+  (lambda (stx)
+    (syntax-case stx ()
+      [(_ (name initial-value) ...)
+       (with-syntax ([state-map (datum->syntax stx 'state-map)])
+         #'(begin
+             (begin
+               (registry 'set-state 'name initial-value)
+               (display (format #f "Initialized state ~a = ~a\n" 'name initial-value))
+             ) ...
+           ))])))
+
 (define-syntax context
   (lambda (stx)
     (syntax-case stx ()
-      ;; context-item = enactment|roles
+      ;; context-item = enactment|roles|state
       [(_ name context-item ...)
           #'(begin
               (define name (spawn-vat))
               context-item ...
             )])))
+
+(define-syntax init-state
+  (lambda (stx)
+    (syntax-case stx ()
+      [(_ name value)
+        #'(define name (spawn ^cell value))])))
+
+(define (init-states)
+  (hash-for-each
+    (lambda (key value)
+      (eval `(define ,key ,value) (interaction-environment)))
+    (registry 'states)))
 
 (define-syntax play
   (lambda (stx)
@@ -301,6 +327,7 @@
        (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
          #'(call-with-vat context
              (lambda ()
+                (init-states)
                 (begin body ...)
                 (display "\n~~~ Enactment ~~~\n\n")
                 (the-enactment)

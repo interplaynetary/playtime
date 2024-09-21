@@ -1,41 +1,39 @@
 (use-modules
+  (goblins)
   (srfi srfi-19)) ;; for date-hour
 
-;; (print-and-run (quote
+(print-and-run (quote
   (context kitchen
-    ;; (variables timeframe number-of-dishes)
+    (state
+      (ndishes 10))
     (roles
       (cleaner
         (scripts
           ((wash-dishes)
-            (if (> (date-hour (current-date)) 8)
+            (if (> ndishes 0)
               (begin
                 (cue "It's time to wash the dishes")
-                (this cleaner another-script)
-                (any cleaner another-script)
-                ;; (player draw-circle 'blue)
-                (request "Confirm here when you're ready")
-                (cast cleaner "Chloe")
-                (any drier dry-dish))
-              (cue "Nah… it's not time yet to wash the dishes"))
+                (on (request "Confirm here when you're ready")
+                  (lambda (response)
+                    (any drier dry-dish))))
+              (cue "Dishes are all done!"))
           )
-          ((another-script)
-            (cue "Another script!\n"))
         ))
       (drier
         (scripts
           ((dry-dish)
             (cue "There's dishes to dry!")
-            (request "Let me know when you're done")
-            (cast drier "Dirk")
-            (any cleaner wash-dishes))
-          )))
+            (on (request "Let me know when you're done")
+              (lambda (response)
+                (any cleaner wash-dishes)))
+          ))))
     (enactment
       (any cleaner wash-dishes)))
-;; ))
+))
 
-;; (print-and-run (quote
+(print-and-run (quote
   (play kitchen
-    (cast cleaner telegram "fronx84")
+    ;; (state ndishes 10)
+    (cast cleaner "Fronx")
     (cast drier "Bob"))
-;; ))
+))

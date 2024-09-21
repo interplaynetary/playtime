@@ -35,8 +35,14 @@
   (let ((players (make-hash-table))
         (roles (make-hash-table))
         (role-players (make-hash-table)) ;; role-name -> list of spawned role players
-        (last-selected (make-hash-table)))
+        (last-selected (make-hash-table))
+        (states (make-hash-table)))
     (methods
+      ((set-state key value)
+        (hash-set! states key value))
+      ((get-state key)
+        (hash-ref states key #f))
+      ((states) states)
       ((register-player symbol actor)
         (hash-set! players symbol actor))
       ((get-player symbol)
