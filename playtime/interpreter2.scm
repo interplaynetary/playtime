@@ -13,6 +13,7 @@
   #:use-module (fibers conditions)
   #:export (print-and-run)
   #:export (request-get)
+  #:export (get)
   #:export (play)
   #:export (cast)
   #:export (player)
@@ -306,6 +307,15 @@
               context-item ...
             )])))
 
+(define-syntax get
+  (lambda (stx)
+    (syntax-case stx ()
+      [(_ key)
+        #'(let ((cell (registry 'get-state 'key)))
+            (if cell
+              ($ cell)
+              (error "State not found:" 'key)))])))
+
 (define-syntax init-states
   (lambda (stx)
     (syntax-case stx ()
@@ -322,18 +332,11 @@
   (lambda (stx)
     (syntax-case stx ()
       [(_ context body ...)
-       (let* ((states (registry 'states))
-              (state-keys (hash-map->list (lambda (k v) k) states)))
-         (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)]
-                       [(state-vars ...) (map (lambda (key) (datum->syntax stx key)) state-keys)]
-                       [(state-lookups ...) (map (lambda (key) 
-                                                   (registry 'get-state key))
-                                                 state-keys)]
-                       [state-initers (datum->syntax stx (hash-table->pairs (registry 'states)))])
-           #`(call-with-vat context
+        (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)]
+                      [state-initers (datum->syntax stx (hash-table->pairs (registry 'states)))])
+           #'(call-with-vat context
                (lambda ()
-                 (init-states state-initers)
-                 (with-syntax ([state-vars state-lookups] ...)
-                   (begin body ...
-                          (display "\n~~~ Enactment ~~~\n\n")
-                          (the-enactment)))))))])))
+                  (init-states state-initers)
+                  (begin body ...
+                    (display "\n~~~ Enactment ~~~\n\n")
+                    (the-enactment)))))])))

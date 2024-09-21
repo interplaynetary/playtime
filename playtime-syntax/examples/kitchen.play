@@ -2,15 +2,15 @@
   (goblins)
   (srfi srfi-19)) ;; for date-hour
 
-(print-and-run (quote
+;; (print-and-run (quote
   (context kitchen
     (state
-      (ndishes 10))
+      (ndishes 11))
     (roles
       (cleaner
         (scripts
           ((wash-dishes)
-            (if (> ndishes 0)
+            (if (> (get ndishes) 0)
               (begin
                 (cue "It's time to wash the dishes")
                 (on (request "Confirm here when you're ready")
@@ -29,11 +29,10 @@
           ))))
     (enactment
       (any cleaner wash-dishes)))
-))
+;; ))
 
 (print-and-run (quote
   (play kitchen
-    ;; (state ndishes 10)
     (cast cleaner "Fronx")
     (cast drier "Bob"))
 ))
