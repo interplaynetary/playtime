@@ -19,7 +19,7 @@
 (define (is-suitable role-symbol)
   (let ((reqs (requirements role-symbol)))
     (lambda (player)
-      (display (format #f "[~a] Checking requirements ~a for ~a\n" role-symbol reqs ($ player 'who)))
+      ; (display (format #f "[~a] Checking requirements ~a for ~a\n" role-symbol reqs ($ player 'who)))
       (let ((missing-reqs
            (filter (lambda (req) (not ($ player 'has-capability? req)))
                    reqs)))
@@ -69,7 +69,7 @@
                 ((any)
                  (let* ((selected (car suitable-players))
                         (rotated-list (append (cdr suitable-players) (list selected))))
-                   (display (format #f "[any ~a] Selected player: ~a\n" role-symbol ($ selected 'who)))
+                  ;  (display (format #f "[any ~a] Selected player: ~a\n" role-symbol ($ selected 'who)))
                   ;  (display (format #f "[any ~a] Rotated list: ~a\n" role-symbol (player-names rotated-list)))
                    (hash-set! role-players role-symbol rotated-list)
                    (hash-set! last-selected role-symbol selected)

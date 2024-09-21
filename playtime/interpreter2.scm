@@ -14,6 +14,9 @@
   #:export (print-and-run)
   #:export (request-get)
   #:export (get)
+  #:export (set)
+  #:export (inc)
+  #:export (dec)
   #:export (play)
   #:export (cast)
   #:export (player)
@@ -195,7 +198,7 @@
     (if (not (null? role-players))
       (for-each
         (lambda (role-player)
-          (display (format #f "Player \"~a\" -> ~a ~a\n" ($ role-player 'who) script args))
+          ; (display (format #f "Player \"~a\" -> ~a ~a\n" ($ role-player 'who) script args))
           (apply <- (append (list role-player script role-player) (or args '()))))
         role-players))))
 
@@ -293,8 +296,8 @@
       [(_ (name initial-value) ...)
        (with-syntax ([state-map (datum->syntax stx 'state-map)])
          #'(begin
-              (registry 'set-state 'name initial-value)
-              ...
+              (registry 'set-state 'name initial-value) ...
+              (display "[state] ")(print-hash (registry 'states))
            ))])))
 
 (define-syntax context
@@ -311,32 +314,40 @@
   (lambda (stx)
     (syntax-case stx ()
       [(_ key)
-        #'(let ((cell (registry 'get-state 'key)))
-            (if cell
-              ($ cell)
-              (error "State not found:" 'key)))])))
+        #'($ (registry 'get-state 'key))])))
 
-(define-syntax init-states
+(define-syntax set
   (lambda (stx)
     (syntax-case stx ()
-      [(_ ((key value) ...))
-        #'(begin
-            (registry 'set-state 'key (spawn ^cell value))
-            ...)
-      ])))
+      [(_ key value)
+        #'($ (registry 'get-state 'key) value)])))
 
-(define (hash-table->pairs hash-table)
-  (hash-map->list (lambda (key value) (list key value)) hash-table))
+(define-syntax inc
+  (lambda (stx)
+    (syntax-case stx ()
+      [(_ key)
+       #'(set key (+ (get key) 1))])))
+
+(define-syntax dec
+  (lambda (stx)
+    (syntax-case stx ()
+      [(_ key)
+       #'(set key (- (get key) 1))])))
+
+(define (init-states)
+  (hash-for-each
+    (lambda (key value)
+      (registry 'set-state key (spawn ^cell value)))
+    (registry 'states)))
 
 (define-syntax play
   (lambda (stx)
     (syntax-case stx ()
       [(_ context body ...)
-        (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)]
-                      [state-initers (datum->syntax stx (hash-table->pairs (registry 'states)))])
+        (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
            #'(call-with-vat context
                (lambda ()
-                  (init-states state-initers)
+                  (init-states)
                   (begin body ...
                     (display "\n~~~ Enactment ~~~\n\n")
                     (the-enactment)))))])))
