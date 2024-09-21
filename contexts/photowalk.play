@@ -34,8 +34,10 @@
 
 ;; (print-and-run (quote
 (play photowalk
+  ;; TODO The same name for different roles should still
+  ;; lead to unique players!
   (cast organizer "Fronx" (has-ideas #t))
-  (cast photographer "Fronx" (telegram "fronx84"))
+  (cast photographer "fronx84" (telegram "fronx84"))
   (cast photographer "other1")
   (cast photographer "other2")
   ;; (cast photographer telegram "ruzgarimski")
