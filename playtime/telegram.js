@@ -1,211 +1,25 @@
+require('dotenv').config();
+
 const { Bot } = require("grammy");
 const { hydrateFiles } = require("@grammyjs/files");
 const { Menu } = require("@grammyjs/menu");
-const { spawn } = require('child_process');
-const readline = require('readline');
 
 const express = require('express');
-const fs = require('fs');
+
 const path = require('path');
-const csv = require('csv-parser');
-const fastcsv = require('fast-csv');
-require('dotenv').config();
+const requireRelative = (modulePath) => require(path.join(__dirname, modulePath));
 
-// -- User database -----------------------------------
+const Users = requireRelative('users.js');
+Users.load();
 
-const users = new Map();
-const USER_DB_FILE = 'users.csv';
-
-function ensureUserDBExists() {
-  if (!fs.existsSync(USER_DB_FILE)) {
-    fs.writeFileSync(USER_DB_FILE, 'username,id,name');
-    console.log('Created new users.csv file');
-  }
-}
-
-function loadUsers() {
-  ensureUserDBExists();
-  fs.createReadStream(USER_DB_FILE)
-    .pipe(csv())
-    .on('data', (row) => {
-      users.set(row.username, { username: row.username, id: row.id, name: row.name });
-    })
-    .on('end', () => {
-      console.log('Users loaded from CSV file');
-    });
-}
-
-function saveUser(user) {
-  const writer = fcreateWriteStream(USER_DB_FILE, { flags: 'a' });
-  writer.write('\n'); // Add a new line before writing the new user
-  fastcsv.write([user], { headers: false }).pipe(writer);
-}
-
-function checkAndAddUser(userId, name, username) {
-  if (!username) {
-    console.log('User has no username, skipping database entry');
-    return;
-  }
-  if (!users.has(username)) {
-    const newUser = { username, id: userId, name };
-    users.set(username, newUser);
-    saveUser(newUser);
-    console.log('New user added:', newUser);
-  }
-}
-
-loadUsers();
-
-// --- Context management ------------------------------
-
-const runningContexts = new Map();
-let activeContext = null;
-
-function __startContext(context) {
-  if (runningContexts.has(context)) {
-    console.log(`Context ${context} is already running.`);
-    return;
-  }
-
-  console.log(`Starting context: ${context}`);
-  const contextProcess = spawn('guile', ['--fresh-auto-compile', '-s', 'playtime.scm', `contexts/${context}.play`]);
-
-  contextProcess.stdout.setEncoding('utf8');
-  contextProcess.stdout.on('data', (data) => {
-    console.log(`[${context}] ${data.toString().trim()}`);
-  });
-
-  contextProcess.stderr.on('data', (data) => {
-    console.error(`[${context}] stderr: ${data}`);
-  });
-
-  contextProcess.on('close', (code) => {
-    console.log(`[${context}] process exited with code ${code}`);
-    runningContexts.delete(context);
-    if (activeContext === context) {
-      activeContext = null;
-    }
-  });
-
-  runningContexts.set(context, contextProcess);
-  setActiveContext(context);
-}
-
-function __terminateContext(context) {
-  if (runningContexts.has(context)) {
-    console.log(`Terminating context: ${context}`);
-    runningContexts.get(context).kill();
-    runningContexts.delete(context);
-  } else {
-    console.log(`Context ${context} is not running`);
-  }
-}
-
-function __terminateAllContexts() {
-  console.log('Terminating all contexts');
-  for (const [context, process] of runningContexts) {
-    process.kill();
-    console.log(`Terminated context: ${context}`);
-  }
-  runningContexts.clear();
-}
-
-function setActiveContext(context) {
-  if (runningContexts.has(context)) {
-    activeContext = context;
-    console.log(`Active context set to: ${context}`);
-  } else {
-    console.log(`Context ${context} is not running`);
-  }
-}
-
-// --- I/O ----------------------------------------------
-
+const Contexts = requireRelative('contexts.js');
+const readline = require('readline');
+const CLI = requireRelative('cli.js');
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
-
-rl.on('line', async (input) => {
-  if (input.startsWith('/')) {
-    // Command mode
-    const [command, ...args] = input.slice(1).split(' ');
-    switch (command) {
-      case 'start':
-        if (args.length > 0) {
-          __startContext(args[0]);
-        } else {
-          console.log('Usage: /start <context>');
-        }
-        break;
-      case 'stop':
-        if (args.length > 0) {
-          __terminateContext(args[0]);
-        } else if (activeContext) {
-          __terminateContext(activeContext);
-          console.log(`Stopped active context: ${activeContext}`);
-          activeContext = null;
-        } else {
-          console.log('No active context to stop. Usage: /stop [context]');
-        }
-        break;
-      case 'list':
-        console.log('Running contexts:', Array.from(runningContexts.keys()));
-        break;
-      case 'active':
-        if (args.length > 0) {
-          setActiveContext(args[0]);
-        } else {
-          console.log('Active context:', activeContext || 'None');
-        }
-        break;
-      case 'index':
-        const availableContexts = await listAvailableContexts();
-        if (availableContexts.length > 0) {
-          console.log('Available contexts:');
-          availableContexts.forEach(context => console.log(`- ${context}`));
-        } else {
-          console.log('No available contexts found.');
-        }
-        break;
-      default:
-        console.log('Unknown command');
-    }
-  } else if (activeContext) {
-    // Send input to active context
-    const contextProcess = runningContexts.get(activeContext);
-    if (contextProcess) {
-      contextProcess.stdin.write(input + '\n');
-    }
-  } else {
-    console.log('No active context. Use /active <context> to set an active context.');
-  }
-});
-
-async function listAvailableContexts() {
-  try {
-    const files = await fs.promises.readdir('contexts');
-    const playFiles = files.filter(file => file.endsWith('.play'));
-    const contexts = playFiles.map(file => path.basename(file, '.play'));
-    return contexts;
-  } catch (error) {
-    console.error('Error reading contexts directory:', error);
-    return [];
-  }
-}
-
-function printInstructions() {
-  console.log('\n--- Playtime Context Manager ---');
-  console.log('Available commands:');
-  console.log('/index            - List all available context files');
-  console.log('/start <context>  - Start a new context');
-  console.log('/stop [context]   - Stop a running context (stops active context if no argument given)');
-  console.log('/list             - List all running contexts');
-  console.log('/active [context] - Set or display the active context');
-  console.log('');
-  console.log('To interact with the active context, simply type your input.');
-  console.log('-----------------------------------\n');
-}
+CLI.init(rl, Contexts);
 
 // --- Telegram bot -------------------------------------
 
@@ -222,7 +36,7 @@ const startContext = (ctx, context) => {
     return;
   } else {
     ctx.reply("Starting context: " + context);
-    __startContext(context);
+    Contexts.start(context);
   }
 }
 
@@ -243,7 +57,7 @@ bot.on("message:text", async (ctx) => {
   const userId = ctx.message.from.id.toString();
   const name = `${ctx.message.from.first_name} ${ctx.message.from.last_name || ''}`.trim();
   const username = ctx.message.from.username || '';
-  checkAndAddUser(userId, name, username);
+  Users.checkAndAdd(userId, name, username);
 
   const text = ctx.message.text;
   console.log('Received message from Telegram:', { userId, text, username });
@@ -263,7 +77,7 @@ bot.on("message:photo", async (ctx) => {
   const userId = ctx.message.from.id.toString();
   const name = `${ctx.message.from.first_name} ${ctx.message.from.last_name || ''}`.trim();
   const username = ctx.message.from.username || '';
-  checkAndAddUser(userId, name, username);
+  Users.checkAndAdd(userId, name, username);
 
   const text = ctx.message.caption;
   console.log('Received photo message from Telegram:', { userId, text, username });
@@ -374,10 +188,10 @@ app.post('/request-input', async (req, res) => {
 app.post('/terminate-context', (req, res) => {
   const { context } = req.body;
   if (context) {
-    __terminateContext(context);
+    Contexts.terminate(context);
     res.status(200).json({ message: `Context ${context} terminated` });
   } else {
-    __terminateAllContexts();
+    Contexts.terminateAll();
     res.status(200).json({ message: 'All contexts terminated' });
   }
 });
@@ -393,7 +207,7 @@ app.get('/list-contexts', (req, res) => {
 // Start the Express server
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
-  printInstructions();
+  CLI.printInstructions();
 });
 
 // Start the bot (using long polling)
