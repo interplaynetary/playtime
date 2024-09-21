@@ -35,6 +35,9 @@
 			"end": "\\)",
 			"patterns": [
 				{
+					"include": "#state"
+				},
+				{
 					"include": "#roles"
 				},
 				{
@@ -59,6 +62,24 @@
 				}
 			],
 			"end": "\\)"
+		},
+		"state": {
+			"name": "meta.state.playtime",
+			"begin": "\\(\\s*(state)\\s*",
+			"beginCaptures": {
+				"1": {
+					"name": "keyword.control.playtime"
+				}
+			},
+			"end": "\\)",
+			"patterns": [
+				{
+					"include": "#comment"
+				},
+				{
+					"include": "source.scheme"
+				}
+			]
 		},
 		"roles": {
 			"name": "meta.roles.playtime",
