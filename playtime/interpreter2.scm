@@ -292,10 +292,8 @@
       [(_ (name initial-value) ...)
        (with-syntax ([state-map (datum->syntax stx 'state-map)])
          #'(begin
-             (begin
-               (registry 'set-state 'name initial-value)
-               (display (format #f "Initialized state ~a = ~a\n" 'name initial-value))
-             ) ...
+              (registry 'set-state 'name initial-value)
+              ...
            ))])))
 
 (define-syntax context
@@ -308,27 +306,34 @@
               context-item ...
             )])))
 
-(define-syntax init-state
+(define-syntax init-states
   (lambda (stx)
     (syntax-case stx ()
-      [(_ name value)
-        #'(define name (spawn ^cell value))])))
+      [(_ ((key value) ...))
+        #'(begin
+            (registry 'set-state 'key (spawn ^cell value))
+            ...)
+      ])))
 
-(define (init-states)
-  (hash-for-each
-    (lambda (key value)
-      (eval `(define ,key ,value) (interaction-environment)))
-    (registry 'states)))
+(define (hash-table->pairs hash-table)
+  (hash-map->list (lambda (key value) (list key value)) hash-table))
 
 (define-syntax play
   (lambda (stx)
     (syntax-case stx ()
       [(_ context body ...)
-       (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
-         #'(call-with-vat context
-             (lambda ()
-                (init-states)
-                (begin body ...)
-                (display "\n~~~ Enactment ~~~\n\n")
-                (the-enactment)
-              )))])))
+       (let* ((states (registry 'states))
+              (state-keys (hash-map->list (lambda (k v) k) states)))
+         (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)]
+                       [(state-vars ...) (map (lambda (key) (datum->syntax stx key)) state-keys)]
+                       [(state-lookups ...) (map (lambda (key) 
+                                                   (registry 'get-state key))
+                                                 state-keys)]
+                       [state-initers (datum->syntax stx (hash-table->pairs (registry 'states)))])
+           #`(call-with-vat context
+               (lambda ()
+                 (init-states state-initers)
+                 (with-syntax ([state-vars state-lookups] ...)
+                   (begin body ...
+                          (display "\n~~~ Enactment ~~~\n\n")
+                          (the-enactment)))))))])))
