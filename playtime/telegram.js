@@ -13,13 +13,8 @@ const Users = requireRelative('users.js');
 Users.load();
 
 const Contexts = requireRelative('contexts.js');
-const readline = require('readline');
 const CLI = requireRelative('cli.js');
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-CLI.init(rl, Contexts);
+CLI.init(Contexts);
 
 // --- Telegram bot -------------------------------------
 
@@ -49,10 +44,16 @@ bot.command("menu", async (ctx) => {
 
 bot.command("start", async (ctx) => {
   const args = ctx.message.text.split(' ');
-  if (args.length > 1) {
+  if (args.length == 2) {
     const contextName = args[1].toLowerCase();
     const user = Users.register(ctx);
-    Contexts.deliverPlayerMessage(contextName, user.username, `start`);
+    try {
+      let response = await Contexts.deliverPlayerMessage(contextName, user.username, `start`);
+      await ctx.reply(response);
+    } catch (error) {
+      console.error(error.message);
+      await ctx.reply(error.message);
+    }
   } else {
     await ctx.reply("Usage: /start <context-name>");
   }

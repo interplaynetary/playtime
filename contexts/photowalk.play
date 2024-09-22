@@ -41,6 +41,7 @@
   ;; TODO The same name for different roles should still
   ;; lead to unique players!
   (cast organizer "Fronx" (has-ideas #t))
+  (cast organizer "fronx84" (has-ideas #t) (telegram "fronx84"))
   (cast photographer "fronx84" (telegram "fronx84"))
   (cast photographer "other1")
   (cast photographer "other2")

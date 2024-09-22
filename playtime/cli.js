@@ -1,7 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
-const init = (rl, Contexts) => {
+const readline = require('readline');
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+const init = (Contexts) => {
   rl.on('line', async (input) => {
     if (input.startsWith('/')) {
       // Command mode

@@ -4,33 +4,49 @@ const runningContexts = new Map();
 let activeContext = null;
 
 function start(context) {
-  if (runningContexts.has(context)) {
-    console.log(`Context ${context} is already running.`);
-    return;
-  }
-
-  console.log(`Starting context: ${context}`);
-  const contextProcess = spawn('guile', ['--fresh-auto-compile', '-s', 'playtime.scm', `contexts/${context}.play`]);
-
-  contextProcess.stdout.setEncoding('utf8');
-  contextProcess.stdout.on('data', (data) => {
-    console.log(`[${context}] ${data.toString().trim()}`);
-  });
-
-  contextProcess.stderr.on('data', (data) => {
-    console.error(`[${context}] stderr: ${data}`);
-  });
-
-  contextProcess.on('close', (code) => {
-    console.log(`[${context}] process exited with code ${code}`);
-    runningContexts.delete(context);
-    if (activeContext === context) {
-      activeContext = null;
+  return new Promise((resolve, reject) => {
+    if (runningContexts.has(context)) {
+      console.log(`Context ${context} is already running.`);
+      resolve(runningContexts.get(context));
+      return;
     }
-  });
 
-  runningContexts.set(context, contextProcess);
-  setActive(context);
+    console.log(`Starting context: ${context}`);
+    const contextProcess = spawn('guile', ['--fresh-auto-compile', '-s', 'playtime.scm', `contexts/${context}.play`]);
+
+    contextProcess.stdout.setEncoding('utf8');
+    contextProcess.stdout.on('data', (data) => {
+      console.log(`[${context}] ${data.toString().trim()}`);
+    });
+
+    contextProcess.stderr.on('data', (data) => {
+      console.error(`[${context}] stderr: ${data}`);
+    });
+
+    contextProcess.on('error', (error) => {
+      console.error(`[${context}] Failed to start process: ${error}`);
+      reject(error);
+    });
+
+    // Set a timeout to check if the process is still running after a short delay
+    setTimeout(() => {
+      if (contextProcess.exitCode === null) {
+        runningContexts.set(context, contextProcess);
+        setActive(context);
+        resolve(contextProcess);
+      } else {
+        reject(new Error(`Context ${context} failed to start`));
+      }
+    }, 1000); // Wait for 1 second to check if the process is still running
+
+    contextProcess.on('close', (code) => {
+      console.log(`[${context}] process exited with code ${code}`);
+      runningContexts.delete(context);
+      if (activeContext === context) {
+        activeContext = null;
+      }
+    });
+  });
 }
 
 function terminate(context) {
@@ -72,13 +88,33 @@ function getRunning() {
   return runningContexts;
 }
 
-const deliverPlayerMessage = (contextName, username, message) => {
-  const contextProcess = running.get(contextName);
-  if (contextProcess) {
+const deliverPlayerMessage = async (contextName, username, message) => {
+  try {
+    let contextProcess = runningContexts.get(contextName);
+    if (!contextProcess) {
+      contextProcess = await start(contextName);
+    }
+
     const formattedMessage = `${message} ${username}\n`;
     contextProcess.stdin.write(formattedMessage);
-  } else {
-    console.error(`Context ${contextName} is not running.`);
+
+    // Listen for a response from the process
+    return new Promise((resolve, reject) => {
+      const onData = (data) => {
+        contextProcess.stdout.removeListener('data', onData);
+        resolve(data.toString().trim());
+      };
+
+      const onError = (error) => {
+        contextProcess.stderr.removeListener('data', onError);
+        reject(new Error(`[${contextName}] Error: ${error.toString().trim()}`));
+      };
+
+      contextProcess.stdout.on('data', onData);
+      contextProcess.stderr.on('data', onError);
+    });
+  } catch (error) {
+    throw new Error(`[${contextName}] Failed to deliver message. ${error.message}`);
   }
 };
 

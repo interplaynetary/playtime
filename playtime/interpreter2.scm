@@ -51,6 +51,14 @@
                   (format #t "  ~a => ~a~%" key value))
                hash))
 
+(define (hash-map->string hash)
+  (let ((result ""))
+    (hash-for-each
+     (lambda (key value)
+       (set! result (string-append result (format #f "  ~a => ~a\n" key value))))
+     hash)
+    result))
+
 (define* (^player bcom name #:optional [telegram-user-id #f] [capabilities (make-hash-table)])
   (define telegram-player
     (if telegram-user-id
@@ -350,18 +358,6 @@
           ))]
     )))
 
-; (define-syntax play
-;   (lambda (stx)
-;     (syntax-case stx ()
-;       [(_ context body ...)
-;         (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
-;            #'(call-with-vat context
-;                (lambda ()
-;                   (init-states)
-;                   (begin body ...
-;                     (display "\n~~~ Enactment ~~~\n\n")
-;                     (the-enactment)))))])))
-
 (define-syntax play
   (lambda (stx)
     (syntax-case stx ()
@@ -382,22 +378,12 @@
                           (display-flush (format #f "\n--- Enacting play ~a with organizer ~a ---\n\n" 'context username))
                           (the-enactment))
                         (begin
-                          (display-flush (format #f "Error: ~a is not an organizer. Please try again.\n" player-symbol))
-                          (print-hash (registry 'player-roles))
-                          (display-flush (format #f "Player roles: ~a\n" (registry 'get-player-roles player-symbol)))
+                          (display-flush (format #f "Error: ~a ~a is not an organizer.\nAll player roles:\n~a"
+                                                 player-symbol
+                                                 (registry 'get-player-roles player-symbol)
+                                                 (hash-map->string (registry 'player-roles))))
                           (loop))))
                     (begin
                       (display-flush "Invalid input. Please try again.\n")
                       (loop)))))
             )))])))
-
-; (define-syntax start
-;   (lambda (stx)
-;     (syntax-case stx ()
-;       [(_ context-name)
-;         (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
-;           #'(call-with-vat context-name
-;               (lambda ()
-;                 (the-enactment)
-;               ))
-;         )])))
