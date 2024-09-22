@@ -1,6 +1,3 @@
-const fs = require('fs');
-const path = require('path');
-
 const readline = require('readline');
 const rl = readline.createInterface({
   input: process.stdin,
@@ -40,7 +37,7 @@ const init = (Contexts) => {
           }
           break;
         case 'index':
-          const availableContexts = await listAvailableContexts();
+          const availableContexts = await Contexts.getAvailable();
           if (availableContexts.length > 0) {
             console.log('Available contexts:');
             availableContexts.forEach(context => console.log(`- ${context}`));
@@ -65,18 +62,6 @@ const init = (Contexts) => {
       console.log('No active context. Use /active <context> to set an active context.');
     }
   });
-}
-
-async function listAvailableContexts() {
-  try {
-    const files = await fs.promises.readdir('contexts');
-    const playFiles = files.filter(file => file.endsWith('.play'));
-    const contexts = playFiles.map(file => path.basename(file, '.play'));
-    return contexts;
-  } catch (error) {
-    console.error('Error reading contexts directory:', error);
-    return [];
-  }
 }
 
 function printInstructions() {

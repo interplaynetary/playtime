@@ -21,9 +21,16 @@ CLI.init(Contexts);
 const telegramApiToken = process.env.TELEGRAM_API_TOKEN;
 const bot = new Bot(telegramApiToken);
 
-const menuContexts = new Menu("contexts-menu")
-  .text("Kitchen", (ctx) => startContext(ctx, "kitchen")).row()
-  .text("Photowalk", (ctx) => startContext(ctx, "photowalk"));
+const menuContexts = new Menu("contexts-menu");
+
+Contexts.getAvailable().then((availableContexts) => {
+  availableContexts.forEach((contextName) => {
+    menuContexts.text(
+      contextName.charAt(0).toUpperCase() + contextName.slice(1),
+      (ctx) => startContext(ctx, contextName)
+    ).row();
+  });
+});
 
 const startContext = async (ctx, contextName) => {
   if (Contexts.getRunning().has(contextName)) {

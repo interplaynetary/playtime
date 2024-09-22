@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const { spawn } = require('child_process');
 
 const runningContexts = new Map();
@@ -88,6 +90,18 @@ function getRunning() {
   return runningContexts;
 }
 
+async function getAvailable() {
+  try {
+    const files = await fs.promises.readdir('contexts');
+    const playFiles = files.filter(file => file.endsWith('.play'));
+    const contexts = playFiles.map(file => path.basename(file, '.play'));
+    return contexts;
+  } catch (error) {
+    console.error('Error reading contexts directory:', error);
+    return [];
+  }
+}
+
 const deliverPlayerMessage = async (contextName, telegramUsername, message) => {
   try {
     let contextProcess = runningContexts.get(contextName);
@@ -124,6 +138,7 @@ module.exports = {
   terminateAll,
   setActive,
   getRunning,
+  getAvailable,
   getActive,
   deliverPlayerMessage
 };
