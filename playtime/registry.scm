@@ -41,7 +41,8 @@
         (role-players (make-hash-table)) ;; role-name -> list of spawned role players
         (player-roles (make-hash-table)) ;; player-symbol -> list of role-symbols
         (last-selected (make-hash-table))
-        (states (make-hash-table)))
+        (states (make-hash-table))
+        (telegram-to-player (make-hash-table))) ;; telegram username -> player symbol
     (methods
       ((set-state key value)
         (hash-set! states key value))
@@ -50,6 +51,10 @@
       ((states) states)
       ((register-player symbol actor)
         (hash-set! players symbol actor))
+      ((register-telegram-lookup telegram-username player-symbol)
+        (hash-set! telegram-to-player telegram-username player-symbol))
+      ((get-player-symbol-by-telegram username)
+        (hash-ref telegram-to-player username #f))
       ((get-player symbol)
         (hash-ref players symbol #f))
       ((register-role symbol role)
@@ -89,4 +94,5 @@
        (hash-ref player-roles player-symbol '()))
       ((has-role? player-symbol role-symbol)
        (let ((player-role-list (hash-ref player-roles player-symbol '())))
-         (member role-symbol player-role-list))))))
+         (member role-symbol player-role-list)))
+)))

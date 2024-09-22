@@ -69,8 +69,9 @@
       (hash-set! capabilities key value))
     ((has-capability? key)
       (hash-ref capabilities key #f))
-    ((add-telegram _telegram-user-id)
+    ((add-telegram _telegram-user-id _telegram-username)
       (hash-set! capabilities 'telegram #t)
+      (registry 'register-telegram-lookup _telegram-username (normalize-name name))
       (bcom (^player bcom name _telegram-user-id capabilities)))
     ((cue msg) ;; cue the player to do something
       (if telegram-player
@@ -329,7 +330,7 @@
        #'(let* ((user (find-user-by-telegram-username telegram-username))
                 (telegram-user-id (and user (assoc-ref user "id"))))
           (if telegram-user-id
-            ($ player 'add-telegram telegram-user-id)
+            ($ player 'add-telegram telegram-user-id telegram-username)
             (display (format #f "\n===> Telegram player @~a not found.\n     Open a chat with ~a and say hi to register.\n\n" 
               telegram-username "https://t.me/the_playtime_bot")))
          )]
@@ -366,24 +367,34 @@
           #'(call-with-vat context
               (lambda ()
                 (init-states)
-              (begin body ...
-                (display-flush "\n--- Casting finished ---\n\n"))
-              (let loop ()
-                (let ((response (readline (format #f "Enter 'start <username>' to begin the enactment: "))))
-                  (if (string-prefix? "start " response)
-                    (let* ((username (string-trim (substring response 6)))
-                           (player-symbol (normalize-name username)))
-                      (if (registry 'has-role? player-symbol 'organizer)
-                        (begin
-                          (display-flush (format #f "\n--- Enacting play ~a with organizer ~a ---\n\n" 'context username))
-                          (the-enactment))
-                        (begin
-                          (display-flush (format #f "Error: ~a ~a is not an organizer.\nAll player roles:\n~a"
-                                                 player-symbol
-                                                 (registry 'get-player-roles player-symbol)
-                                                 (hash-map->string (registry 'player-roles))))
-                          (loop))))
-                    (begin
-                      (display-flush "Invalid input. Please try again.\n")
-                      (loop)))))
-            )))])))
+                (begin body ...
+                  (display-flush "\n--- Casting finished ---\n\n"))
+                (let loop ()
+                  (let ((response (readline (format #f "Enter 'start <username>' to begin the enactment. Prefix the name with @ if it's a Telegram username. "))))
+                    (if (string-prefix? "start " response)
+                      (let* ((input-username (string-trim (substring response 6)))
+                             (is-telegram? (string-prefix? "@" input-username))
+                             (username (if is-telegram?
+                                           (substring input-username 1)
+                                           input-username))
+                             (player-symbol (if is-telegram?
+                                                (registry 'get-player-symbol-by-telegram username)
+                                                (normalize-name username))))
+                        (if player-symbol
+                          (if (registry 'has-role? player-symbol 'organizer)
+                            (begin
+                              (display-flush (format #f "\n--- Enacting play ~a with organizer ~a ---\n\n" 'context username))
+                              (the-enactment))
+                            (begin
+                              (display-flush (format #f "Error: ~a ~a is not an organizer.\nAll player roles:\n~a"
+                                                     player-symbol
+                                                     (registry 'get-player-roles player-symbol)
+                                                     (hash-map->string (registry 'player-roles))))
+                              (loop)))
+                          (begin
+                            (display-flush (format #f "Error: Player not found for ~a\n" input-username))
+                            (loop))))
+                      (begin
+                        (display-flush "Invalid input. Please try again.\n")
+                        (loop)))))
+              )))])))

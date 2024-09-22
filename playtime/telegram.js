@@ -48,7 +48,10 @@ bot.command("start", async (ctx) => {
     const contextName = args[1].toLowerCase();
     const user = Users.register(ctx);
     try {
-      let response = await Contexts.deliverPlayerMessage(contextName, user.username, `start`);
+      let response = await Contexts.deliverPlayerMessage(
+        contextName,
+        `@${user.username}`, // the '@' is needed to indicate that it's a Telegram username
+        'start');
       await ctx.reply(response);
     } catch (error) {
       console.error(error.message);

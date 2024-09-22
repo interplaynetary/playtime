@@ -88,14 +88,14 @@ function getRunning() {
   return runningContexts;
 }
 
-const deliverPlayerMessage = async (contextName, username, message) => {
+const deliverPlayerMessage = async (contextName, telegramUsername, message) => {
   try {
     let contextProcess = runningContexts.get(contextName);
     if (!contextProcess) {
       contextProcess = await start(contextName);
     }
 
-    const formattedMessage = `${message} ${username}\n`;
+    const formattedMessage = `${message} ${telegramUsername}\n`;
     contextProcess.stdin.write(formattedMessage);
 
     // Listen for a response from the process
