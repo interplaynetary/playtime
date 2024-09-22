@@ -387,7 +387,7 @@
                               (begin
                                 (display-flush (format #f "\n--- Enacting play ~a with organizer ~a ---\n\n"
                                                        'context
-                                                       username))
+                                                       player-symbol))
                                 (the-enactment))
                               (begin
                                 (display-flush (format #f "Error: ~a ~a is not an organizer.\nAll player roles:\n~a"
