@@ -367,34 +367,37 @@
           #'(call-with-vat context
               (lambda ()
                 (init-states)
-                (begin body ...
-                  (display-flush "\n--- Casting finished ---\n\n"))
-                (let loop ()
-                  (let ((response (readline (format #f "Enter 'start <username>' to begin the enactment. Prefix the name with @ if it's a Telegram username. "))))
-                    (if (string-prefix? "start " response)
-                      (let* ((input-username (string-trim (substring response 6)))
-                             (is-telegram? (string-prefix? "@" input-username))
-                             (username (if is-telegram?
-                                           (substring input-username 1)
-                                           input-username))
-                             (player-symbol (if is-telegram?
-                                                (registry 'get-player-symbol-by-telegram username)
-                                                (normalize-name username))))
-                        (if player-symbol
-                          (if (registry 'has-role? player-symbol 'organizer)
+                (begin body ...)
+                (if (not (registry 'get-role 'organizer))
+                  (the-enactment)
+                  (let loop ()
+                    (let ((response (readline (format #f "Enter 'start <username>' to begin the enactment. Prefix the name with @ if it's a Telegram username. "))))
+                      (if (string-prefix? "start " response)
+                        (let* ((input-username (string-trim (substring response 6)))
+                               (is-telegram? (string-prefix? "@" input-username))
+                               (username (if is-telegram?
+                                             (substring input-username 1)
+                                             input-username))
+                               (player-symbol (if is-telegram?
+                                                  (registry 'get-player-symbol-by-telegram username)
+                                                  (normalize-name username))))
+                          (if player-symbol
+                            (if (registry 'has-role? player-symbol 'organizer)
+                              (begin
+                                (display-flush (format #f "\n--- Enacting play ~a with organizer ~a ---\n\n"
+                                                       'context
+                                                       username))
+                                (the-enactment))
+                              (begin
+                                (display-flush (format #f "Error: ~a ~a is not an organizer.\nAll player roles:\n~a"
+                                                       player-symbol
+                                                       (registry 'get-player-roles player-symbol)
+                                                       (hash-map->string (registry 'player-roles))))
+                                (loop)))
                             (begin
-                              (display-flush (format #f "\n--- Enacting play ~a with organizer ~a ---\n\n" 'context username))
-                              (the-enactment))
-                            (begin
-                              (display-flush (format #f "Error: ~a ~a is not an organizer.\nAll player roles:\n~a"
-                                                     player-symbol
-                                                     (registry 'get-player-roles player-symbol)
-                                                     (hash-map->string (registry 'player-roles))))
-                              (loop)))
-                          (begin
-                            (display-flush (format #f "Error: Player not found for ~a\n" input-username))
-                            (loop))))
-                      (begin
-                        (display-flush "Invalid input. Please try again.\n")
-                        (loop)))))
+                              (display-flush (format #f "Error: Player not found for ~a\n" input-username))
+                              (loop))))
+                        (begin
+                          (display-flush "Invalid input. Please try again.\n")
+                          (loop))))))
               )))])))

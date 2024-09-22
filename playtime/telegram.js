@@ -25,13 +25,21 @@ const menuContexts = new Menu("contexts-menu")
   .text("Kitchen", (ctx) => startContext(ctx, "kitchen")).row()
   .text("Photowalk", (ctx) => startContext(ctx, "photowalk"));
 
-const startContext = (ctx, context) => {
-  if (Contexts.getRunning().has(context)) {
-    ctx.reply(`Context ${context} is already running.`);
+const startContext = async (ctx, contextName) => {
+  if (Contexts.getRunning().has(contextName)) {
+    ctx.reply(`Context ${contextName} is already running.`);
     return;
-  } else {
-    ctx.reply("Starting context: " + context);
-    Contexts.start(context);
+  }
+  const user = Users.register(ctx);
+  try {
+    let response = await Contexts.deliverPlayerMessage(
+      contextName,
+      `@${user.username}`, // the '@' is needed to indicate that it's a Telegram username
+      'start');
+    await ctx.reply(response);
+  } catch (error) {
+    console.error(error.message);
+    await ctx.reply(error.message);
   }
 }
 
@@ -45,18 +53,7 @@ bot.command("menu", async (ctx) => {
 bot.command("start", async (ctx) => {
   const args = ctx.message.text.split(' ');
   if (args.length == 2) {
-    const contextName = args[1].toLowerCase();
-    const user = Users.register(ctx);
-    try {
-      let response = await Contexts.deliverPlayerMessage(
-        contextName,
-        `@${user.username}`, // the '@' is needed to indicate that it's a Telegram username
-        'start');
-      await ctx.reply(response);
-    } catch (error) {
-      console.error(error.message);
-      await ctx.reply(error.message);
-    }
+    startContext(ctx, args[1]);
   } else {
     await ctx.reply("Usage: /start <context-name>");
   }

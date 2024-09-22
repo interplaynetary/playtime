@@ -44,9 +44,14 @@ function checkAndAdd(userId, name, username) {
 }
 
 function register(ctx) {
-  const id = ctx.message.from.id.toString();
-  const name = `${ctx.message.from.first_name} ${ctx.message.from.last_name || ''}`.trim();
-  const username = ctx.message.from.username || '';
+  const from = ctx.update
+    ? ctx.update.callback_query
+      ? ctx.update.callback_query.from
+      : ctx.update.message.from
+    : ctx.message.from;
+  const id = from.id.toString();
+  const name = `${from.first_name} ${from.last_name || ''}`.trim();
+  const username = from.username || '';
   checkAndAdd(id, name, username);
   return { id, name, username };
 }
