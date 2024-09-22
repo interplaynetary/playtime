@@ -41,12 +41,22 @@ const startContext = (ctx, context) => {
 }
 
 bot.use(menuContexts);
+bot.api.config.use(hydrateFiles(bot.token));
 
 bot.command("menu", async (ctx) => {
   await ctx.reply("Pick a context:", { reply_markup: menuContexts });
 });
 
-bot.api.config.use(hydrateFiles(bot.token));
+bot.command("start", async (ctx) => {
+  const args = ctx.message.text.split(' ');
+  if (args.length > 1) {
+    const contextName = args[1].toLowerCase();
+    const user = Users.register(ctx);
+    Contexts.deliverPlayerMessage(contextName, user.username, `start`);
+  } else {
+    await ctx.reply("Usage: /start <context-name>");
+  }
+});
 
 bot.on("message:voice", async (ctx) => {
   // TODO: transcribe voice message
@@ -54,41 +64,33 @@ bot.on("message:voice", async (ctx) => {
 
 // Handle incoming messages from Telegram
 bot.on("message:text", async (ctx) => {
-  const userId = ctx.message.from.id.toString();
-  const name = `${ctx.message.from.first_name} ${ctx.message.from.last_name || ''}`.trim();
-  const username = ctx.message.from.username || '';
-  Users.checkAndAdd(userId, name, username);
-
+  const user = Users.register(ctx);
   const text = ctx.message.text;
-  console.log('Received message from Telegram:', { userId, text, username });
+  console.log('Received message from Telegram:', { userId: user.id, text, username: user.username });
 
-  if (pendingRequests.has(userId)) {
-    const { resolve } = pendingRequests.get(userId);
-    pendingRequests.delete(userId);
+  if (pendingRequests.has(user.id)) {
+    const { resolve } = pendingRequests.get(user.id);
+    pendingRequests.delete(user.id);
     // TODO: handle photo/video/voice messages
     resolve({ text: text });
-    console.log('Resolved pending request for user:', userId);
+    console.log('Resolved pending request for user:', user.id);
   } else {
     await ctx.reply("Welcome to Playtime!", { reply_markup: menuContexts });
   }
 });
 
 bot.on("message:photo", async (ctx) => {
-  const userId = ctx.message.from.id.toString();
-  const name = `${ctx.message.from.first_name} ${ctx.message.from.last_name || ''}`.trim();
-  const username = ctx.message.from.username || '';
-  Users.checkAndAdd(userId, name, username);
-
+  const user = Users.register(ctx);
   const text = ctx.message.caption;
-  console.log('Received photo message from Telegram:', { userId, text, username });
+  console.log('Received photo message from Telegram:', { userId: user.id, text, username: user.username });
   const file = await ctx.getFile();
   const path = await file.download(`assets/photos/${file.file_id}.jpg`);
 
-  if (pendingRequests.has(userId)) {
-    const { resolve } = pendingRequests.get(userId);
-    pendingRequests.delete(userId);
+  if (pendingRequests.has(user.id)) {
+    const { resolve } = pendingRequests.get(user.id);
+    pendingRequests.delete(user.id);
     resolve({ text: text, path: path, photo_file_id: file.file_id });
-    console.log('Resolved pending request for user:', userId);
+    console.log('Resolved pending request for user:', user.id);
   }
 });
 

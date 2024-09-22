@@ -18,6 +18,7 @@
   #:export (set)
   #:export (inc)
   #:export (dec)
+  #:export (start)
   #:export (play)
   #:export (cast)
   #:export (player)
@@ -142,50 +143,6 @@
           #'(<- script-player 'script-name script-player args ...))
       ])))
 
-(define (find-user-by-telegram-username username)
-  (let ((response (send-http-get
-                    (string-append "/find-user-by-username/" (uri-encode username))
-                    `())))
-    (if (assoc-ref response 'error)
-        (throw 'user-not-found-error (assoc-ref response 'error))
-        response)))
-
-(define-syntax add-capability
-  (lambda (stx)
-    (syntax-case stx (telegram)
-      [(_ player telegram telegram-username)
-       #'(let* ((user (find-user-by-telegram-username telegram-username))
-                (telegram-user-id (and user (assoc-ref user "id"))))
-          (if telegram-user-id
-            ($ player 'add-telegram telegram-user-id)
-            (display (format #f "\n===> Telegram player @~a not found.\n     Open a chat with ~a and say hi to register.\n\n" 
-              telegram-username "https://t.me/the_playtime_bot")))
-         )]
-      [(_ player key value)
-        #'($ player 'add-capability 'key value)]
-    )))
-
-;; Example: (cast cleaner "Alice")
-(define-syntax cast
-  (lambda (stx)
-    (syntax-case stx ()
-      [(_ role-name player-name)
-       #'(let* ((player (get-player player-name))
-                (role-instance (and player (spawn (registry 'get-role 'role-name) player))))
-           (registry 'register-role-player 'role-name role-instance))]
-      [(_ role-name player-name (key value) ...)
-       #'(let* ((player (get-player player-name))
-                (role-instance (and player (spawn (registry 'get-role 'role-name) player))))
-           (if role-instance
-             (begin
-               (registry 'register-role-player 'role-name role-instance)
-               (begin
-                 (add-capability player key 'value) ;; key can be e.g. telegram
-                 ...))
-             (error "Player not found:" player-name player)
-          ))]
-    )))
-
 ; (define-syntax recast
 ;   (lambda (stx)
 ;     (syntax-case stx ()
@@ -244,6 +201,7 @@
             (extend-methods _scripts
               ((role-name) _name)
               ((who)         ($ _player 'who))
+              ((symbol)      (normalize-name ($ _player 'who)))
               ((cue msg)     (<- _player 'cue msg))
               ((request msg) (<- _player 'request msg))
               ((has-capability? key) ($ _player 'has-capability? key))
@@ -348,14 +306,98 @@
       (registry 'set-state key (spawn ^cell value)))
     (registry 'states)))
 
+(define (find-user-by-telegram-username username)
+  (let ((response (send-http-get
+                    (string-append "/find-user-by-username/" (uri-encode username))
+                    `())))
+    (if (assoc-ref response 'error)
+        (throw 'user-not-found-error (assoc-ref response 'error))
+        response)))
+
+(define-syntax add-capability
+  (lambda (stx)
+    (syntax-case stx (telegram)
+      [(_ player telegram telegram-username)
+       #'(let* ((user (find-user-by-telegram-username telegram-username))
+                (telegram-user-id (and user (assoc-ref user "id"))))
+          (if telegram-user-id
+            ($ player 'add-telegram telegram-user-id)
+            (display (format #f "\n===> Telegram player @~a not found.\n     Open a chat with ~a and say hi to register.\n\n" 
+              telegram-username "https://t.me/the_playtime_bot")))
+         )]
+      [(_ player key value)
+        #'($ player 'add-capability 'key value)]
+    )))
+
+;; Example: (cast cleaner "Alice")
+(define-syntax cast
+  (lambda (stx)
+    (syntax-case stx ()
+      [(_ role-name player-name)
+       #'(let* ((player (get-player player-name))
+                (role-instance (and player (spawn (registry 'get-role 'role-name) player))))
+           (registry 'register-role-player 'role-name role-instance))]
+      [(_ role-name player-name (key value) ...)
+       #'(let* ((player (get-player player-name))
+                (role-instance (and player (spawn (registry 'get-role 'role-name) player))))
+           (if role-instance
+             (begin
+               (registry 'register-role-player 'role-name role-instance)
+               (begin
+                 (add-capability player key 'value) ;; key can be e.g. telegram
+                 ...))
+             (error "Player not found:" player-name player)
+          ))]
+    )))
+
+; (define-syntax play
+;   (lambda (stx)
+;     (syntax-case stx ()
+;       [(_ context body ...)
+;         (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
+;            #'(call-with-vat context
+;                (lambda ()
+;                   (init-states)
+;                   (begin body ...
+;                     (display "\n~~~ Enactment ~~~\n\n")
+;                     (the-enactment)))))])))
+
 (define-syntax play
   (lambda (stx)
     (syntax-case stx ()
       [(_ context body ...)
         (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
-           #'(call-with-vat context
-               (lambda ()
-                  (init-states)
-                  (begin body ...
-                    (display "\n~~~ Enactment ~~~\n\n")
-                    (the-enactment)))))])))
+          #'(call-with-vat context
+              (lambda ()
+                (init-states)
+              (begin body ...
+                (display-flush "\n--- Casting finished ---\n\n"))
+              (let loop ()
+                (let ((response (readline (format #f "Enter 'start <username>' to begin the enactment: "))))
+                  (if (string-prefix? "start " response)
+                    (let* ((username (string-trim (substring response 6)))
+                           (player-symbol (normalize-name username)))
+                      (if (registry 'has-role? player-symbol 'organizer)
+                        (begin
+                          (display-flush (format #f "\n--- Enacting play ~a with organizer ~a ---\n\n" 'context username))
+                          (the-enactment))
+                        (begin
+                          (display-flush (format #f "Error: ~a is not an organizer. Please try again.\n" player-symbol))
+                          (print-hash (registry 'player-roles))
+                          (display-flush (format #f "Player roles: ~a\n" (registry 'get-player-roles player-symbol)))
+                          (loop))))
+                    (begin
+                      (display-flush "Invalid input. Please try again.\n")
+                      (loop)))))
+            )))])))
+
+; (define-syntax start
+;   (lambda (stx)
+;     (syntax-case stx ()
+;       [(_ context-name)
+;         (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
+;           #'(call-with-vat context-name
+;               (lambda ()
+;                 (the-enactment)
+;               ))
+;         )])))

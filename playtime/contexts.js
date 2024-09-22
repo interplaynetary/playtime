@@ -72,11 +72,22 @@ function getRunning() {
   return runningContexts;
 }
 
+const deliverPlayerMessage = (contextName, username, message) => {
+  const contextProcess = running.get(contextName);
+  if (contextProcess) {
+    const formattedMessage = `${message} ${username}\n`;
+    contextProcess.stdin.write(formattedMessage);
+  } else {
+    console.error(`Context ${contextName} is not running.`);
+  }
+};
+
 module.exports = {
   start,
   terminate,
   terminateAll,
   setActive,
   getRunning,
-  getActive
+  getActive,
+  deliverPlayerMessage
 };

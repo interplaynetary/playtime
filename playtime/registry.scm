@@ -31,10 +31,15 @@
                   missing-reqs role-symbol))
             #f))))))
 
+(define (add-to-hash-list! hash key value)
+  (let ((current-list (hash-ref hash key '())))
+    (hash-set! hash key (cons value current-list))))
+
 (define registry
   (let ((players (make-hash-table))
         (roles (make-hash-table))
         (role-players (make-hash-table)) ;; role-name -> list of spawned role players
+        (player-roles (make-hash-table)) ;; player-symbol -> list of role-symbols
         (last-selected (make-hash-table))
         (states (make-hash-table)))
     (methods
@@ -52,9 +57,9 @@
       ((get-role symbol)
         (hash-ref roles symbol #f))
       ((register-role-player role-symbol role-instance)
-        (let ((current-players (hash-ref role-players role-symbol '())))
-          (hash-set! role-players role-symbol 
-            (cons role-instance current-players))))
+        (let ((player-symbol ($ role-instance 'symbol)))
+          (add-to-hash-list! role-players role-symbol role-instance)
+          (add-to-hash-list! player-roles player-symbol role-symbol)))
       ((get-role-players role-symbol)
         (let ((all-players (hash-ref role-players role-symbol '())))
           (filter (is-suitable role-symbol) all-players)))
@@ -78,4 +83,10 @@
       ((roles) roles)
       ((players) players)
       ((role-players) role-players)
-      ((last-selected) last-selected))))
+      ((last-selected) last-selected)
+      ((player-roles) player-roles)
+      ((get-player-roles player-symbol)
+       (hash-ref player-roles player-symbol '()))
+      ((has-role? player-symbol role-symbol)
+       (let ((player-role-list (hash-ref player-roles player-symbol '())))
+         (member role-symbol player-role-list))))))
