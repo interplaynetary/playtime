@@ -331,7 +331,7 @@
                 (telegram-user-id (and user (assoc-ref user "id"))))
           (if telegram-user-id
             ($ player 'add-telegram telegram-user-id telegram-username)
-            (display (format #f "\n===> Telegram player @~a not found.\n     Open a chat with ~a and say hi to register.\n\n" 
+            (display (format #f "\n===> Telegram player @~a not found.\n     Open a chat with ~a and say hi to register.\n\n"
               telegram-username "https://t.me/the_playtime_bot")))
          )]
       [(_ player key value)
@@ -359,9 +359,85 @@
           ))]
     )))
 
+(define (colorize text color)
+  (let ((code (case color
+                ((black)        "30")
+                ((red)          "31")
+                ((green)        "32")
+                ((yellow)       "33")
+                ((blue)         "34")
+                ((magenta)      "35")
+                ((cyan)         "36")
+                ((white)        "37")
+                ((bright-black) "90")
+                ((bright-red)   "91")
+                ((bright-green) "92")
+                ((bright-yellow)"93")
+                ((bright-blue)  "94")
+                ((bright-magenta)"95")
+                ((bright-cyan)  "96")
+                ((bright-white) "97")
+                ((bold)         "1")
+                (else           "0"))))
+    (format #f "\x1b[~am~a\x1b[0m" code text)))
+
+(define (display-role-summary)
+  (hash-for-each (lambda (role-name _)
+    (let ((player (registry 'get-role-player role-name 'any)))
+      (if player
+        (display-flush (format #f "(cast ~a ~a)\n"
+                             (colorize role-name 'bright-white)
+                             (colorize (format #f "\"~a\"" ($ player 'who)) 'green)))
+        (display-flush (format #f "(cast ~a <player-name> (telegram <username>)\n"
+                             (colorize role-name 'bright-white))))))
+    (registry 'roles)))
+
+(define (try-eval-command input allowed-commands)
+  (letrec ((expr (with-exception-handler
+                    (lambda (exn)
+                      (display "Parse error: ") (display exn) (newline)
+                      #f)
+                    (lambda ()
+                      (read (open-input-string
+                        (if (and (> (string-length input) 0)
+                                (char=? (string-ref input 0) #\())
+                            input                           ; Input already has parentheses
+                            (string-append "(" input ")"))  ; Add parentheses if missing
+                        )))))
+            (is-list? (pair? expr))
+            (is-allowed? (memq (car expr) allowed-commands)))
+    (and is-list? is-allowed?
+      (begin
+        (eval expr (interaction-environment))
+        #t))))
+
 (define-syntax play
   (lambda (stx)
     (syntax-case stx ()
+      [(_ context)
+        (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
+          #'(call-with-vat context
+              (lambda ()
+                (init-states)
+                (let loop ()
+                  (newline)
+                  (display "#====== CAST ROLES =================================\n")
+                  (display-role-summary)
+                  (newline)
+                  (if (registry 'all-roles-cast?)
+                    (the-enactment)
+                    (begin
+                      (display "> ")
+                      (let ((input (readline)))
+                        (cond
+                          [(string=? "exit" (string-trim input))
+                          (display "Exiting...\n")
+                          #f]
+                          [(try-eval-command input '(cast))
+                          (loop)]
+                          [else
+                            (display "Unknown command. Available commands: cast, exit\n")
+                            (loop)]))))))))]
       [(_ context body ...)
         (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
           #'(call-with-vat context

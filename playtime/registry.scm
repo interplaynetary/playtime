@@ -73,7 +73,7 @@
                (suitable-players (filter (is-suitable role-symbol) all-players)))
           (if (null? suitable-players)
               (begin
-                (display (format #f "No players registered for role ~a who meet the requirements ~a\n" role-symbol (requirements role-symbol)))
+                ; (display (format #f "[Registry] No players registered for role ~a who meet the requirements ~a\n" role-symbol (requirements role-symbol)))
                 #f)  ; Return #f if no players meet the requirements
               (case selector
                 ((any)
@@ -88,6 +88,10 @@
       ((roles) roles)
       ((players) players)
       ((role-players) role-players)
+      ((all-roles-cast?)
+        (every (lambda (role-symbol)
+                 (not (null? (registry 'get-role-players role-symbol))))
+               (hash-keys roles)))
       ((last-selected) last-selected)
       ((player-roles) player-roles)
       ((get-player-roles player-symbol)
