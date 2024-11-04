@@ -415,7 +415,7 @@
                   (colorize (format #f "\"~a\"" ($ player 'who)) 'green))
                 width))
               players)
-            (display-framed (format #f "~a (cast ~a \"<player-name>\" (telegram <username>))"
+            (display-framed (format #f "~a (cast ~a \"<player-name>\" (telegram \"<username>\"))"
                   (colorize "[ ]" 'bright-yellow)
                   (colorize role-name 'bright-white)
                   (bold (colorize role-name 'bright-red)))
