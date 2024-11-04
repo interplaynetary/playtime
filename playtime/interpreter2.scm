@@ -392,47 +392,65 @@
       "\x1b[1m" "")
     "\x1b[92m" ""))
 
+(define (pad-string str length)
+  (let ((padding-length (max 0 (- length (string-length (strip-ansi-sequences str))))))
+    (if (> padding-length 0)
+      (string-append str (make-string padding-length #\space))
+      str)))
+
+(define (display-framed content width)
+  (display (format #f "⎥ ~a ⎪\n" (pad-string content width))))
+
 (define (display-role-summary)
   (let ((width 71))
     (display "┌~~~~~~~~~~~~ 𝗥𝗼𝗹𝗲 𝗖𝗮𝘀𝘁𝗶𝗻𝗴𝘀 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~┐\n")
-    (hash-for-each (lambda (role-name _)
-      (let* ((player (registry 'get-role-player role-name 'any))
-             (content
-                (if player
-                  (format #f "~a (cast ~a ~a)"
-                          (colorize "[✓]" 'bright-green)
-                          (colorize role-name 'bright-white)
-                          (colorize (format #f "\"~a\"" ($ player 'who)) 'green))
-                  (format #f "~a (cast ~a \"<player-name>\" (telegram <username>))"
-                          (colorize "[ ]" 'bright-yellow)
-                          (colorize role-name 'bright-white)
-                          (bold (colorize role-name 'bright-red)))))
-             (visible-length (string-length (strip-ansi-sequences content)))
-             (padding (make-string (max 0 (- width visible-length)) #\space)))
-        (display-flush (format #f "⎥ ~a~a ⎪\n" content padding))))
+    (hash-for-each
+      (lambda (role-name _)
+        (let ((players (registry 'get-role-players role-name)))
+          (if (not (null? players))
+            (for-each (lambda (player)
+              (display-framed (format #f "~a (cast ~a ~a)"
+                  (colorize "[✓]" 'bright-green)
+                  (colorize role-name 'bright-white)
+                  (colorize (format #f "\"~a\"" ($ player 'who)) 'green))
+                width))
+              players)
+            (display-framed (format #f "~a (cast ~a \"<player-name>\" (telegram <username>))"
+                  (colorize "[ ]" 'bright-yellow)
+                  (colorize role-name 'bright-white)
+                  (bold (colorize role-name 'bright-red)))
+                width))
+          ))
       (registry 'roles))
     (display "└~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~┘\n")
     (newline)
   ))
 
+(define (add-parentheses-if-needed input)
+  (if (and (> (string-length input) 0)
+           (char=? (string-ref input 0) #\x28))  ; #\x28 is equivalent to #\(
+      input                           ; Input already has parentheses
+      (string-append "(" input ")"))) ; Add parentheses if missing
+
+(define (parse-command-string input)
+  (with-exception-handler
+    (lambda (exn)
+      (display "Parse error: ") (display exn) (newline)
+      #f)
+    (lambda ()
+      (read (open-input-string (add-parentheses-if-needed input))))))
+
+(define (valid-command? expr allowed-commands)
+  (and (pair? expr)              ; Is it a list?
+       (memq (car expr) allowed-commands))) ; Is the command allowed?
+
 (define (try-eval-command input allowed-commands)
-  (letrec ((expr (with-exception-handler
-                    (lambda (exn)
-                      (display "Parse error: ") (display exn) (newline)
-                      #f)
-                    (lambda ()
-                      (read (open-input-string
-                        (if (and (> (string-length input) 0)
-                                (char=? (string-ref input 0) #\())
-                            input                           ; Input already has parentheses
-                            (string-append "(" input ")"))  ; Add parentheses if missing
-                        )))))
-            (is-list? (pair? expr))
-            (is-allowed? (memq (car expr) allowed-commands)))
-    (and is-list? is-allowed?
-      (begin
-        (eval expr (interaction-environment))
-        #t))))
+  (let ((expr (parse-command-string input)))
+    (and expr
+         (valid-command? expr allowed-commands)
+         (begin
+           (eval expr (interaction-environment))
+           #t))))
 
 (define (casting-loop the-enactment)
   (let loop ()
