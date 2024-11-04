@@ -5,6 +5,7 @@
   #:use-module (srfi srfi-19)
   #:use-module (ice-9 readline)
   #:use-module (ice-9 pretty-print)
+  #:use-module (ice-9 string-fun)
   #:use-module (ice-9 textual-ports)
   #:use-module (language tree-il)
   #:use-module (web uri)
@@ -381,16 +382,38 @@
                 (else           "0"))))
     (format #f "\x1b[~am~a\x1b[0m" code text)))
 
+(define (bold text)
+  (colorize text 'bold))
+
+(define (strip-ansi-sequences str)
+  (string-replace-substring
+    (string-replace-substring
+      (string-replace-substring str "\x1b[0m" "")
+      "\x1b[1m" "")
+    "\x1b[92m" ""))
+
 (define (display-role-summary)
-  (hash-for-each (lambda (role-name _)
-    (let ((player (registry 'get-role-player role-name 'any)))
-      (if player
-        (display-flush (format #f "(cast ~a ~a)\n"
-                             (colorize role-name 'bright-white)
-                             (colorize (format #f "\"~a\"" ($ player 'who)) 'green)))
-        (display-flush (format #f "(cast ~a <player-name> (telegram <username>)\n"
-                             (colorize role-name 'bright-white))))))
-    (registry 'roles)))
+  (let ((width 71))
+    (display "┌~~~~~~~~~~~~ 𝗥𝗼𝗹𝗲 𝗖𝗮𝘀𝘁𝗶𝗻𝗴𝘀 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~┐\n")
+    (hash-for-each (lambda (role-name _)
+      (let* ((player (registry 'get-role-player role-name 'any))
+             (content
+                (if player
+                  (format #f "~a (cast ~a ~a)"
+                          (colorize "[✓]" 'bright-green)
+                          (colorize role-name 'bright-white)
+                          (colorize (format #f "\"~a\"" ($ player 'who)) 'green))
+                  (format #f "~a (cast ~a \"<player-name>\" (telegram <username>))"
+                          (colorize "[ ]" 'bright-yellow)
+                          (colorize role-name 'bright-white)
+                          (bold (colorize role-name 'bright-red)))))
+             (visible-length (string-length (strip-ansi-sequences content)))
+             (padding (make-string (max 0 (- width visible-length)) #\space)))
+        (display-flush (format #f "⎥ ~a~a ⎪\n" content padding))))
+      (registry 'roles))
+    (display "└~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~┘\n")
+    (newline)
+  ))
 
 (define (try-eval-command input allowed-commands)
   (letrec ((expr (with-exception-handler
@@ -411,70 +434,34 @@
         (eval expr (interaction-environment))
         #t))))
 
+(define (casting-loop the-enactment)
+  (let loop ()
+    (newline)
+    (display-role-summary)
+    (if (registry 'all-roles-cast?)
+      (the-enactment)
+      (begin
+        (display "> ")
+        (let ((input (readline)))
+          (cond
+            [(string=? "exit" (string-trim input))
+            (display "Exiting...\n")
+            #f]
+            [(try-eval-command input '(cast))
+            (loop)]
+            [else
+              (display "Unknown command. Available commands: cast, exit\n")
+              (loop)]))
+      ))))
+
 (define-syntax play
   (lambda (stx)
     (syntax-case stx ()
-      [(_ context)
-        (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
-          #'(call-with-vat context
-              (lambda ()
-                (init-states)
-                (let loop ()
-                  (newline)
-                  (display "#====== CAST ROLES =================================\n")
-                  (display-role-summary)
-                  (newline)
-                  (if (registry 'all-roles-cast?)
-                    (the-enactment)
-                    (begin
-                      (display "> ")
-                      (let ((input (readline)))
-                        (cond
-                          [(string=? "exit" (string-trim input))
-                          (display "Exiting...\n")
-                          #f]
-                          [(try-eval-command input '(cast))
-                          (loop)]
-                          [else
-                            (display "Unknown command. Available commands: cast, exit\n")
-                            (loop)]))))))))]
       [(_ context body ...)
         (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
           #'(call-with-vat context
               (lambda ()
                 (init-states)
                 (begin body ...)
-                (if (not (registry 'get-role 'organizer))
-                  (the-enactment)
-                  (let loop ()
-                    (display-flush (format #f "Enter 'start <username>' to begin the enactment. Prefix the name with @ if it's a Telegram username. "))
-                    (let ((response (readline)))
-                      (if (string-prefix? "start " response)
-                        (let* ((input-username (string-trim (substring response 6)))
-                               (is-telegram? (string-prefix? "@" input-username))
-                               (username (if is-telegram?
-                                             (substring input-username 1)
-                                             input-username))
-                               (player-symbol (if is-telegram?
-                                                  (registry 'get-player-symbol-by-telegram username)
-                                                  (normalize-name username))))
-                          (if player-symbol
-                            (if (registry 'has-role? player-symbol 'organizer)
-                              (begin
-                                (display-flush (format #f "\n--- Enacting play ~a with organizer ~a ---\n\n"
-                                                       'context
-                                                       player-symbol))
-                                (the-enactment))
-                              (begin
-                                (display-flush (format #f "Error: ~a ~a is not an organizer.\nAll player roles:\n~a"
-                                                       player-symbol
-                                                       (registry 'get-player-roles player-symbol)
-                                                       (hash-map->string (registry 'player-roles))))
-                                (loop)))
-                            (begin
-                              (display-flush (format #f "Error: Player not found for ~a\n" input-username))
-                              (loop))))
-                        (begin
-                          (display-flush "Invalid input. Please try again.\n")
-                          (loop))))))
+                (casting-loop the-enactment)
               )))])))
