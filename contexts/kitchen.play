@@ -33,7 +33,8 @@
 ;; ))
 
 ;; (print-and-run (quote
-  (play kitchen
+  (play kitchen)
     (cast cleaner "Fronx" (telegram "fronx84"))
-    (cast drier "Other"))
+    (cast drier "Ruz" (telegram "ruz"))
+    ;; (cast drier "Other"))
 ;; ))

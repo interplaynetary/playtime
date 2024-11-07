@@ -19,7 +19,7 @@ Built on top of **[Goblin's distributed object programming environment]([url](ht
 
 **Goblins** provides an intuitive security model, automatic local transactions for locally synchronous operations, and an easy to use and efficient asynchronous programming interface for encapsulated objects which can live anywhere on the network. **Goblins** also integrates powerful distributed debugging tools, and a process persistence and upgrade model which respects its security fundamentals.
 
-## Run Playtime Environment
+## Run Playtime Environment (with Telegram server)
 
 First, start the JS server (it runs the telegram bot):
 
@@ -28,6 +28,11 @@ node playtime/telegram.js
 ```
 
 The server has its own CLI for starting and stopping contexts and for interacting with them.
+
+## Run Playtime Environment (just terminal)
+
+```
+guile --fresh-auto-compile -s playtime.scm contexts/kitchen.play```
 
 ## Install Guile on Mac
 
