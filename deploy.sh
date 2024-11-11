@@ -1,1 +1,1 @@
-rsync -avz --exclude='.git' . root@83.231.240.6:/opt/playtime/
+rsync -avz --exclude='.git' . root@195.192.213.4:/opt/playtime/

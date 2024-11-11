@@ -25,7 +25,7 @@ function load() {
 }
 
 function saveUser(user) {
-  const writer = fcreateWriteStream(USER_DB_FILE, { flags: 'a' });
+  const writer = fs.createWriteStream(USER_DB_FILE, { flags: 'a' });
   writer.write('\n'); // Add a new line before writing the new user
   fastcsv.write([user], { headers: false }).pipe(writer);
 }
