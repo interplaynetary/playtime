@@ -4,8 +4,6 @@
              (gnu packages guile)
              (gnu packages guile-xyz)
              (gnu packages gnupg))
-             (gnu packages guile-xyz)
-             (gnu packages gnupg))
 
 (packages->manifest
  (list guile-next

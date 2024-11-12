@@ -14,7 +14,7 @@ function start(context) {
     }
 
     console.log(`Starting context: ${context}`);
-    const contextProcess = spawn('guile', ['--fresh-auto-compile', '-s', '../playtime.scm', `contexts/${context}.play`]);
+    const contextProcess = spawn('guile', ['--fresh-auto-compile', '-s', 'playtime.scm', `contexts/${context}.play`]);
 
     contextProcess.stdout.setEncoding('utf8');
     contextProcess.stdout.on('data', (data) => {
@@ -92,7 +92,7 @@ function getRunning() {
 
 async function getAvailable() {
   try {
-    const files = await fs.promises.readdir('../contexts');
+    const files = await fs.promises.readdir('contexts');
     const playFiles = files.filter(file => file.endsWith('.play'));
     const contexts = playFiles.map(file => path.basename(file, '.play'));
     return contexts;
