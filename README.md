@@ -19,6 +19,50 @@ Built on top of **[Goblin's distributed object programming environment]([url](ht
 
 **Goblins** provides an intuitive security model, automatic local transactions for locally synchronous operations, and an easy to use and efficient asynchronous programming interface for encapsulated objects which can live anywhere on the network. **Goblins** also integrates powerful distributed debugging tools, and a process persistence and upgrade model which respects its security fundamentals.
 
+## Install and Set Up (Ubuntu)
+
+Install Guix:
+```
+sudo apt install guix
+```
+
+Install Guile:
+```
+guix install guile
+```
+
+Adding readline and colorized modules:
+```
+guix install guile-readline
+guix install guile-colorized
+```
+
+Edit the Guile configuration file:
+```
+nano ~/.guile
+```
+
+Add the following to the file:
+```
+(use-modules (ice-9 readline) (ice-9 colorized))
+
+(activate-readline)
+(activate-colorized)
+```
+
+Install the Guile Goblins module:
+```
+guix install guile-goblins
+```
+Enter the directory of the repository:
+```
+cd playtime
+```
+Install the dependencies:
+```
+guix package -m manifest.scm 
+```
+
 ## Run Playtime Environment (with Telegram server)
 
 First, start the JS server (it runs the telegram bot):
