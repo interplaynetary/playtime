@@ -26,6 +26,16 @@ Install Guix:
 sudo apt install guix
 ```
 
+Pull the Guix channels:
+```
+guix pull
+```
+
+Update the Guix packages:
+```
+guix package -u
+```
+
 Install Guile:
 ```
 guix install guile
