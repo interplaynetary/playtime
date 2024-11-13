@@ -1,7 +1,7 @@
 # Playtime
 **Playtime** is a _xorganizational_ **runtime** and **DSL** (Domain Specific Language) for _expressing_ and _experimenting_ with organization inspired by the **role-oriented programming** language paradigm.
 
-**Playtime** provides **interfaces** for **players** to _offer_ **play-role-castings** (_casting_ **elements/players/plays** into **roles**), to _recognize_ the **role-play requirements** for **elements** to _play_ certain **roles**, and to _utilise_ the **scripts** of their **role’s interface**.
+**Playtime** provides **interfaces** for **players** to _offer_ **play-role-castings** (_casting_ **elements/players/plays** into **roles**), to _recognize_ the **role-play requirements** for **elements** to _play_ certain **roles**, and to _utilise_ the **interfaces** provided by their **role's scripts**.
 
 **Playtime** provides interfaces for recognizing attributes of elements (such as **players, plays, roles, scripts, performances, points, rewards**, the **satisfaction/non-satisfaction** of the **role-play requirements** for **play-role-castings** etc.) and provides **interfaces** for _viewing_ **elements** from multiple (even _transitively-constructed_) **perspectives**.
 
@@ -86,7 +86,8 @@ The server has its own CLI for starting and stopping contexts and for interactin
 ## Run Playtime Environment (just terminal)
 
 ```
-guile --fresh-auto-compile -s playtime.scm contexts/kitchen.play```
+guile --fresh-auto-compile -s playtime.scm contexts/kitchen.play
+```
 
 ## Install Guile on Mac
 
