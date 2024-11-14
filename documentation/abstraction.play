@@ -1,0 +1,31 @@
+(humans
+  (human
+    (machines
+      (machine 
+        (event-loops ; synchronous communication within event-loops, asynchronous communication between them.
+          (event-loop <event-loop-name>
+            (actor-map {actor-reference: object-behavior})) 
+          (context <context-name> ; a particular kind of event-loop
+            (role-player-map {role-reference: player-references}) ; <- objects/actors can play roles! Roles can be recast.
+            (state {variable: value})
+            (enactment <expression>) ; <- a single expression that initates interaction
+            (roles
+              (<role-name>
+                (scripts
+                  ((<script-name> <parameters>)
+                    <expression> ; <- expressions in scripts can cue the scripts of roles
+                    ))
+                (requires <role-play-contract>))) ; <- the condition that would need to be satisfied for an object/player to play them.
+            ...)
+          ...)
+        ...)
+    ...))
+  ...)
+
+
+;; Interaction Flow
+(enactment <expression>)
+  → triggers initial roles
+    → triggers script expressions
+      → cues other role scripts (synchronous)
+      → cues role-players (asynchronous)
