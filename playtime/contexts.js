@@ -14,7 +14,9 @@ function start(context) {
     }
 
     console.log(`Starting context: ${context}`);
+    // e.g. guile --fresh-auto-compile -s playtime.scm contexts/kitchen.play
     const contextProcess = spawn('guile', ['--fresh-auto-compile', '-s', 'playtime.scm', `contexts/${context}.play`]);
+    console.log(contextProcess);
 
     contextProcess.stdout.setEncoding('utf8');
     contextProcess.stdout.on('data', (data) => {
@@ -102,6 +104,11 @@ async function getAvailable() {
   }
 }
 
+async function getCode(contextName) {
+  const code = await fs.promises.readFile(`contexts/${contextName}.play`, 'utf8');
+  return code;
+}
+
 const deliverPlayerMessage = async (contextName, telegramUsername, message) => {
   try {
     let contextProcess = runningContexts.get(contextName);
@@ -140,5 +147,6 @@ module.exports = {
   getRunning,
   getAvailable,
   getActive,
+  getCode,
   deliverPlayerMessage
 };

@@ -1,9 +1,9 @@
 require('dotenv').config();
 
-const { Bot } = require("grammy");
+const { Bot, GrammyError, HttpError } = require("grammy");
 const { hydrateFiles } = require("@grammyjs/files");
 const { Menu } = require("@grammyjs/menu");
-
+const { session } = require("grammy");
 const express = require('express');
 
 const path = require('path');
@@ -21,16 +21,17 @@ CLI.init(Contexts);
 const telegramApiToken = process.env.TELEGRAM_API_TOKEN;
 const bot = new Bot(telegramApiToken);
 
-const menuContexts = new Menu("contexts-menu");
+const listContexts = async (ctx) => {
+  await ctx.reply("Welcome to Playtime! Here are the available contexts:", { reply_markup: menuContexts })
+}
 
-Contexts.getAvailable().then((availableContexts) => {
-  availableContexts.forEach((contextName) => {
-    menuContexts.text(
-      contextName.charAt(0).toUpperCase() + contextName.slice(1),
-      (ctx) => startContext(ctx, contextName)
-    ).row();
-  });
-});
+const showContext = async (ctx, contextName) => {
+  ctx.session = ctx.session || {};
+  ctx.session.contextName = contextName;
+
+  const code = await Contexts.getCode(contextName);
+  await ctx.reply(code, { reply_markup: menuContextDetails });
+}
 
 const startContext = async (ctx, contextName) => {
   if (Contexts.getRunning().has(contextName)) {
@@ -50,6 +51,39 @@ const startContext = async (ctx, contextName) => {
   }
 }
 
+const menuContexts = new Menu("contexts-menu");
+const menuContextDetails = new Menu("context-details-menu");
+
+Contexts.getAvailable().then((availableContexts) => {
+  availableContexts.forEach((contextName) => {
+    menuContexts.text(
+      contextName.charAt(0).toUpperCase() + contextName.slice(1),
+      (ctx) => showContext(ctx, contextName)
+    ).row();
+  });
+
+  menuContextDetails
+    .back("◀ Back", async (ctx) => listContexts(ctx))
+    .text("Start ▶", (ctx) => startContext(ctx, ctx.session.contextName))
+    .row();
+
+  menuContexts.register(menuContextDetails);
+});
+
+bot.catch((err) => {
+  const ctx = err.ctx;
+  console.error(`Error while handling update ${ctx.update.update_id}:`);
+  const e = err.error;
+  if (e instanceof GrammyError) {
+    console.error("Error in request:", e.description);
+  } else if (e instanceof HttpError) {
+    console.error("Could not contact Telegram:", e);
+  } else {
+    console.error("Unknown error:", e);
+  }
+});
+
+bot.use(session());
 bot.use(menuContexts);
 bot.api.config.use(hydrateFiles(bot.token));
 
@@ -83,7 +117,7 @@ bot.on("message:text", async (ctx) => {
     resolve({ text: text });
     console.log('Resolved pending request for user:', user.id);
   } else {
-    await ctx.reply("Welcome to Playtime!", { reply_markup: menuContexts });
+    listContexts(ctx);
   }
 });
 
