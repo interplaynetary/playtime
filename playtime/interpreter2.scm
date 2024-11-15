@@ -260,8 +260,8 @@
   (lambda (stx)
     (syntax-case stx ()
       ((_ stmt ...)
-        (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
-          #'(define (the-enactment)
+        (with-syntax ([start (datum->syntax stx 'start)])
+          #'(define (start)
               stmt
               ...
             ))))))
@@ -450,59 +450,89 @@
       input                           ; Input already has parentheses
       (string-append "(" input ")"))) ; Add parentheses if missing
 
-(define (parse-command-string input)
-  (with-exception-handler
-    (lambda (exn)
-      (display "Parse error: ") (display exn) (newline)
-      #f)
+(define (parse-command-string input organizer)
+  (catch #t
     (lambda ()
-      (read (open-input-string (add-parentheses-if-needed input))))))
+      (with-exception-handler
+        (lambda (exn)
+          ($ organizer 'cue (format #f "Parse error: ~a" exn))
+          #f)
+        (lambda ()
+          (read (open-input-string (add-parentheses-if-needed input))))))
+    (lambda (key . args)
+      ($ organizer 'cue (format #f "Parse error: ~a ~a" key (if (pair? args) (car args) "")))
+      #f)))
 
 (define (valid-command? expr allowed-commands)
   (and (pair? expr)              ; Is it a list?
        (memq (car expr) allowed-commands))) ; Is the command allowed?
 
-(define (try-eval-command input allowed-commands)
-  (let ((expr (parse-command-string input)))
-    (and expr
-         (valid-command? expr allowed-commands)
-         (begin
-           (eval expr (interaction-environment))
-           #t))))
+(define (try-eval-command input allowed-commands organizer)
+  (catch #t  ; catch all exceptions
+    (lambda ()
+      (let ((expr (parse-command-string input organizer)))
+        (and expr
+             (valid-command? expr allowed-commands)
+             (begin
+               (eval expr (interaction-environment))
+               (car expr)))))  ; Return the command that was executed
+    (lambda (key . args)
+      (let ((error-msg
+              (string-append
+                "Error executing command:\n"
+                "  Type: " (symbol->string key) "\n"
+                (if (not (null? args))
+                    (string-append "  Details: " (format #f "~a" (car args)) "\n")
+                    ""))))
+        ($ organizer 'cue error-msg))
+      #f)))  ; Return #f to indicate failure
 
-(define (casting-loop the-enactment organizer)
+(define (casting-loop start organizer)
   (if ($ organizer 'has-capability? 'telegram)
     (let loop ()
-      (if (registry 'all-roles-cast?)
-        (the-enactment)
-        (begin
-          (display-role-summary-telegram organizer)
-          (on ($ organizer 'request "Use (cast <role> <player>) to assign roles")
-            (lambda (response)
-              (let ((input (assoc-ref response "text")))
-                (if (try-eval-command input '(cast))
-                    (loop)
-                    (begin
-                      ($ organizer 'cue "Unknown command. Available commands: cast")
-                      (loop)))))))))
-    (let loop () ;; terminal branch stays the same
-      (if (registry 'all-roles-cast?)
-        (the-enactment)
-        (begin
-          (newline)
-          (display-role-summary)
-          (display-flush "> ")
-          (let ((input (readline)))
-            (cond
-              [(string=? "exit" (string-trim input))
+      (begin
+        (display-role-summary-telegram organizer)
+        (on ($ organizer 'request
+              (if (registry 'all-roles-cast?)
+                  "All roles are cast. Type (start) to begin, or continue casting with (cast ...)"
+                  "Use (cast <role> <player>) to assign roles"))
+          (lambda (response)
+            (let* ((input (assoc-ref response "text"))
+                   (result (try-eval-command input
+                                           (if (registry 'all-roles-cast?)
+                                               '(start cast)
+                                               '(cast))
+                                           organizer)))
+              (if result
+                (cond
+                  [(eq? result 'cast) (loop)]
+                  [(eq? result 'start) (display-flush "The enactment has started...")])
+                (loop)))))))
+    (let loop ()
+      (begin
+        (newline)
+        (display-role-summary)
+        (display-flush
+          (if (registry 'all-roles-cast?)
+              "All roles are cast. Type 'start' to begin, or continue casting.\n> "
+              "> "))
+        (let* ((input (readline))
+               (result (try-eval-command input
+                                       (if (registry 'all-roles-cast?)
+                                           '(start cast)
+                                           '(cast))
+                                       organizer)))
+          (if (string=? "exit" (string-trim input))
               (display-flush "Exiting...\n")
-              #f]
-              [(try-eval-command input '(cast))
-              (loop)]
-              [else
-                (display-flush "Unknown command. Available commands: cast, exit\n")
-                (loop)]))))
-    )))
+              (if result
+                  (when (eq? result 'cast)
+                    (loop))
+                  (begin
+                    (display-flush
+                      (if (registry 'all-roles-cast?)
+                          "Unknown command. Available commands: cast, start, exit\n"
+                          "Unknown command. Available commands: cast, exit\n"))
+                    (loop)))))))))
 
 (define terminal "__terminal__")
 (define organizer-username
@@ -514,7 +544,7 @@
   (lambda (stx)
     (syntax-case stx ()
       [(_ context body ...)
-        (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
+        (with-syntax ([start (datum->syntax stx 'start)])
           #'(call-with-vat context
               (lambda ()
                 (let ((organizer (get-player organizer-username)))
@@ -522,5 +552,5 @@
                     (add-capability organizer telegram organizer-username))
                   (init-states)
                   (begin body ...)
-                  (casting-loop the-enactment organizer))
+                  (casting-loop start organizer))
               )))])))
