@@ -399,11 +399,11 @@
       str)))
 
 (define (display-framed content width)
-  (display (format #f "⎥ ~a ⎪\n" (pad-string content width))))
+  (display-flush (format #f "⎥ ~a ⎪\n" (pad-string content width))))
 
 (define (display-role-summary)
   (let ((width 71))
-    (display "┌~~~~~~~~~~~~ 𝗥𝗼𝗹𝗲 𝗖𝗮𝘀𝘁𝗶𝗻𝗴𝘀 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~┐\n")
+    (display-flush "┌~~~~~~~~~~~~ 𝗥𝗼𝗹𝗲 𝗖𝗮𝘀𝘁𝗶𝗻𝗴𝘀 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~┐\n")
     (hash-for-each
       (lambda (role-name _)
         (let ((players (registry 'get-role-players role-name)))
@@ -422,7 +422,7 @@
                 width))
           ))
       (registry 'roles))
-    (display "└~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~┘\n")
+    (display-flush "└~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~┘\n")
     (newline)
   ))
 
@@ -459,16 +459,16 @@
     (if (registry 'all-roles-cast?)
       (the-enactment)
       (begin
-        (display "> ")
+        (display-flush "> ")
         (let ((input (readline)))
           (cond
             [(string=? "exit" (string-trim input))
-            (display "Exiting...\n")
+            (display-flush "Exiting...\n")
             #f]
             [(try-eval-command input '(cast))
             (loop)]
             [else
-              (display "Unknown command. Available commands: cast, exit\n")
+              (display-flush "Unknown command. Available commands: cast, exit\n")
               (loop)]))
       ))))
 
