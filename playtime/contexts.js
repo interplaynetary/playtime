@@ -5,7 +5,7 @@ const { spawn } = require('child_process');
 const runningContexts = new Map();
 let activeContext = null;
 
-function start(context) {
+function startProcess(context, telegramUsername) {
   return new Promise((resolve, reject) => {
     if (runningContexts.has(context)) {
       console.log(`Context ${context} is already running.`);
@@ -14,9 +14,8 @@ function start(context) {
     }
 
     console.log(`Starting context: ${context}`);
-    // e.g. guile --fresh-auto-compile -s playtime.scm contexts/kitchen.play
-    const contextProcess = spawn('guile', ['--fresh-auto-compile', '-s', 'playtime.scm', `contexts/${context}.play`]);
-    console.log(contextProcess);
+    // e.g. guile --fresh-auto-compile -s playtime.scm contexts/kitchen.play <telegramUsername>
+    const contextProcess = spawn('guile', ['--fresh-auto-compile', '-s', 'playtime.scm', `contexts/${context}.play`, telegramUsername]);
 
     contextProcess.stdout.setEncoding('utf8');
     contextProcess.stdout.on('data', (data) => {
@@ -109,11 +108,18 @@ async function getCode(contextName) {
   return code;
 }
 
-const deliverPlayerMessage = async (contextName, telegramUsername, message) => {
+const start = async (contextName, telegramUsername) => {
+  return deliverPlayerMessage(contextName, telegramUsername);
+}
+
+const deliverPlayerMessage = async (contextName, telegramUsername, message=undefined) => {
   try {
     let contextProcess = runningContexts.get(contextName);
     if (!contextProcess) {
-      contextProcess = await start(contextName);
+      contextProcess = await startProcess(contextName, telegramUsername);
+      return `Context ${contextName} started`;
+    } else if (!message) {
+      return `Context ${contextName} is already running`;
     }
 
     const formattedMessage = `${message} ${telegramUsername}\n`;

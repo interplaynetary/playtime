@@ -417,8 +417,7 @@
               players)
             (display-framed (format #f "~a (cast ~a \"<player-name>\" (telegram \"<username>\"))"
                   (colorize "[ ]" 'bright-yellow)
-                  (colorize role-name 'bright-white)
-                  (bold (colorize role-name 'bright-red)))
+                  (colorize role-name 'bright-white))
                 width))
           ))
       (registry 'roles))
@@ -452,25 +451,34 @@
            (eval expr (interaction-environment))
            #t))))
 
-(define (casting-loop the-enactment)
+(define (casting-loop the-enactment organizer)
   (let loop ()
     (newline)
     (display-role-summary)
     (if (registry 'all-roles-cast?)
       (the-enactment)
-      (begin
-        (display-flush "> ")
-        (let ((input (readline)))
-          (cond
-            [(string=? "exit" (string-trim input))
-            (display-flush "Exiting...\n")
-            #f]
-            [(try-eval-command input '(cast))
-            (loop)]
-            [else
-              (display-flush "Unknown command. Available commands: cast, exit\n")
-              (loop)]))
+      (if ($ organizer 'has-capability? 'telegram)
+        (begin
+          ($ organizer 'cue "Use /cast <role> <player> to assign roles")
+          (loop))
+        (begin
+          (display-flush "> ")
+          (let ((input (readline)))
+            (cond
+              [(string=? "exit" (string-trim input))
+              (display-flush "Exiting...\n")
+              #f]
+              [(try-eval-command input '(cast))
+              (loop)]
+              [else
+                (display-flush "Unknown command. Available commands: cast, exit\n")
+                (loop)])))
       ))))
+
+(define organizer-username
+  (if (> (length (command-line)) 2)
+      (caddr (command-line))  ;; Use provided telegram username
+      "terminal"))            ;; Default to "terminal"
 
 (define-syntax play
   (lambda (stx)
@@ -479,7 +487,8 @@
         (with-syntax ([the-enactment (datum->syntax stx 'the-enactment)])
           #'(call-with-vat context
               (lambda ()
-                (init-states)
-                (begin body ...)
-                (casting-loop the-enactment)
+                (let ((organizer (get-player organizer-username)))
+                  (init-states)
+                  (begin body ...)
+                  (casting-loop the-enactment organizer))
               )))])))
