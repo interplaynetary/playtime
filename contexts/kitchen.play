@@ -2,39 +2,32 @@
   (goblins)
   (srfi srfi-19)) ;; for date-hour
 
-;; (print-and-run (quote
-  (context kitchen
-    (state
-      (ndishes 3))
-    (roles
-      (cleaner
-        (scripts
-          ((wash-dishes)
-            (if (> (get ndishes) 0)
-              (begin
-                (cue (format #f "Time to wash the dishes. ~a dishes to go!" (get ndishes)))
-                (on (request "Confirm here when you're ready")
-                  (lambda (response)
-                    (any drier dry-dish))))
-              (cue "Dishes are all done!"))
-          )
-        ))
-      (drier
-        (scripts
-          ((dry-dish)
-            (cue "There's dishes to dry!")
-            (on (request "Let me know when you're done")
-              (lambda (response)
-                (dec ndishes)
-                (any cleaner wash-dishes)))
-          ))))
-    (enactment
-      (any cleaner wash-dishes)))
-;; ))
+(context kitchen
+  (state
+    (ndishes 3))
+  (roles
+    (cleaner
+      (scripts
+        ((wash-dishes)
+          (if (> (get ndishes) 0)
+            (begin
+              (cue (format #f "Time to wash the dishes. ~a dishes to go!" (get ndishes)))
+              (on (request "Confirm here when you're ready")
+                (lambda (response)
+                  (any drier dry-dish))))
+            (cue "Dishes are all done!"))
+        )
+      ))
+    (drier
+      (scripts
+        ((dry-dish)
+          (cue "There's dishes to dry!")
+          (on (request "Let me know when you're done")
+            (lambda (response)
+              (dec ndishes)
+              (any cleaner wash-dishes)))
+        ))))
+  (enactment
+    (any cleaner wash-dishes)))
 
-;; (print-and-run (quote
-  (play kitchen)
-    (cast cleaner "Fronx" (telegram "fronx84"))
-    (cast drier "Ruz" (telegram "ruz"))
-    ;; (cast drier "Other"))
-;; ))
+(play kitchen)
