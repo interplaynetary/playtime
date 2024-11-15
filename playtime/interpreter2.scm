@@ -331,8 +331,10 @@
        #'(let* ((user (find-user-by-telegram-username telegram-username))
                 (telegram-user-id (and user (assoc-ref user "id"))))
           (if telegram-user-id
-            ($ player 'add-telegram telegram-user-id telegram-username)
-            (display (format #f "\n===> Telegram player @~a not found.\n     Open a chat with ~a and say hi to register.\n\n"
+            (begin
+              ($ player 'add-telegram telegram-user-id telegram-username)
+              (display-flush (format #f "\n===> Telegram player @~a registered (user-id ~a).\n\n" telegram-username telegram-user-id)))
+            (display-flush (format #f "\n===> Telegram player @~a not found.\n     Open a chat with ~a and say hi to register.\n\n"
               telegram-username "https://t.me/the_playtime_bot")))
          )]
       [(_ player key value)
@@ -425,6 +427,23 @@
     (newline)
   ))
 
+(define (display-role-summary-telegram organizer)
+  (let ((output (call-with-output-string
+                  (lambda (port)
+                    (format port "Role Castings:~%~%")
+                    (hash-for-each
+                      (lambda (role-name _)
+                        (let ((players (registry 'get-role-players role-name)))
+                          (if (not (null? players))
+                            (for-each (lambda (player)
+                              (format port "[✓] (cast ~a ~a)~%"
+                                     role-name ($ player 'who)))
+                              players)
+                            (format port "[ ] (cast ~a \"<player-name>\" (telegram \"<username>\"))~%"
+                                   role-name))))
+                      (registry 'roles))))))
+    ($ organizer 'cue output)))
+
 (define (add-parentheses-if-needed input)
   (if (and (> (string-length input) 0)
            (char=? (string-ref input 0) #\x28))  ; #\x28 is equivalent to #\(
@@ -452,16 +471,26 @@
            #t))))
 
 (define (casting-loop the-enactment organizer)
-  (let loop ()
-    (newline)
-    (display-role-summary)
-    (if (registry 'all-roles-cast?)
-      (the-enactment)
-      (if ($ organizer 'has-capability? 'telegram)
+  (if ($ organizer 'has-capability? 'telegram)
+    (let loop ()
+      (if (registry 'all-roles-cast?)
+        (the-enactment)
         (begin
-          ($ organizer 'cue "Use /cast <role> <player> to assign roles")
-          (loop))
+          (display-role-summary-telegram organizer)
+          (on ($ organizer 'request "Use (cast <role> <player>) to assign roles")
+            (lambda (response)
+              (let ((input (assoc-ref response "text")))
+                (if (try-eval-command input '(cast))
+                    (loop)
+                    (begin
+                      ($ organizer 'cue "Unknown command. Available commands: cast")
+                      (loop)))))))))
+    (let loop () ;; terminal branch stays the same
+      (if (registry 'all-roles-cast?)
+        (the-enactment)
         (begin
+          (newline)
+          (display-role-summary)
           (display-flush "> ")
           (let ((input (readline)))
             (cond
@@ -472,13 +501,14 @@
               (loop)]
               [else
                 (display-flush "Unknown command. Available commands: cast, exit\n")
-                (loop)])))
-      ))))
+                (loop)]))))
+    )))
 
+(define terminal "__terminal__")
 (define organizer-username
   (if (> (length (command-line)) 2)
       (caddr (command-line))  ;; Use provided telegram username
-      "terminal"))            ;; Default to "terminal"
+      terminal))            ;; Default to "terminal"
 
 (define-syntax play
   (lambda (stx)
@@ -488,6 +518,8 @@
           #'(call-with-vat context
               (lambda ()
                 (let ((organizer (get-player organizer-username)))
+                  (when (not (string=? organizer-username terminal))
+                    (add-capability organizer telegram organizer-username))
                   (init-states)
                   (begin body ...)
                   (casting-loop the-enactment organizer))

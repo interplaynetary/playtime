@@ -40,7 +40,7 @@ const startContext = async (ctx, contextName) => {
   }
   const user = Users.register(ctx);
   try {
-    let response = await Contexts.start(contextName, `@${user.username}`);
+    let response = await Contexts.start(contextName, user.username);
     await ctx.reply(response);
   } catch (error) {
     console.error(error.message);

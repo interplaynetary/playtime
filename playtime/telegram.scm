@@ -53,7 +53,7 @@
         (receive (response body)
             (apply http-method request-args)
           (if (= (response-code response) 200)
-              (json-string->scm (utf8->string body))  ; Parse JSON response for POST requests          
+              (json-string->scm (utf8->string body))  ; Parse JSON response for POST requests
               (begin
                 (display (format #f "HTTP request failed with code ~a\n" (response-code response)))
                 #f))))
@@ -73,7 +73,7 @@
     ((cue msg) ;; cue the player to do something
      (send-http-post "/send-message"
                      `((userId . ,telegram-user-id)
-                       (text . ,(format #f "Hey ~a! ~a" name msg)))))
+                       (text . ,(format #f "~a" msg)))))
     ((request msg) ;; request input from the player
      (send-http-post "/request-input"
                     `((userId . ,telegram-user-id)
