@@ -142,9 +142,9 @@
           #'(<- script-player 'script-name script-player args ...))
       ])))
 
-;; Alternative to 'player', which should be preferred.
-;; 'this' is not recommended, because we can't check the (redundant)
-;; role-name parameter.
+;; Alternative to 'player' so we can write `this <role-name> <script>`
+;; Note: 'this' is not recommended, because we don't actually check the
+;; role-name parameter against the player's current role.
 (define-syntax this
   (lambda (stx)
     (syntax-case stx ()
