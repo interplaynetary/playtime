@@ -481,9 +481,7 @@
               (string-append
                 "Error executing command:\n"
                 "  Type: " (symbol->string key) "\n"
-                (if (not (null? args))
-                    (string-append "  Details: " (format #f "~a" (car args)) "\n")
-                    ""))))
+                (string-append "  Details: " (format #f "~a" args) "\n"))))
         ($ organizer 'cue error-msg))
       #f)))  ; Return #f to indicate failure
 
