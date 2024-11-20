@@ -187,6 +187,44 @@
     [(every role-name script-name . args)
      (run-role-script 'every 'role-name 'script-name . args)]))
 
+(define current-execution-stack (make-parameter '()))
+
+(define (make-execution-frame label player role)
+  (let ((frame (make-hash-table)))
+    (when label (hash-set! frame 'label label))
+    (when player (hash-set! frame 'player player))
+    (when role (hash-set! frame 'role role))
+    frame))
+
+(define (format-execution-frame frame)
+  (let ((label (hash-ref frame 'label ""))
+        (player (hash-ref frame 'player #f))
+        (role (hash-ref frame 'role #f)))
+    (string-append
+      label
+      (if player (format #f "[~a" player) "")
+      (if role (format #f ":~a" role) "")
+      (if (or player role) "]" ""))))
+
+(define (with-execution-tracking frame thunk)
+  (parameterize ((current-execution-stack
+                  (cons frame (current-execution-stack))))
+    (let ((result (thunk)))
+      (display-flush
+       (format #f "~a: ~a\n"
+               (string-join
+                (map format-execution-frame
+                     (reverse (current-execution-stack)))
+                " → ")
+               (if (promise? result) "<promise>" result)))
+      result)))
+
+(define-syntax with-frame
+  (syntax-rules ()
+    [(_ frame-info expr ...)
+     (with-execution-tracking frame-info
+       (lambda () (begin expr ...)))]))
+
 (define-syntax scripts
   (lambda (stx)
     (syntax-case stx ()
@@ -194,13 +232,14 @@
           #'(begin
               (methods
                 ((script-name script-player args ...)
-                  (begin body ...))
+                  (with-frame
+                    (make-execution-frame
+                      (symbol->string 'script-name)
+                      ($ script-player 'who)
+                      ($ script-player 'role-name))
+                    (begin body ...)))
                 ...)
-        )]
-      [_ (begin
-           (display "Unexpected syntax in scripts: ")
-           (display (syntax->datum stx))
-           (newline))])))
+        )])))
 
 ;; This is called when a role is defined, not when it is
 ;; instantiated. The function returns a lambda that can be
@@ -262,9 +301,10 @@
       ((_ stmt ...)
         (with-syntax ([start (datum->syntax stx 'start)])
           #'(define (start)
-              stmt
-              ...
-            ))))))
+              (with-frame
+                (make-execution-frame "enactment" #f #f)
+                stmt
+                ...)))))))
 
 (define-syntax state
   (lambda (stx)
