@@ -13,6 +13,7 @@
   #:use-module (goblins actor-lib cell)
   #:use-module (goblins actor-lib methods)
   #:use-module (fibers conditions)
+  #:use-module (ice-9 popen)
   #:export (print-and-run)
   #:export (request-get)
   #:export (get)
@@ -35,6 +36,12 @@
   #:export (scripts))
 
 (activate-readline)
+
+;; Add cleanup handler for proper terminal restoration
+(sigaction SIGINT
+  (lambda (sig)
+    (system "stty sane")
+    (primitive-exit 0)))
 
 ;; --- INTERNAL SYNTAX -----
 
