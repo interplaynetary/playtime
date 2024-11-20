@@ -11,7 +11,8 @@
   #:use-module (ice-9 format)
   #:use-module (ice-9 pretty-print)
   #:export (^telegram-player)
-  #:export (send-http-get))
+  #:export (send-http-get)
+  #:export (find-user-by-telegram-username))
 
 
 (define SERVER-URL "http://localhost:3000")
@@ -79,6 +80,15 @@
                     `((userId . ,telegram-user-id)
                       (text . ,(format #f "~a" msg)))))
     ((who) name)))
+
+(define (find-user-by-telegram-username username)
+  (let ((response (send-http-get
+                    (string-append "/find-user-by-username/" (uri-encode username))
+                    `())))
+    (if (assoc-ref response 'error)
+        (throw 'user-not-found-error (assoc-ref response 'error))
+        response)))
+
 
 ; (define context (spawn-vat))
 

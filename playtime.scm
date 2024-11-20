@@ -1,7 +1,7 @@
 (add-to-load-path (dirname (current-filename)))
 
 (define-module (playtime main)
-  #:use-module (playtime interpreter2)
+  #:use-module (playtime interpreter)
   #:use-module (ice-9 rdelim)  ;; For reading entire files
   #:export (main))
 
