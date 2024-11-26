@@ -9,27 +9,31 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Debug Secrets
+      - name: Install SSH client
+        run: sudo apt-get install -y openssh-client sshpass
+        
+      - name: Setup SSH key
         run: |
-          if [ ! -z "${{ secrets.SSH_USERNAME }}" ]; then
-            echo "Username is set (length: $(echo -n "${{ secrets.SSH_USERNAME }}" | wc -c))"
-          fi
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keygen -y -f ~/.ssh/id_rsa || echo "Invalid key format"
           
-      - name: Deploy using SSH
-        uses: nekiro/ssh-job@main
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          user: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          command: |
-            whoami
-            pwd
-            cd playtime
-            git fetch origin main
-            git reset --hard origin/main
-            npm ci
-            pkill -f "node playtime/telegram.js" || true
-            sleep 2
-            pm2 delete telegram || true
+      - name: Test SSH connection (with verbose output)
+        run: |
+          export SSHPASS='${{ secrets.SSH_PASSWORD }}'
+          sshpass -e ssh -v -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} 'echo "Connection test"' || echo "SSH connection failed"
+          
+      - name: Deploy using direct SSH
+        run: |
+          export SSHPASS='${{ secrets.SSH_PASSWORD }}'
+          sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} '
+            cd playtime &&
+            git fetch origin main &&
+            git reset --hard origin/main &&
+            npm ci &&
+            pkill -f "node playtime/telegram.js" || true &&
+            sleep 2 &&
+            pm2 delete telegram || true &&
             pm2 start playtime/telegram.js --name telegram
+          '
