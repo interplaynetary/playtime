@@ -9,6 +9,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug SSH Connection
+        run: |
+          echo "Attempting to connect to ${{ secrets.SSH_HOST }}"
+          echo "With username: ${{ secrets.SSH_USERNAME }}"
+          echo "Private key length: ${{ length(secrets.SSH_PRIVATE_KEY) }}"
+          
       - name: Deploy using SSH
         uses: appleboy/ssh-action@master
         with:
@@ -16,28 +22,19 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          debug: true  # Added debug mode
           script: |
-            # Navigate to your project directory
+            whoami
+            pwd
             cd playtime
-            
-            # Fetch latest changes
             git fetch origin main
-            
-            # Backup current state
-            git rev-parse HEAD > .prev-revision
-            
-            # Reset to match origin/main
             git reset --hard origin/main
-            
-            # Install dependencies
             npm ci
             guix package -m manifest.scm
-            
-            # Find and kill the existing Node.js process
             pkill -f "node playtime/telegram.js" || true
-            
-            # Ensure previous process is fully terminated
             sleep 2
+            pm2 delete telegram || true
+            pm2 start playtime/telegram.js --name telegram
             
             # Start the Node.js process with PM2
             pm2 delete telegram || true
