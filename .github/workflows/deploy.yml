@@ -35,12 +35,17 @@ jobs:
             /home/playtime/.nvm/versions/node/v23.2.0/bin/npm ci --no-audit --no-fund
             
             echo "Managing process..."
-            pkill -f "node playtime/telegram.js" || true
-            sleep 2
+            /home/playtime/.nvm/versions/node/v23.2.0/bin/pm2 list
+            
+            echo "Stopping old process..."
+            /home/playtime/.nvm/versions/node/v23.2.0/bin/pm2 stop telegram || true
+            /home/playtime/.nvm/versions/node/v23.2.0/bin/pm2 delete telegram || true
             
             echo "Starting new process..."
-            /home/playtime/.nvm/versions/node/v23.2.0/bin/pm2 delete telegram || true
             /home/playtime/.nvm/versions/node/v23.2.0/bin/pm2 start playtime/telegram.js --name telegram
+            
+            echo "Checking process status..."
+            /home/playtime/.nvm/versions/node/v23.2.0/bin/pm2 list
             
             echo "Deployment complete!"
             exit 0
