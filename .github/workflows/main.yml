@@ -1,0 +1,44 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy using SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Navigate to your project directory
+            cd playtime
+            
+            # Fetch latest changes
+            git fetch origin main
+            
+            # Backup current state
+            git rev-parse HEAD > .prev-revision
+            
+            # Reset to match origin/main
+            git reset --hard origin/main
+            
+            # Install dependencies
+            npm ci
+            guix package -m manifest.scm
+            
+            # Find and kill the existing Node.js process
+            pkill -f "node playtime/telegram.js" || true
+            
+            # Ensure previous process is fully terminated
+            sleep 2
+            
+            # Start the Node.js process with PM2
+            pm2 delete telegram || true
+            pm2 start playtime/telegram.js --name telegram
