@@ -9,31 +9,38 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Install SSH client
-        run: sudo apt-get install -y openssh-client sshpass
-        
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keygen -y -f ~/.ssh/id_rsa || echo "Invalid key format"
-          
-      - name: Test SSH connection (with verbose output)
-        run: |
-          export SSHPASS='${{ secrets.SSH_PASSWORD }}'
-          sshpass -e ssh -v -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} 'echo "Connection test"' || echo "SSH connection failed"
-          
-      - name: Deploy using direct SSH
+      - name: Deploy using SSH
         run: |
           export SSHPASS='${{ secrets.SSH_PASSWORD }}'
           sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} '
-            cd playtime &&
-            git fetch origin main &&
-            git reset --hard origin/main &&
-            npm ci &&
-            pkill -f "node playtime/telegram.js" || true &&
-            sleep 2 &&
-            pm2 delete telegram || true &&
+            # Source profile to get environment variables
+            source ~/.profile
+            source ~/.bashrc
+            
+            # Navigate to project
+            cd playtime
+            
+            # Git operations
+            git fetch origin main
+            git reset --hard origin/main
+            
+            # Ensure npm is available
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            
+            # Install dependencies
+            npm ci
+            
+            # Install pm2 globally if not present
+            if ! command -v pm2 &> /dev/null; then
+              npm install -g pm2
+            fi
+            
+            # Kill existing process
+            pkill -f "node playtime/telegram.js" || true
+            sleep 2
+            
+            # Start new process
+            pm2 delete telegram || true
             pm2 start playtime/telegram.js --name telegram
           '
