@@ -13,7 +13,6 @@ jobs:
         run: |
           echo "Attempting to connect to ${{ secrets.SSH_HOST }}"
           echo "With username: ${{ secrets.SSH_USERNAME }}"
-          echo "Private key length: ${{ length(secrets.SSH_PRIVATE_KEY) }}"
           
       - name: Deploy using SSH
         uses: appleboy/ssh-action@master
