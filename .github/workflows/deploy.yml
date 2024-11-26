@@ -10,14 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy using SSH
-        uses: appleboy/ssh-action@master
+        uses: nekiro/ssh-job@main
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
+          user: ${{ secrets.SSH_USERNAME }}  # Note: changed from 'username' to 'user'
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           password: ${{ secrets.SSH_PASSWORD }}
-          debug: true
-          script: |
+          envs: ${{ toJson(secrets) }}  # This will pass all secrets to the shell
+          command: |
             whoami
             pwd
             cd playtime
