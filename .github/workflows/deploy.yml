@@ -9,14 +9,19 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug Secrets
+        run: |
+          if [ ! -z "${{ secrets.SSH_USERNAME }}" ]; then
+            echo "Username is set (length: $(echo -n "${{ secrets.SSH_USERNAME }}" | wc -c))"
+          fi
+          
       - name: Deploy using SSH
         uses: nekiro/ssh-job@main
         with:
           host: ${{ secrets.SSH_HOST }}
-          user: ${{ secrets.SSH_USERNAME }}  # Note: changed from 'username' to 'user'
+          user: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           password: ${{ secrets.SSH_PASSWORD }}
-          envs: ${{ toJson(secrets) }}  # This will pass all secrets to the shell
           command: |
             whoami
             pwd
