@@ -9,19 +9,21 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Debug SSH Connection
+      - name: Create SSH key file
         run: |
-          echo "Attempting to connect to ${{ secrets.SSH_HOST }}"
-          echo "With username: ${{ secrets.SSH_USERNAME }}"
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keygen -p -m PEM -f ~/.ssh/deploy_key  # Convert to PEM format if needed
           
       - name: Deploy using SSH
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
+          key_path: ~/.ssh/deploy_key
           password: ${{ secrets.SSH_PASSWORD }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          debug: true  # Added debug mode
+          debug: true
           script: |
             whoami
             pwd
@@ -29,12 +31,7 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             npm ci
-            guix package -m manifest.scm
             pkill -f "node playtime/telegram.js" || true
             sleep 2
-            pm2 delete telegram || true
-            pm2 start playtime/telegram.js --name telegram
-            
-            # Start the Node.js process with PM2
             pm2 delete telegram || true
             pm2 start playtime/telegram.js --name telegram
